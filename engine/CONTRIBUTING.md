@@ -38,6 +38,8 @@ to explain the cause.
 - **Results**: before/after observations, regressions checked, and an explicit
   list of what you could not test (for example: no device, one game only).
 - Run the host checks: see [building](docs/BUILDING.md#host-checks).
+- If you work with a coding assistant, read the
+  [assistant contribution guide](docs/AI-CONTRIBUTING.md) first.
 
 Maintainers can only review evidence they can see. Describe private results
 (logs, captures) in words or with redacted excerpts. Never attach game data,
