@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #define _POSIX_C_SOURCE 200809L
 #include "native_prepare.h"
 #include "native_manifest.h"
@@ -11,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/syscall.h>
 #include <unistd.h>
 
 static bool problem(char *why,size_t cap,const char *text){if(why&&cap)snprintf(why,cap,"%s",text);return false;}
@@ -37,9 +39,18 @@ static bool publish(const char*path,const uint8_t*wire,size_t size,bool*created,
  if(fd<0){free(temporary);return problem(why,cap,"Cannot create native metadata temporary file");}
  bool ok=write_all(fd,wire,size)&&!fsync(fd);if(close(fd))ok=false;
  if(!ok){unlink(temporary);free(temporary);return problem(why,cap,"Cannot write native metadata");}
- if(!link(temporary,path))*created=true;
- else if(errno==EEXIST&&same_file(path,wire,size))*created=false;
- else{unlink(temporary);free(temporary);return problem(why,cap,"Conflicting native metadata exists; original preserved");}
+ /* Android app domains can deny hard links. Prefer an atomic no-replace
+    rename of the fully written temporary; never fall back to lstat()+rename(),
+    which can overwrite a target created between those two operations. */
+ int r=(int)syscall(SYS_renameat2,AT_FDCWD,temporary,AT_FDCWD,path,1u /* RENAME_NOREPLACE */);
+ if(r&&(errno==ENOSYS||errno==EINVAL)){
+  if(!link(temporary,path)){unlink(temporary);r=0;}
+  else if(errno!=EEXIST){unlink(temporary);free(temporary);return problem(why,cap,"Cannot publish atomically without replacement; target left untouched");}
+ }
+ if(!r){*created=true;free(temporary);return true;}
+ int e=errno;
+ if(e==EEXIST&&same_file(path,wire,size))*created=false;
+ else{unlink(temporary);free(temporary);return problem(why,cap,e==EEXIST?"Conflicting native metadata exists; original preserved":"Cannot publish native metadata");}
  unlink(temporary);free(temporary);return true;
 }
 bool native_prepare_exefs(const char*title,const char*exefs,const char*path,const uint8_t contract[32],NativePrepareHash hash,NativePrepareResult*out,char*why,size_t cap){
