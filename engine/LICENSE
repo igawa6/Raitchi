@@ -1,0 +1,32 @@
+Raitchi license map
+
+The default Raitchi engine distribution includes GPL-3.0-or-later components
+adapted from Eden/yuzu, including kernel thread affinity and audio-renderer
+work-size accounting. The Eden-derived Android shell is GPL-3.0-or-later.
+The unmodified GNU GPL version 3 license text is provided in COPYING.
+
+Individual source-file notices and retained upstream grants remain authoritative.
+In particular, the MIT-licensed LAS Recomp, Let's Go Recomp and Echoes-derived
+parts retain their MIT grants and original copyright notices. This license map
+does not replace those notices or relicense third-party files.
+
+Full component notices:
+- ports/shared-android/runtime/LICENSE-kernel-thread-affinity.txt
+- ports/shared-android/runtime/services/LICENSE-audren-work-size.txt
+- native/runtime/LICENSE-LASRecomp
+- native/runtime/LICENSE-LetsGo
+- native/runtime/LICENSE-Echoes
+- native/runtime/LICENSE-EoWRecomp
+- native/adapters/echoes/LICENSE
+- ports/letsgo-android/LICENSE-AdrenoTools
+- ports/letsgo-android/LICENSE-LinkerNSBypass
+- ports/shared-android/assets/fonts/OFL-Fredoka.txt
+- ports/shared-android/assets/fonts/LICENSE-ButtonGlyphs.txt
+
+See NOTICE.md for source provenance, build configurations and dependency notices.
+The separate shell retains its own LICENSE.txt and per-file notices.
+
+The default release configuration excludes the optional Unicorn native-blocks
+backend and legacy on-device compiler toolkit. Their separate licenses and
+packaged notices must be retained when either option is enabled. This document
+makes no blanket license-compatibility claim for every optional configuration.

@@ -1,0 +1,489 @@
+diff --git a/runtime/gamelib.c b/runtime/gamelib.c
+index 06d28e8..b9c6a22 100644
+--- a/runtime/gamelib.c
++++ b/runtime/gamelib.c
+@@ -12,6 +12,9 @@
+ 
+ #include "paths.h"
+ #include "rt.h"
++#ifdef __ANDROID__
++#include <SDL3/SDL.h>
++#endif
+ 
+ static const GameLibTables *g_tables;
+ static char g_error[256];
+@@ -39,19 +42,42 @@ static int candidates(const char *game_dir, char out[3][1100]) {
+     int n = 0;
+     const char *env = getenv("LARECOMP_GAME_LIB");
+     if (env && *env) snprintf(out[n++], 1100, "%s", env);
++#ifdef __ANDROID__
++    // Shared external storage is mounted without exec; generated libraries belong in app-internal storage.
++    (void)game_dir;
++    const char *internal = SDL_GetAndroidInternalStoragePath();
++    if (internal) snprintf(out[n++], 1100, "%s/%s", internal, GAMELIB_NAME);
++    snprintf(out[n++], 1100, "%s", GAMELIB_NAME);  // APK entry: no ordinary file or sidecar to inspect.
++#else
+     char exe_side[1024];
+     if (rt_resource(GAMELIB_NAME, NULL, exe_side, sizeof exe_side) && exists(exe_side))
+         snprintf(out[n++], 1100, "%s", exe_side);
+     if (game_dir) snprintf(out[n++], 1100, "%s/%s", game_dir, GAMELIB_NAME);
++#endif
+     return n;
+ }
+ 
++static bool packaged(const char *path) {
++#ifdef __ANDROID__
++    return !strchr(path, '/');
++#else
++    (void)path;
++    return false;
++#endif
++}
++
+ bool gamelib_present(const char *game_dir) {
+     if (g_tables) return true;
+     char c[3][1100];
+     int n = candidates(game_dir, c);
+-    for (int i = 0; i < n; i++)
++    for (int i = 0; i < n; i++) {
++        if (packaged(c[i])) {
++            char why[8];
++            if (gamelib_load(game_dir, why, sizeof why)) return true;
++            continue;
++        }
+         if (exists(c[i]) && id_matches(c[i])) return true;
++    }
+     return false;
+ }
+ 
+@@ -76,16 +102,25 @@ static const GameLibTables *open_lib(const char *path) {
+ }
+ 
+ bool gamelib_load(const char *game_dir, char *why, size_t why_size) {
++#ifndef __ANDROID__
+     static bool tried;
++#endif
++#ifdef __ANDROID__
++    if (!g_tables) {  // A launcher may check before an internal library is installed.
++#else
+     if (!tried) {
++#endif
++#ifndef __ANDROID__
+         tried = true;
++#endif
+         snprintf(g_error, sizeof g_error, "the game code hasn't been built: set up the game files on the start screen");
+         char c[3][1100];
+         int n = candidates(game_dir, c);
+         const char *env = getenv("LARECOMP_GAME_LIB");
+         for (int i = 0; i < n && !g_tables; i++) {
+-            bool given = i == 0 && env && *env;  // LARECOMP_GAME_LIB: loaded as given, the library's own id decides
+-            if (!exists(c[i])) {
++            bool explicit_path = i == 0 && env && *env;
++            bool given = explicit_path || packaged(c[i]);  // APK/explicit candidates validate their embedded code ID.
++            if (!packaged(c[i]) && !exists(c[i])) {
+                 if (given) { snprintf(g_error, sizeof g_error, "LARECOMP_GAME_LIB: no file %s", c[i]); break; }
+                 continue;
+             }
+diff --git a/runtime/gamelib.h b/runtime/gamelib.h
+index beecb3d..27f56a9 100644
+--- a/runtime/gamelib.h
++++ b/runtime/gamelib.h
+@@ -14,6 +14,9 @@
+ #elif defined(__APPLE__)
+ #define GAMELIB_NAME "lasgame.dylib"
+ #define GAMELIB_EXPORT __attribute__((visibility("default")))
++#elif defined(__ANDROID__)
++#define GAMELIB_NAME "liblasgame.so"
++#define GAMELIB_EXPORT __attribute__((visibility("default")))
+ #else
+ #define GAMELIB_NAME "lasgame.so"
+ #define GAMELIB_EXPORT __attribute__((visibility("default")))
+diff --git a/runtime/main.c b/runtime/main.c
+index 3349faa..66c63ac 100644
+--- a/runtime/main.c
++++ b/runtime/main.c
+@@ -1,6 +1,10 @@
+ // LAS Recomp entry: load modules, set up the kernel, run nn::init::Start on the main thread.
+ #include <SDL3/SDL.h>
++#ifdef __ANDROID__
++#include <SDL3/SDL_main.h>  // SDLActivity calls SDL_main from libmain.so.
++#endif
+ #include <stdbool.h>
++#include <limits.h>
+ #include <stdlib.h>
+ #include <string.h>
+ 
+@@ -38,8 +42,16 @@ static void rtld_init_main(Cpu *c) { module_init(c, &g_modules[0]); }
+ 
+ // Claim the guest address range before anything else can map there. The host allocator places
+ // regions at random addresses in the same window; on a collision, re-exec for a fresh layout.
++#ifdef __ANDROID__
++static bool g_guest_reserved;
++#endif
+ __attribute__((constructor(101))) static void reserve_guest_space(void) {
+     plat_watch_writes(HEAP_BASE);  // (the heap's written pages: vertex data the GPU ring keeps from one frame to the next, exec.c)
++#ifdef __ANDROID__
++    // This reference still uses upstream's unshifted guest window. Zygote apps cannot re-exec for a new layout.
++    g_guest_reserved = plat_reserve_guest(GUEST_LO, GUEST_HI);
++    return;
++#else
+     if (plat_reserve_guest(GUEST_LO, GUEST_HI)) return;
+     const char *tries = getenv("LARECOMP_REEXEC");
+     int n = tries ? atoi(tries) : 0;
+@@ -53,6 +65,7 @@ __attribute__((constructor(101))) static void reserve_guest_space(void) {
+     plat_exec(NULL);
+     perror("re-exec");
+     exit(1);
++#endif
+ }
+ 
+ // ------------------------------------------------------------------ boot / in-place reboot
+@@ -162,6 +175,24 @@ static void boot(const char *root) {
+     kernel_run_main(t, t->handle, 0, init_fn, fini_fn);  // nn::init::Start(thread_handle, args_region, init, fini)
+ }
+ 
++#ifdef __ANDROID__
++static void android_env_file(void) {
++    FILE *f = fopen("env.txt", "r");
++    if (!f) return;
++    char *line = NULL;
++    size_t capacity = 0;
++    while (getline(&line, &capacity, f) >= 0) {
++        line[strcspn(line, "\r\n")] = 0;
++        char *eq = strchr(line, '=');
++        if (line[0] == '#' || !eq || eq == line) continue;
++        *eq = 0;
++        if (setenv(line, eq + 1, 1) == 0) LOG("[env] %s=%s\n", line, eq + 1);
++    }
++    free(line);
++    fclose(f);
++}
++#endif
++
+ int main(int argc, char **argv) {
+     plat_init();
+ #ifdef _WIN32
+@@ -171,13 +202,26 @@ int main(int argc, char **argv) {
+ #endif
+     const char *root = "extracted";  // (in the data root)
+     bool skip_launcher = getenv("LARECOMP_NO_LAUNCHER") || getenv("LARECOMP_INPUT");  // tests boot straight in
+-    static char arg_root[1024];
++    static char arg_root[PATH_MAX];
+     for (int i = 1; i < argc; i++) {
+         if (!strcmp(argv[i], "--play")) skip_launcher = true;
+         else if (argv[i][0] != '-' && !realpath(argv[i], arg_root)) root = argv[i];  // (relative to where we started)
+         else if (argv[i][0] != '-') root = arg_root;
+     }
+     rt_paths_init();  // the data root becomes the working directory (runtime/paths.h)
++#ifdef __ANDROID__
++    android_env_file();
++    if (!g_guest_reserved) {
++        LOG("FATAL: unshifted guest window %llx-%llx is unavailable; no game code will run\n", GUEST_LO, GUEST_HI);
++        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Let's Go Recomp",
++            "The original guest address window is occupied. This reference has no Android address shift; "
++            "the game was not started.", NULL);
++        return 1;
++    }
++    LOG("[mem] reserved complete unshifted guest window %llx-%llx (%llu bytes)\n",
++        GUEST_LO, GUEST_HI, GUEST_HI - GUEST_LO);
++    if (getenv("LARECOMP_NO_LAUNCHER") || getenv("LARECOMP_INPUT")) skip_launcher = true;
++#endif
+     for (bool title = !skip_launcher;;) {
+         if (title) {  // start screen: resolution, fullscreen, anti-aliasing, translation, keys (runtime/ui/launcher_lg.mm)
+             extern void launcher_lg_run(const char *root);
+diff --git a/runtime/paths.c b/runtime/paths.c
+index 9ad64a4..4954221 100644
+--- a/runtime/paths.c
++++ b/runtime/paths.c
+@@ -78,6 +78,38 @@ static void fail(const char *msg) {
+ static bool g_dev;  // the data root is the starting folder because it has extracted/ (a source checkout)
+ bool rt_dev_mode(void) { return g_dev; }
+ 
++#ifdef __ANDROID__
++// Adapted from LAS Recomp Android's MIT-licensed resource path. Fonts/icons are APK assets, not executable-side files.
++static void android_resources(void) {
++    static const char *const names[] = {"Baloo2-SemiBold.ttf", "DejaVuSans.ttf", "icon.png"};
++    const char *internal = SDL_GetAndroidInternalStoragePath();
++    if (!internal || !*internal) return;
++    snprintf(g_exe_dir, sizeof g_exe_dir, "%s/res", internal);
++    mkdirs(g_exe_dir);
++    for (size_t i = 0; i < sizeof names / sizeof *names; i++) {
++        char out[1200], partial[1220];
++        snprintf(out, sizeof out, "%s/%s", g_exe_dir, names[i]);
++        if (exists(out)) continue;
++        SDL_IOStream *in = SDL_IOFromFile(names[i], "rb");
++        if (!in) continue;  // optional resource absent from this APK
++        snprintf(partial, sizeof partial, "%s.part", out);
++        FILE *f = fopen(partial, "wb");
++        bool ok = f != NULL;
++        unsigned char buffer[16384];
++        size_t got, total = 0;
++        while (ok && (got = SDL_ReadIO(in, buffer, sizeof buffer)) > 0) {
++            ok = fwrite(buffer, 1, got, f) == got;
++            total += got;
++        }
++        if (!total) ok = false;
++        if (SDL_GetIOStatus(in) == SDL_IO_STATUS_ERROR) ok = false;
++        SDL_CloseIO(in);
++        if (f && fclose(f) != 0) ok = false;
++        if (!ok || rename(partial, out) != 0) remove(partial);
++    }
++}
++#endif
++
+ void rt_paths_init(void) {
+     if (!getcwd(g_start, sizeof g_start)) g_start[0] = 0;
+     if (plat_exe_path(g_exe_dir, sizeof g_exe_dir)) {
+@@ -88,6 +120,14 @@ void rt_paths_init(void) {
+     char root[1024];
+     const char *env = getenv("LARECOMP_DATA_ROOT");
+     if (env && *env) snprintf(root, sizeof root, "%s", env);
++#ifdef __ANDROID__
++    else {
++        const char *dir = SDL_GetAndroidExternalStoragePath();
++        if (!dir || !*dir) dir = SDL_GetAndroidInternalStoragePath();
++        if (!dir || !*dir) fail("Android app storage is unavailable");
++        snprintf(root, sizeof root, "%s", dir);
++    }
++#else
+     else if (is_dir("extracted")) snprintf(root, sizeof root, "%s", g_start), g_dev = true;  // dev / portable: as before
+     else if (snprintf(root, sizeof root, "%s/../extracted", g_exe_dir), is_dir(root))  // exe in build/ or build/jogo/,
+         snprintf(root, sizeof root, "%s/..", g_exe_dir), g_dev = true;               // started by double-click: the
+@@ -106,6 +146,7 @@ void rt_paths_init(void) {
+         snprintf(root, sizeof root, "%s/Library/Application Support/" RT_BUNDLE_ID, home && *home ? home : "/tmp");
+ #endif
+     }
++#endif
+     mkdirs(root);
+     char msg[1400];
+     if (!is_dir(root) || !writable(root) || chdir(root) != 0) {
+@@ -119,6 +160,9 @@ void rt_paths_init(void) {
+         fail(msg);
+     }
+     if (!getcwd(g_root, sizeof g_root)) snprintf(g_root, sizeof g_root, "%s", root);
++#ifdef __ANDROID__
++    android_resources();
++#endif
+     fprintf(stderr, "[paths] data: %s\n", g_root);
+ }
+ 
+diff --git a/runtime/platform.h b/runtime/platform.h
+index f4e1d4d..6d68224 100644
+--- a/runtime/platform.h
++++ b/runtime/platform.h
+@@ -7,7 +7,7 @@
+ 
+ #ifdef _WIN32
+ #include "platform/win_compat.h"
+-#elif defined(__linux__)
++#elif defined(__linux__) && !defined(__ANDROID__)
+ #include "platform/linux_compat.h"
+ #endif
+ 
+diff --git a/runtime/platform/android.c b/runtime/platform/android.c
+new file mode 100644
+index 0000000..57ab355
+--- /dev/null
++++ b/runtime/platform/android.c
+@@ -0,0 +1,201 @@
++// Android ARM64 host layer, adapted from the MIT-licensed Let's Go Recomp Linux layer and LAS Recomp Android.
++// Upstream copyrights/licenses remain in LICENSE and LICENSE-LASRecomp. No game code is included here.
++#define _GNU_SOURCE
++#include <SDL3/SDL.h>
++#include <android/log.h>
++#include <dlfcn.h>
++#include <errno.h>
++#include <fcntl.h>
++#include <ftw.h>
++#include <pthread.h>
++#include <signal.h>
++#include <spawn.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/mman.h>
++#include <sys/stat.h>
++#include <sys/ucontext.h>
++#include <sys/wait.h>
++#include <time.h>
++#include <unistd.h>
++#include <unwind.h>
++
++#include "../platform.h"
++#include "../paths.h"
++
++#if !defined(__ANDROID__) || !defined(__aarch64__)
++#error "This reference host layer requires Android ARM64"
++#endif
++#ifndef MAP_FIXED_NOREPLACE
++#define MAP_FIXED_NOREPLACE 0x100000
++#endif
++
++static uint64_t reserved_lo, reserved_hi;
++bool plat_reserve_guest(uint64_t lo, uint64_t hi) {
++    if (hi <= lo || reserved_hi) { errno = EINVAL; return false; }
++    void *p = mmap((void *)(uintptr_t)lo, hi - lo, PROT_READ | PROT_WRITE,
++                   MAP_PRIVATE | MAP_ANONYMOUS | MAP_NORESERVE | MAP_FIXED_NOREPLACE, -1, 0);
++    if (p == MAP_FAILED) return false;
++    if (p != (void *)(uintptr_t)lo) { munmap(p, hi - lo); errno = EEXIST; return false; }
++    reserved_lo = lo, reserved_hi = hi;
++    return true;
++}
++bool plat_reset_guest(uint64_t lo, uint64_t hi) {
++    // Never replace memory outside the window this host layer successfully claimed.
++    if (hi <= lo || lo != reserved_lo || hi != reserved_hi) { errno = EINVAL; return false; }
++    return mmap((void *)(uintptr_t)lo, hi - lo, PROT_READ | PROT_WRITE,
++                MAP_PRIVATE | MAP_ANONYMOUS | MAP_NORESERVE | MAP_FIXED, -1, 0) == (void *)(uintptr_t)lo;
++}
++void plat_commit(uint64_t addr, uint64_t size) { (void)addr; (void)size; }
++bool plat_watch_writes(uint64_t watch_lo) { (void)watch_lo; return false; }
++int plat_written(uint64_t addr, uint64_t size, uint64_t *out, int max) {
++    (void)addr; (void)size; (void)out; (void)max;
++    return -1;  // Match the upstream Linux baseline: callers fall back to untracked memory.
++}
++int plat_protect(uint64_t addr, uint64_t size, int prot) {
++    int p = prot == PLAT_PROT_NONE ? PROT_NONE : prot == PLAT_PROT_READ ? PROT_READ : PROT_READ | PROT_WRITE;
++    return mprotect((void *)(uintptr_t)addr, size, p);
++}
++
++uint64_t plat_now_ns(void) {
++    struct timespec ts;
++    clock_gettime(CLOCK_MONOTONIC, &ts);
++    return (uint64_t)ts.tv_sec * 1000000000ull + (uint64_t)ts.tv_nsec;
++}
++void plat_sleep_until_ns(uint64_t t) {
++    struct timespec ts = {.tv_sec = (time_t)(t / 1000000000ull), .tv_nsec = (long)(t % 1000000000ull)};
++    while (clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ts, NULL) == EINTR) {}
++}
++void plat_thread_realtime(uint64_t period_ns) { (void)period_ns; }  // Retain Android's normal scheduler policy.
++
++static char g_log_path[1200];
++void plat_init(void) {
++    const char *dir = getenv("LARECOMP_DATA_ROOT");
++    if (!dir || !*dir) dir = SDL_GetAndroidExternalStoragePath();
++    if (!dir || !*dir) dir = SDL_GetAndroidInternalStoragePath();
++    if (!dir || !*dir) return;
++    char parent[1024];
++    snprintf(parent, sizeof parent, "%s", dir);
++    for (char *p = parent + 1; *p; p++)
++        if (*p == '/') { *p = 0; mkdir(parent, 0755); *p = '/'; }
++    mkdir(parent, 0755);
++    snprintf(g_log_path, sizeof g_log_path, "%s/lasrecomp.log", parent);
++    char previous[1220];
++    snprintf(previous, sizeof previous, "%s.prev", g_log_path);
++    rename(g_log_path, previous);
++    int fd = open(g_log_path, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0600);
++    if (fd < 0) { g_log_path[0] = 0; return; }
++    if (fd != STDERR_FILENO) dup2(fd, STDERR_FILENO);
++    if (fd != STDOUT_FILENO) dup2(fd, STDOUT_FILENO);
++    if (fd != STDERR_FILENO && fd != STDOUT_FILENO) close(fd);
++    setvbuf(stderr, NULL, _IOLBF, 0);
++    __android_log_print(ANDROID_LOG_INFO, "LetsGoRecomp", "Native reference log: %s", g_log_path);
++}
++bool plat_exe_path(char *buf, size_t size) {
++    Dl_info di = {0};
++    if (!buf || !size || !dladdr((void *)plat_exe_path, &di) || !di.dli_fname) return false;
++    int n = snprintf(buf, size, "%s", di.dli_fname);
++    return n >= 0 && (size_t)n < size;
++}
++void plat_exec(char *const argv[]) { (void)argv; errno = ENOTSUP; }
++void plat_terminate(void) { _exit(0); }
++
++const char *plat_symbol(uint64_t pc, uint64_t *offset) {
++    Dl_info di = {0};
++    if (!dladdr((void *)(uintptr_t)pc, &di) || !di.dli_sname) return NULL;
++    if (offset) *offset = pc - (uint64_t)(uintptr_t)di.dli_saddr;
++    return di.dli_sname;
++}
++const char *rt_host_fn_name(uint64_t pc, uint64_t *offset);
++typedef struct { uintptr_t pcs[64]; unsigned n; } Frames;
++static _Unwind_Reason_Code unwind_frame(struct _Unwind_Context *context, void *arg) {
++    Frames *frames = arg;
++    uintptr_t pc = _Unwind_GetIP(context);
++    if (pc && frames->n < 64) frames->pcs[frames->n++] = pc;
++    return frames->n < 64 ? _URC_NO_REASON : _URC_END_OF_STACK;
++}
++void plat_print_backtrace(void) {
++    Frames frames = {0};
++    _Unwind_Backtrace(unwind_frame, &frames);
++    Dl_info self = {0};
++    dladdr((void *)plat_print_backtrace, &self);
++    for (unsigned i = 0; i < frames.n; i++) {
++        uint64_t pc = frames.pcs[i], offset = 0;
++        Dl_info di = {0};
++        dladdr((void *)(uintptr_t)pc, &di);
++        const char *name = plat_symbol(pc, &offset);
++        if (!name && di.dli_fbase && di.dli_fbase == self.dli_fbase) name = rt_host_fn_name(pc, &offset);
++        const char *module = di.dli_fname ? strrchr(di.dli_fname, '/') : NULL;
++        module = module ? module + 1 : di.dli_fname ? di.dli_fname : "?";
++        fprintf(stderr, "  #%u %016llx %s+%llx (%s+%llx)\n", i, (unsigned long long)pc,
++                name ? name : "?", (unsigned long long)offset, module,
++                (unsigned long long)(pc - (uint64_t)(uintptr_t)di.dli_fbase));
++    }
++}
++void plat_fatal_notice(void) {
++    fflush(stderr);
++    char text[1400];
++    snprintf(text, sizeof text, RT_APP_NAME " stopped. Details: %s", g_log_path[0] ? g_log_path : "native stderr");
++    __android_log_write(ANDROID_LOG_ERROR, "LetsGoRecomp", text);
++    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, RT_APP_NAME, text, NULL);
++}
++static void crash_handler(int sig, siginfo_t *info, void *context) {
++    ucontext_t *uc = context;
++    uint64_t fault = (uint64_t)(uintptr_t)info->si_addr;
++    uint64_t pc = uc->uc_mcontext.pc, lr = uc->uc_mcontext.regs[30];
++    if (rt_fault_watch(fault, pc)) return;
++    static volatile sig_atomic_t handling;
++    if (handling) _exit(128 + sig);
++    handling = 1;
++    char what[32];
++    snprintf(what, sizeof what, "signal %d", sig);
++    rt_fault_report(what, fault, pc, lr);
++}
++void plat_crash_handler_install(void) {
++    stack_t alternate = {.ss_sp = malloc(1 << 20), .ss_size = 1 << 20};
++    if (alternate.ss_sp && sigaltstack(&alternate, NULL) != 0) free(alternate.ss_sp);
++    struct sigaction action = {0};
++    sigemptyset(&action.sa_mask);
++    action.sa_sigaction = crash_handler;
++    action.sa_flags = SA_SIGINFO | SA_ONSTACK;
++    const int signals[] = {SIGSEGV, SIGBUS, SIGILL, SIGFPE, SIGABRT};
++    for (unsigned i = 0; i < sizeof signals / sizeof *signals; i++) sigaction(signals[i], &action, NULL);
++}
++
++extern char **environ;
++PlatProc plat_spawn(const char *const argv[], const char *log_path, bool append_log) {
++    if (!argv || !argv[0]) { errno = EINVAL; return 0; }
++    posix_spawn_file_actions_t files;
++    posix_spawn_file_actions_init(&files);
++    posix_spawn_file_actions_addopen(&files, STDOUT_FILENO, log_path ? log_path : "/dev/null",
++        O_WRONLY | O_CREAT | (append_log ? O_APPEND : O_TRUNC), 0600);
++    posix_spawn_file_actions_adddup2(&files, STDOUT_FILENO, STDERR_FILENO);
++    posix_spawnattr_t attributes;
++    posix_spawnattr_init(&attributes);
++    posix_spawnattr_setflags(&attributes, POSIX_SPAWN_SETPGROUP);
++    posix_spawnattr_setpgroup(&attributes, 0);
++    pid_t child;
++    int status = posix_spawn(&child, argv[0], &files, &attributes, (char *const *)argv, environ);
++    posix_spawnattr_destroy(&attributes);
++    posix_spawn_file_actions_destroy(&files);
++    if (status) errno = status;
++    return status ? 0 : (PlatProc)child;
++}
++int plat_proc_wait(PlatProc child, bool block) {
++    if (child <= 0) return 255;
++    int status;
++    pid_t result;
++    do result = waitpid((pid_t)child, &status, block ? 0 : WNOHANG); while (result < 0 && errno == EINTR);
++    return !result ? -1 : result < 0 || !WIFEXITED(status) ? 255 : WEXITSTATUS(status);
++}
++void plat_proc_kill(PlatProc child) {
++    if (child <= 0) return;
++    kill(-(pid_t)child, SIGKILL);
++    while (waitpid((pid_t)child, NULL, 0) < 0 && errno == EINTR) {}
++}
++static int remove_entry(const char *path, const struct stat *st, int type, struct FTW *walk) {
++    (void)st; (void)type; (void)walk;
++    return remove(path);
++}
++bool plat_remove_tree(const char *dir) { return nftw(dir, remove_entry, 16, FTW_DEPTH | FTW_PHYS) == 0; }

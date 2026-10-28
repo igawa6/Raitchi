@@ -1,0 +1,22 @@
+{
+  "description": "Reload the isolated File 1 test save, advance the introductory dialogue, and request short stick movements.",
+  "driver": "bundled",
+  "seconds": 100,
+  "checkpoints": [20, 40, 60, 90],
+  "settings": {
+    "aspect": "original",
+    "resolution": "1",
+    "upscaler": "bilinear",
+    "frame_rate": "0",
+    "frame_gen": "0",
+    "show_fps": "1",
+    "touch_controls": "always",
+    "touch_all": "1"
+  },
+  "environment": {
+    "LARECOMP_INPUT": "180:A:30,360:L:60,360:R:60,900:A:10,1080:A:10,1440:A:5,1470:A:5,1500:A:5,1530:A:5,1560:A:5,1590:A:5,1620:A:5,1650:A:5,1680:A:5,1710:A:5,1740:A:5,1770:A:5,1800:A:5,1830:A:5,1860:A:5,1890:A:5,1920:A:5,1950:A:5,2100:STICK_DOWN:30,2190:STICK_RIGHT:30",
+    "LARECOMP_NO_USER_INPUT": "0",
+    "LARECOMP_LOG_EVENTS": "1",
+    "LARECOMP_LOG_LINK": "30"
+  }
+}

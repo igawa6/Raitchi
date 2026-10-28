@@ -1,0 +1,22 @@
+{
+  "description": "Reach the empty file menu for a supervised new-save check; subsequent input is supplied only after observing each screen.",
+  "driver": "bundled",
+  "seconds": 180,
+  "checkpoints": [10, 20, 60, 120, 170],
+  "settings": {
+    "aspect": "original",
+    "resolution": "1",
+    "upscaler": "bilinear",
+    "frame_rate": "0",
+    "frame_gen": "0",
+    "show_fps": "1",
+    "touch_controls": "always",
+    "touch_all": "1"
+  },
+  "environment": {
+    "LARECOMP_INPUT": "180:A:30,360:L:60,360:R:60",
+    "LARECOMP_NO_USER_INPUT": "0",
+    "LARECOMP_LOG_EVENTS": "1",
+    "LARECOMP_LOG_LINK": "60"
+  }
+}

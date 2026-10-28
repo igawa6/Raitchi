@@ -1,0 +1,4 @@
+NAP_PROOF_1 {
+  global: native_arm64_proof_run;
+  local: *;
+};

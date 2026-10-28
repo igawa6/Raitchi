@@ -1,0 +1,16 @@
+{
+  "_comment": "User-visible upstream names allowed only where license notices require them (GPLv3 section 5(d) Appropriate Legal Notices, MIT notices). Keep this list minimal; every entry is reviewed by the maintainer.",
+  "resources": [],
+  "resource_prefixes": [
+    "license_"
+  ],
+  "files": [
+    "(^|/)LicensesFragment\\.kt$",
+    "(^|/)LicenseAdapter\\.kt$",
+    "(^|/)LicenseItem\\.kt$"
+  ],
+  "literals": [
+    "logcat (tag LASRecomp)"
+  ],
+  "_literals_comment": "Exact literals allowed: names the real internal Android log tag so users can find the log."
+}

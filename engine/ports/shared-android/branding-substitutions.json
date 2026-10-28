@@ -1,0 +1,127 @@
+{
+ "schema": 1,
+ "base": "las-android",
+ "purpose": "User-visible product name in pinned base strings; comments and notices are untouched",
+ "files": [
+  {
+   "path": "ui/launcher.mm",
+   "rules": [
+    {
+     "old": "LAS Recomp and a Switch emulator (yuzu, Eden, Citron, Sudachi, Ryujinx)",
+     "new": "Raitchi and another Switch emulator",
+     "count": 1
+    },
+    {
+     "old": "(yuzu, Eden, Citron, Sudachi: ",
+     "new": "(",
+     "count": 1
+    },
+    {
+     "old": "<user>/01006BB00C6F0000; Ryujinx: bis",
+     "new": "<user>/01006BB00C6F0000; or bis",
+     "count": 1
+    },
+    {
+     "old": "LAS Recomp",
+     "new": "Raitchi",
+     "count": 23
+    }
+   ]
+  },
+  {
+   "path": "ui/i18n_pt_br.h",
+   "rules": [
+    {
+     "old": "LAS Recomp and a Switch emulator (yuzu, Eden, Citron, Sudachi, Ryujinx)",
+     "new": "Raitchi and another Switch emulator",
+     "count": 1
+    },
+    {
+     "old": "o LAS Recomp e um emulador de Switch (yuzu, Eden, Citron, Sudachi, Ryujinx)",
+     "new": "o Raitchi e outro emulador de Switch",
+     "count": 1
+    },
+    {
+     "old": "(yuzu, Eden, Citron, Sudachi: ",
+     "new": "(",
+     "count": 2
+    },
+    {
+     "old": "<user>/01006BB00C6F0000; Ryujinx: bis",
+     "new": "<user>/01006BB00C6F0000; or bis",
+     "count": 1
+    },
+    {
+     "old": "<usuário>/01006BB00C6F0000; Ryujinx: bis",
+     "new": "<usuário>/01006BB00C6F0000; ou bis",
+     "count": 1
+    },
+    {
+     "old": "LAS Recomp",
+     "new": "Raitchi",
+     "count": 44
+    }
+   ]
+  },
+  {
+   "path": "ui/rando_tab.mm",
+   "rules": [
+    {
+     "old": "LAS Recomp",
+     "new": "Raitchi",
+     "count": 2
+    }
+   ]
+  },
+  {
+   "path": "ui/controls_ui.mm",
+   "rules": [
+    {
+     "old": "LAS Recomp",
+     "new": "Raitchi",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "path": "settings.c",
+   "rules": [
+    {
+     "old": "LAS Recomp",
+     "new": "Raitchi",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "path": "gamebuild.c",
+   "rules": [
+    {
+     "old": "LAS Recomp",
+     "new": "Raitchi",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "path": "game_addresses.c",
+   "rules": [
+    {
+     "old": "LAS Recomp",
+     "new": "Raitchi",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "path": "platform/android.c",
+   "rules": [
+    {
+     "old": "LAS Recomp",
+     "new": "Raitchi",
+     "count": 1
+    }
+   ]
+  }
+ ]
+}

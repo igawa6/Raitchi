@@ -1,0 +1,9 @@
+{
+  "version": "0.0.1",
+  "maintainer": "igawa6",
+  "application_id": "dev.igawa6.raitchi",
+  "default_cpu": "continuous-nce",
+  "release_apk_sha256": "ffc149aeda040261bd936308ae3cd3a3cfb48f90eab6a7fdc4b912713d82207b",
+  "source_manifest_sha256": "df51c0099b5c09c7323724387a4ed333ab829d7c73a1a0a3aa5e67ecaead42d5",
+  "scope": "Experimental Android ARM64 preview. See TESTING.md for bounded compatibility and build validation limits."
+}

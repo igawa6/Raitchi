@@ -1,0 +1,5 @@
+plugins {
+    id 'com.android.application' version '8.11.1' apply false
+}
+ext.workspaceRoot = projectDir.toPath().resolve('../../..').normalize().toFile()
+layout.buildDirectory = new File(workspaceRoot, 'build/letsgo-android/gradle')

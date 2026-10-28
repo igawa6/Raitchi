@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "captured_on": "2026-10-25",
+  "sources": [
+    {
+      "id": "echoes",
+      "url": "https://github.com/Nycolazs/EoWRecomp.git",
+      "path": "sources/echoes",
+      "commit": "dd9c79d6c01d9eaddafc1fc5a07b6658bfc56505",
+      "remote_head": "refs/heads/main",
+      "role": "Pinned reference for Echoes native startup, resource extraction, services and NVN compatibility; device qualification is recorded separately"
+    }
+  ]
+}

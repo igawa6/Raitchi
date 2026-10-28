@@ -1,0 +1,27 @@
+plugins { id 'com.android.application' }
+
+def workspace = rootProject.ext.workspaceRoot
+layout.buildDirectory = new File(workspace, 'build/letsgo-android/apk')
+android {
+    namespace 'com.recomp.letsgo.test'
+    compileSdk 36
+    ndkVersion '27.2.12479018'
+    defaultConfig {
+        applicationId 'com.recomp.letsgo.test'
+        minSdk 30
+        targetSdk 36
+        versionCode 1
+        versionName '0.1-reference'
+        ndk { abiFilters 'arm64-v8a' }
+    }
+    sourceSets.main {
+        java.srcDirs += new File(workspace, 'work/las-baseline/build/android/SDL3/android-project/app/src/main/java')
+        jniLibs.srcDirs = [new File(workspace, 'build/letsgo-android/apk-inputs/jniLibs')]
+        assets.srcDirs = [new File(workspace, 'build/letsgo-android/apk-inputs/assets')]
+    }
+    packaging { jniLibs { useLegacyPackaging true } }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

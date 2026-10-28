@@ -1,0 +1,191 @@
+/* Cpu and native-frame offsets are generated with offsetof, never duplicated. */
+#include "bridge_offsets.inc"
+.text
+.p2align 2
+.macro NR_CAPTURE
+    sub sp,sp,#NR_FRAME_SIZE
+    stp x0,x1,[sp,#NR_X+0]
+    stp x2,x3,[sp,#NR_X+16]
+    stp x4,x5,[sp,#NR_X+32]
+    stp x6,x7,[sp,#NR_X+48]
+    stp x8,x9,[sp,#NR_X+64]
+    stp x10,x11,[sp,#NR_X+80]
+    stp x12,x13,[sp,#NR_X+96]
+    stp x14,x15,[sp,#NR_X+112]
+    stp x16,x17,[sp,#NR_X+128]
+    stp x18,x19,[sp,#NR_X+144]
+    stp x20,x21,[sp,#NR_X+160]
+    stp x22,x23,[sp,#NR_X+176]
+    stp x24,x25,[sp,#NR_X+192]
+    stp x26,x27,[sp,#NR_X+208]
+    stp x28,x29,[sp,#NR_X+224]
+    str x30,[sp,#NR_X+240]
+    add x9,sp,#NR_FRAME_SIZE
+    str x9,[sp,#NR_SP]
+    mrs x9,nzcv
+    str x9,[sp,#NR_NZCV]
+    mrs x9,fpcr
+    str x9,[sp,#NR_FPCR]
+    mrs x9,fpsr
+    str x9,[sp,#NR_FPSR]
+    stp q0,q1,[sp,#NR_Q+0]
+    stp q2,q3,[sp,#NR_Q+32]
+    stp q4,q5,[sp,#NR_Q+64]
+    stp q6,q7,[sp,#NR_Q+96]
+    stp q8,q9,[sp,#NR_Q+128]
+    stp q10,q11,[sp,#NR_Q+160]
+    stp q12,q13,[sp,#NR_Q+192]
+    stp q14,q15,[sp,#NR_Q+224]
+    stp q16,q17,[sp,#NR_Q+256]
+    stp q18,q19,[sp,#NR_Q+288]
+    stp q20,q21,[sp,#NR_Q+320]
+    stp q22,q23,[sp,#NR_Q+352]
+    stp q24,q25,[sp,#NR_Q+384]
+    stp q26,q27,[sp,#NR_Q+416]
+    stp q28,q29,[sp,#NR_Q+448]
+    stp q30,q31,[sp,#NR_Q+480]
+.endm
+.macro NR_RESTORE
+    ldp q0,q1,[sp,#NR_Q+0]
+    ldp q2,q3,[sp,#NR_Q+32]
+    ldp q4,q5,[sp,#NR_Q+64]
+    ldp q6,q7,[sp,#NR_Q+96]
+    ldp q8,q9,[sp,#NR_Q+128]
+    ldp q10,q11,[sp,#NR_Q+160]
+    ldp q12,q13,[sp,#NR_Q+192]
+    ldp q14,q15,[sp,#NR_Q+224]
+    ldp q16,q17,[sp,#NR_Q+256]
+    ldp q18,q19,[sp,#NR_Q+288]
+    ldp q20,q21,[sp,#NR_Q+320]
+    ldp q22,q23,[sp,#NR_Q+352]
+    ldp q24,q25,[sp,#NR_Q+384]
+    ldp q26,q27,[sp,#NR_Q+416]
+    ldp q28,q29,[sp,#NR_Q+448]
+    ldp q30,q31,[sp,#NR_Q+480]
+    ldr x9,[sp,#NR_FPCR]
+    msr fpcr,x9
+    ldr x9,[sp,#NR_FPSR]
+    msr fpsr,x9
+    ldr x9,[sp,#NR_NZCV]
+    msr nzcv,x9
+    ldp x0,x1,[sp,#NR_X+0]
+    ldp x2,x3,[sp,#NR_X+16]
+    ldp x4,x5,[sp,#NR_X+32]
+    ldp x6,x7,[sp,#NR_X+48]
+    ldp x8,x9,[sp,#NR_X+64]
+    ldp x10,x11,[sp,#NR_X+80]
+    ldp x12,x13,[sp,#NR_X+96]
+    ldp x14,x15,[sp,#NR_X+112]
+    ldp x16,x17,[sp,#NR_X+128]
+    /* physical X18 is Android's; physical X19 remains the context */
+    ldp x20,x21,[sp,#NR_X+160]
+    ldp x22,x23,[sp,#NR_X+176]
+    ldp x24,x25,[sp,#NR_X+192]
+    ldp x26,x27,[sp,#NR_X+208]
+    ldp x28,x29,[sp,#NR_X+224]
+    ldr x30,[sp,#NR_X+240]
+    add sp,sp,#NR_FRAME_SIZE
+.endm
+
+.hidden nr_enter
+.global nr_enter
+.type nr_enter,%function
+nr_enter:
+    sub sp,sp,#256
+    stp x19,x20,[sp,#0]
+    stp x21,x22,[sp,#16]
+    stp x23,x24,[sp,#32]
+    stp x25,x26,[sp,#48]
+    stp x27,x28,[sp,#64]
+    stp x29,x30,[sp,#80]
+    stp q8,q9,[sp,#96]
+    stp q10,q11,[sp,#128]
+    stp q12,q13,[sp,#160]
+    stp q14,q15,[sp,#192]
+    mrs x9,fpcr
+    str x9,[sp,#224]
+    mrs x9,fpsr
+    str x9,[sp,#232]
+    mov x19,x0
+    mov x9,sp
+    str x9,[x19,#CTX_EXPECTED_SP]
+    ldr x17,[x19,#CTX_CPU]
+    ldr x9,[x17,#CPU_FPCR]
+    msr fpcr,x9
+    ldr x9,[x17,#CPU_FPSR]
+    msr fpsr,x9
+    ldr x9,[x17,#CPU_NZCV]
+    msr nzcv,x9
+    ldp q0,q1,[x17,#CPU_V+0]
+    ldp q2,q3,[x17,#CPU_V+32]
+    ldp q4,q5,[x17,#CPU_V+64]
+    ldp q6,q7,[x17,#CPU_V+96]
+    ldp q8,q9,[x17,#CPU_V+128]
+    ldp q10,q11,[x17,#CPU_V+160]
+    ldp q12,q13,[x17,#CPU_V+192]
+    ldp q14,q15,[x17,#CPU_V+224]
+    ldp q16,q17,[x17,#CPU_V+256]
+    ldp q18,q19,[x17,#CPU_V+288]
+    ldp q20,q21,[x17,#CPU_V+320]
+    ldp q22,q23,[x17,#CPU_V+352]
+    ldp q24,q25,[x17,#CPU_V+384]
+    ldp q26,q27,[x17,#CPU_V+416]
+    ldp q28,q29,[x17,#CPU_V+448]
+    ldp q30,q31,[x17,#CPU_V+480]
+    ldp x0,x1,[x17,#CPU_X+0]
+    ldp x2,x3,[x17,#CPU_X+16]
+    ldp x4,x5,[x17,#CPU_X+32]
+    ldp x6,x7,[x17,#CPU_X+48]
+    ldp x8,x9,[x17,#CPU_X+64]
+    ldp x10,x11,[x17,#CPU_X+80]
+    ldp x12,x13,[x17,#CPU_X+96]
+    ldp x14,x15,[x17,#CPU_X+112]
+    ldr x16,[x17,#CPU_X+128]
+    ldp x20,x21,[x17,#CPU_X+160]
+    ldp x22,x23,[x17,#CPU_X+176]
+    ldp x24,x25,[x17,#CPU_X+192]
+    ldp x26,x27,[x17,#CPU_X+208]
+    ldp x28,x29,[x17,#CPU_X+224]
+    ldr x30,[x17,#CPU_X+240]
+    ldr x17,[x17,#CPU_X+136]
+    br x16 /* seeded guest X16 already equals the RX snippet pointer */
+.hidden nr_resume
+.global nr_resume
+nr_resume:
+    NR_CAPTURE
+    eor x9,x0,#1
+    str x9,[sp,#NR_CONSUMED]
+    mov x0,x19
+    mov x1,sp
+    bl nr_observe
+    add sp,sp,#NR_FRAME_SIZE
+    ldr x9,[sp,#224]
+    msr fpcr,x9
+    ldr x9,[sp,#232]
+    msr fpsr,x9
+    ldp q8,q9,[sp,#96]
+    ldp q10,q11,[sp,#128]
+    ldp q12,q13,[sp,#160]
+    ldp q14,q15,[sp,#192]
+    ldp x19,x20,[sp,#0]
+    ldp x21,x22,[sp,#16]
+    ldp x23,x24,[sp,#32]
+    ldp x25,x26,[sp,#48]
+    ldp x27,x28,[sp,#64]
+    ldp x29,x30,[sp,#80]
+    add sp,sp,#256
+    ret
+.size nr_enter,.-nr_enter
+
+.hidden nr_gateway
+.global nr_gateway
+.type nr_gateway,%function
+nr_gateway:
+    NR_CAPTURE
+    mov x0,x19
+    mov x1,sp
+    bl nr_call_production
+    NR_RESTORE
+    ret
+.size nr_gateway,.-nr_gateway
+.section .note.GNU-stack,"",%progbits

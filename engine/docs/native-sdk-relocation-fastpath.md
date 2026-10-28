@@ -1,0 +1,15 @@
+# Optional SDK relocation accelerator
+
+The generic relocation accelerator has passed its AYN Thor differential gate. It remains unbound to the loader and is unused by the current game session. There is no measured game speed improvement from it yet.
+
+The [implementation and API](../ports/shared-android/runtime/native_sdk_fastpath.h) operate on resource relocation tables, preserving null pointers, section-base selection, traversal order, unsigned pointer wrapping, gaps and the file relocation flag. Repeating a call repeats the original additions; it is not idempotent. A complete preflight checks mapped metadata and writable destinations before any resource mutation. Production support for protected application-heap pages is restricted to the selected dirty-tracked range.
+
+On Thor, [the differential probe](../tests/native_sdk_relocation_probe.c) passed **1,518 checks across 150 synthetic resource cases**, with 300 calls to the actual verified CPU3 title-library descriptor entry and 300 accelerator calls. All 150 second-call comparisons passed, nine malformed or inaccessible inputs were rejected before effects, and ABI failures were zero. Each comparison restored identical input at the same buffer address and compared every resource byte, including flags and untouched gaps. This avoids masking pointer errors through address normalization.
+
+The matrix covers multiple sections and entry indices, default and external section bases, structure counts and strides, 0/1/3/4/5/255 pointers, nulls, unaligned fields, wrapping additions and skipped sections. The ABI checks preserve X0, SP, callee-saved guest registers, vector/FP state, opaque CPU fields and host TLS/X18. Original caller-saved X1–X18 and NZCV are allowed to differ from the accelerator.
+
+This was synthetic-resource execution on the actual installed descriptor, with a synthetic CPU and no SDK startup. The Thor differential used writable memory and did not exercise the production dirty-page handler. It does not establish correctness on real loaded resources or during a game boot. Original SDK identity and the actual title artifact were hash-bound to audited producer table/body/object records. Original instructions, addresses and generated excerpts remain in ignored candidate evidence. Optimized and ASan/UBSan host differentials also passed 1,518 checks each against the independently verified generated body.
+
+The [builder/checker](../tools/check_native_sdk_relocation_probe.py) produces the paired helper and runner under ignored `build/native-sdk-relocation-probe`. The measured helper SHA256 is `c38fa87f601c04e5cae9ee16f41a6f7cc15df82ab2a8270f6915290727b8d4ce`; local device evidence is `evidence/native-sdk-relocation-probe-device-current.json`.
+
+The resolver requires `LARECOMP_NATIVE_SDK_RELOCATE_FASTPATH=1` and the exact SDK relocation symbol. **The loader does not call this resolver yet**, so setting that variable alone does not enable acceleration in the launcher. A later native-session integration still needs an explicit binding, a real-resource boot check and measured behavior. Default C-AOT execution retains its existing path.

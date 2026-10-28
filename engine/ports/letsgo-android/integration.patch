@@ -1,0 +1,63 @@
+diff --git a/runtime/hle/movie.c b/runtime/hle/movie.c
+index a591b97..48e714e 100644
+--- a/runtime/hle/movie.c
++++ b/runtime/hle/movie.c
+@@ -17,6 +17,8 @@
+ #include <pthread.h>
+ #include <stdlib.h>
+ #include <string.h>
++#include <sys/stat.h>
++#include <unistd.h>
+ 
+ #include "../hle.h"
+ #include "../mods.h"
+diff --git a/runtime/hle/pl.c b/runtime/hle/pl.c
+index e0a866c..55ed4d5 100644
+--- a/runtime/hle/pl.c
++++ b/runtime/hle/pl.c
+@@ -12,6 +12,7 @@
+ #include <strings.h>
+ 
+ #include "../hle.h"
++#include "../paths.h"
+ 
+ typedef struct { uint64_t addr, size; } Font;
+ static Font fonts[2];  // [0] Standard (every type), [1] NintendoExt when a dump provides it
+@@ -124,6 +125,12 @@ static void load_fonts(void) {
+                          "/usr/share/fonts/dejavu-sans-fonts/DejaVuSans.ttf"};
+     for (size_t i = 0; i < sizeof std / sizeof *std && !fonts[0].addr; i++)
+         if (std[i]) load_one(std[i], &fonts[0]);
++#ifdef __ANDROID__
++    if (!fonts[0].addr) {
++        char shipped[1024];
++        if (rt_resource("DejaVuSans.ttf", NULL, shipped, sizeof shipped)) load_one(shipped, &fonts[0]);
++    }
++#endif
+     if (!fonts[0].addr) FATAL("no usable system font substitute\n");
+     if (!load_one("fonts/nintendo_ext_003.bfttf", &fonts[1])) load_one("fonts/nintendo_ext_003.ttf", &fonts[1]);
+ }
+diff --git a/runtime/mods.c b/runtime/mods.c
+index 32f178e..dec42a5 100644
+--- a/runtime/mods.c
++++ b/runtime/mods.c
+@@ -9,6 +9,7 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
++#include <unistd.h>
+ #include <sys/stat.h>
+ 
+ #include "gamesetup.h"
+diff --git a/runtime/services/hwopus.c b/runtime/services/hwopus.c
+index e9e3b6d..2b885a0 100644
+--- a/runtime/services/hwopus.c
++++ b/runtime/services/hwopus.c
+@@ -29,7 +29,7 @@ static bool opus_open(OpusDec *d) {
+     const AVCodec *codec = avcodec_find_decoder(AV_CODEC_ID_OPUS);
+     // (the game aborts without it, right after the controller screen: say why instead - an FFmpeg built without
+     // swresample has no Opus decoder, tools/build_deps_windows.sh)
+-    if (!codec) FATAL("the game's audio needs FFmpeg's Opus decoder, and the avcodec DLL next to the exe has none\n");
++    if (!codec) FATAL("the game's audio needs FFmpeg's Opus decoder, but this runtime was built without it\n");
+     d->ctx = avcodec_alloc_context3(codec);
+     d->ctx->sample_rate = 48000;  // (FFmpeg decodes Opus at 48 kHz: other rates are decimated below)
+     av_channel_layout_default(&d->ctx->ch_layout, (int)d->channels);

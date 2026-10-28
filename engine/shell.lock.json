@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "id": "raitchi-shell",
+  "url": "https://github.com/igawa6/Raitchi",
+  "path": "../shell-with-history",
+  "commit": "989768aa46720e3fcab9e2111e3ddd70819c382b",
+  "upstream": {
+    "url": "https://git.eden-emu.dev/eden-emu/eden",
+    "commit": "989768aa46720e3fcab9e2111e3ddd70819c382b"
+  },
+  "role": "Exact upstream base plus hashed uncommitted Android source overlay; not a published Raitchi integration commit. Restore through the supplied overlay manifest.",
+  "source_overlay": {
+    "manifest": "../shell-overlay.json",
+    "sha256": "e1e11e2b757f39cd5eac8f9e3734c98e5576eafa31cf55cda60597bbd557c11b",
+    "scope": "uncommitted source snapshot",
+    "integration_commit": null,
+    "maintained_fork_integration_required": true
+  }
+}

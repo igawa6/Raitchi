@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "game": {
+    "title": "Super Mario Bros. Wonder",
+    "program_id": "010015100B514000",
+    "version": "1.0.0",
+    "content": "base"
+  },
+  "build": {
+    "app_version": "0.0.1",
+    "runtime_sha256": "9da6023b22445be511101872f3a66bf6ad528d43ab04ffa4eaa6b0df82856f1a",
+    "apk_sha256": "e251e0a9dbd355b550185933c279c956819f954217374127a39c19846526f30e",
+    "source_commit": null
+  },
+  "device": {
+    "model": "AYN Thor",
+    "soc": "Qualcomm QCS8550 (Adreno 740)",
+    "gpu_driver": "Turnip Balemuni Apex v2 Ultimate (Mesa 26.3.0-devel)",
+    "android": "13",
+    "settings": "Continuous NCE; experimental command lifetime enabled; migrated owner settings"
+  },
+  "test": {
+    "date": "2026-10-27",
+    "tester": "local automated run",
+    "route": "Flower Kingdom opening: Mario, talking flower, blue sky and pale wind streaks; bounded movement/opening and orderly guest-thread shutdown",
+    "observation": "observed",
+    "fps": 30,
+    "save": "opening route"
+  },
+  "result": {
+    "state": "interactive",
+    "limitations": [
+      "Only the named scene and short route were tested; no whole-game claim",
+      "Physical controls, audio and long-session stability not requalified",
+      "Opening FPS varies; capture is not a constant60fps guarantee"
+    ]
+  }
+}

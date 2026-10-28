@@ -1,0 +1,34 @@
+/* Actual-production GPL cache/assembly smoke on a CPU Vulkan driver; synthetic shaders only. */
+#define _GNU_SOURCE
+#include <vulkan/vulkan.h>
+#include <pthread.h>
+#include <stdatomic.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+typedef struct { VkShaderModule vs, fs, fs_late; VkPipelineLayout layout; } Prog;
+static struct { bool vids, divisor, gpl; VkDevice dev; VkPipelineCache pcache; } g_vk;
+static uint64_t SDL_GetTicksNS(void) { struct timespec t; clock_gettime(CLOCK_MONOTONIC,&t);return (uint64_t)t.tv_sec*1000000000+t.tv_nsec; }
+#define LOG(...) fprintf(stderr,__VA_ARGS__)
+#include "gpl.production.h"
+#define CHECK(x) do{if(!(x)){fprintf(stderr,"line %d: %s\n",__LINE__,#x);exit(1);}}while(0)
+#define VK_OK(x) CHECK((x)==VK_SUCCESS)
+static bool extension(VkPhysicalDevice physical,const char *name){uint32_t n=0;VK_OK(vkEnumerateDeviceExtensionProperties(physical,NULL,&n,NULL));VkExtensionProperties *all=calloc(n,sizeof*all);CHECK(all);VK_OK(vkEnumerateDeviceExtensionProperties(physical,NULL,&n,all));bool found=false;for(unsigned i=0;i<n;i++)if(!strcmp(name,all[i].extensionName))found=true;free(all);return found;}
+static VkShaderModule module(const char *path){FILE *f=fopen(path,"rb");CHECK(f);CHECK(!fseek(f,0,SEEK_END));long n=ftell(f);CHECK(n>0&&n%4==0);rewind(f);uint32_t *p=malloc(n);CHECK(p&&fread(p,1,n,f)==(size_t)n);fclose(f);VkShaderModuleCreateInfo ci={.sType=VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,.codeSize=(size_t)n,.pCode=p};VkShaderModule out;VK_OK(vkCreateShaderModule(g_vk.dev,&ci,NULL,&out));free(p);return out;}
+int main(int argc,char **argv){
+    CHECK(argc==3);VkApplicationInfo app={.sType=VK_STRUCTURE_TYPE_APPLICATION_INFO,.apiVersion=VK_API_VERSION_1_3};VkInstanceCreateInfo ici={.sType=VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,.pApplicationInfo=&app};VkInstance instance;VK_OK(vkCreateInstance(&ici,NULL,&instance));uint32_t n=8;VkPhysicalDevice physicals[8];VK_OK(vkEnumeratePhysicalDevices(instance,&n,physicals));VkPhysicalDevice physical=VK_NULL_HANDLE;VkPhysicalDeviceProperties props;
+    for(unsigned i=0;i<n;i++){vkGetPhysicalDeviceProperties(physicals[i],&props);if(props.deviceType==VK_PHYSICAL_DEVICE_TYPE_CPU){physical=physicals[i];break;}}CHECK(physical);vkGetPhysicalDeviceProperties(physical,&props);
+    if(!extension(physical,VK_EXT_GRAPHICS_PIPELINE_LIBRARY_EXTENSION_NAME)||!extension(physical,VK_KHR_PIPELINE_LIBRARY_EXTENSION_NAME)){printf("{\"state\":\"skipped\",\"reason\":\"CPU Vulkan driver has no GPL extensions\"}\n");vkDestroyInstance(instance,NULL);return 0;}
+    VkPhysicalDeviceGraphicsPipelineLibraryPropertiesEXT gp={.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_GRAPHICS_PIPELINE_LIBRARY_PROPERTIES_EXT};VkPhysicalDeviceProperties2 p2={.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2,.pNext=&gp};vkGetPhysicalDeviceProperties2(physical,&p2);
+    VkPhysicalDeviceGraphicsPipelineLibraryFeaturesEXT gf={.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_GRAPHICS_PIPELINE_LIBRARY_FEATURES_EXT};VkPhysicalDeviceVulkan13Features f13={.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,.pNext=&gf};VkPhysicalDeviceExtendedDynamicStateFeaturesEXT f1={.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_FEATURES_EXT,.pNext=&f13};VkPhysicalDeviceExtendedDynamicState2FeaturesEXT f2={.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_2_FEATURES_EXT,.pNext=&f1};VkPhysicalDeviceFeatures2 features={.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,.pNext=&f2};vkGetPhysicalDeviceFeatures2(physical,&features);
+    if(!gf.graphicsPipelineLibrary||!gp.graphicsPipelineLibraryFastLinking||!f13.dynamicRendering||!f1.extendedDynamicState||!f2.extendedDynamicState2){printf("{\"state\":\"skipped\",\"reason\":\"CPU Vulkan driver lacks GPL fast linking or required dynamic state\"}\n");vkDestroyInstance(instance,NULL);return 0;}
+    uint32_t nq=16;VkQueueFamilyProperties queues[16];vkGetPhysicalDeviceQueueFamilyProperties(physical,&nq,queues);uint32_t family=0;while(family<nq&&!(queues[family].queueFlags&VK_QUEUE_GRAPHICS_BIT))family++;CHECK(family<nq);float priority=1;VkDeviceQueueCreateInfo qci={.sType=VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,.queueFamilyIndex=family,.queueCount=1,.pQueuePriorities=&priority};const char *ext[]={VK_EXT_GRAPHICS_PIPELINE_LIBRARY_EXTENSION_NAME,VK_KHR_PIPELINE_LIBRARY_EXTENSION_NAME};
+    memset(&f13,0,sizeof f13);f13.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;f13.dynamicRendering=VK_TRUE;f13.pNext=&gf;f1.extendedDynamicState=VK_TRUE;f1.pNext=&f13;memset(&f2,0,sizeof f2);f2.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_2_FEATURES_EXT;f2.extendedDynamicState2=VK_TRUE;f2.pNext=&f1;VkDeviceCreateInfo dci={.sType=VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,.pNext=&f2,.queueCreateInfoCount=1,.pQueueCreateInfos=&qci,.enabledExtensionCount=2,.ppEnabledExtensionNames=ext};VK_OK(vkCreateDevice(physical,&dci,NULL,&g_vk.dev));g_vk.gpl=true;
+    VkPipelineCacheCreateInfo pci={.sType=VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO};VK_OK(vkCreatePipelineCache(g_vk.dev,&pci,NULL,&g_vk.pcache));Prog program={0};program.vs=module(argv[1]);program.fs=program.fs_late=module(argv[2]);VkPipelineLayoutCreateInfo lci={.sType=VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};VK_OK(vkCreatePipelineLayout(g_vk.dev,&lci,NULL,&program.layout));
+    unsigned linked=0;uint64_t start=SDL_GetTicksNS();for(unsigned i=0;i<5;i++){PipeKey k={0};k.prog=&program;k.ncolor=1;k.color[0]=VK_FORMAT_R8G8B8A8_UNORM;k.depth=VK_FORMAT_D32_SFLOAT;k.samples=1;k.topo_class=2;k.poly_fill=1;k.write_mask[0]=i==2?7:15;k.a2c=i==3;k.depth=i==4?VK_FORMAT_UNDEFINED:k.depth;PipeCI ci;pipe_ci_fill(&ci,&k);VkPipeline executable;GplBuildStats stats;VK_OK(pipe_create_graphics(&k,&ci,&executable,&stats));CHECK(executable&&stats.attempted&&!stats.fallback);CHECK(stats.hits+stats.misses==4);if(i==1)CHECK(stats.hits==4&&stats.misses==0);if(i==2)CHECK(stats.hits==3&&stats.misses==1);if(i==3||i==4)CHECK(stats.hits==2&&stats.misses==2);linked++;vkDestroyPipeline(g_vk.dev,executable,NULL);}
+    VK_OK(vkDeviceWaitIdle(g_vk.dev));printf("{\"state\":\"passed\",\"software_device\":true,\"device\":\"%s\",\"linked_executables\":%u,\"cached_libraries\":%u,\"fallbacks\":%u,\"elapsed_ms\":%.3f,\"scope\":\"actual production creation/link and subset reuse; no draw or hardware speedup claim\"}\n",props.deviceName,linked,gpl_count,atomic_load(&gpl_fallbacks),(SDL_GetTicksNS()-start)/1e6);
+    for(unsigned i=0;i<GPL_BUCKETS;i++){GplEntry *e=gpl_buckets[i];while(e){GplEntry *next=e->next;if(e->pipeline)vkDestroyPipeline(g_vk.dev,e->pipeline,NULL);free(e);e=next;}}vkDestroyShaderModule(g_vk.dev,program.vs,NULL);vkDestroyShaderModule(g_vk.dev,program.fs,NULL);vkDestroyPipelineLayout(g_vk.dev,program.layout,NULL);vkDestroyPipelineCache(g_vk.dev,g_vk.pcache,NULL);vkDestroyDevice(g_vk.dev,NULL);vkDestroyInstance(instance,NULL);return 0;
+}

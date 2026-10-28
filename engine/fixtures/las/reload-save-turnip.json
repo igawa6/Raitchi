@@ -1,0 +1,22 @@
+{
+  "description": "Reload the deliberately created File 1 test save; no new game or overwrite commands.",
+  "driver": "bundled",
+  "seconds": 240,
+  "checkpoints": [10, 20, 40, 90, 150, 230],
+  "settings": {
+    "aspect": "original",
+    "resolution": "1",
+    "upscaler": "bilinear",
+    "frame_rate": "0",
+    "frame_gen": "0",
+    "show_fps": "1",
+    "touch_controls": "always",
+    "touch_all": "1"
+  },
+  "environment": {
+    "LARECOMP_INPUT": "180:A:30,360:L:60,360:R:60,900:A:10,1080:A:10",
+    "LARECOMP_NO_USER_INPUT": "0",
+    "LARECOMP_LOG_EVENTS": "1",
+    "LARECOMP_LOG_LINK": "60"
+  }
+}

@@ -1,0 +1,913 @@
+diff --git a/runtime/nvn/maxwell/shader.h b/runtime/nvn/maxwell/shader.h
+index 1dee623..8a9d707 100644
+--- a/runtime/nvn/maxwell/shader.h
++++ b/runtime/nvn/maxwell/shader.h
+@@ -73,6 +73,7 @@ typedef struct {
+     uint32_t out_mask;      // vertex: output varyings; fragment: render targets written
+     bool writes_depth, uses_discard, writes_point_size;
+     bool uses_gmem;         // global memory access: bind the guest heap at GMEM_BUFFER_INDEX
++    bool uses_gmem_map;     // read-only Android snapshot + address table at GMAP_BUFFER_INDEX
+     bool gmem_stores;       // ... and it stores: the shader writes guest memory (through its storage buffers, or any pointer)
+     bool uses_tint;         // fragment: reads the per-draw tint (buffer 19, float4[2]) applied to color target 0
+     bool uses_rscale;       // reads the resolution-scale table (fragment/compute buffer 18): float4 [0] = render
+@@ -89,7 +90,10 @@ typedef struct {
+ 
+ // Global memory (LDG/STG) is addressed through one buffer that wraps the guest heap.
+ #define GMEM_BUFFER_INDEX 17
++#define GMAP_BUFFER_INDEX 21  // 20 is already the vertex jitter uniform
++#define GMAP_MAX 32
+ extern uint64_t maxwell_gmem_base, maxwell_gmem_size;
++extern int maxwell_gmem_mirror, maxwell_shader_int64;
+ // Debug: when translating the shader whose code starts at maxwell_dbg_code, output register
+ // maxwell_dbg_reg as captured after the instruction at maxwell_dbg_pc (greyscale, all targets).
+ extern const uint8_t *maxwell_dbg_code;
+diff --git a/runtime/nvn/maxwell/translate.c b/runtime/nvn/maxwell/translate.c
+index fd9af89..fd3798c 100644
+--- a/runtime/nvn/maxwell/translate.c
++++ b/runtime/nvn/maxwell/translate.c
+@@ -24,6 +24,8 @@
+ #include "shader.h"
+ 
+ uint64_t maxwell_gmem_base, maxwell_gmem_size;
++int maxwell_gmem_mirror;
++int maxwell_shader_int64 = 1;  // desktop contract; Android sets this from device features
+ const uint8_t *maxwell_dbg_code;
+ uint32_t maxwell_dbg_pc;
+ int maxwell_dbg_reg;
+@@ -1168,8 +1170,11 @@ static void emit_insn(Ctx *c, uint64_t w, uint32_t pc) {
+     } else if (OPM(0x1c00000000000000ull, 0xfe00000000000000ull)) {  // IADD32I (CC bit 52, X bit 53)
+         bool wcc = bits(w, 52, 1), x = bits(w, 53, 1);
+         if (wcc || x) c->uses_cc = true;
+-        sp(&c->body, "    { ulong sum = ulong(%s%s) + ulong(0x%08xu)%s;%s\n", bits(w, 56, 1) ? "-" : "", R(a), (uint32_t)bits(w, 20, 32),
+-           x ? " + ulong(cc)" : "", wcc ? " cc = uint(sum >> 32) & 1u;" : "");
++        if (c->glsl && !maxwell_shader_int64)
++            sp(&c->body, "    { uint carry; uint sum = add32(%s%s, 0x%08xu, %s, carry);%s\n",
++               bits(w, 56, 1) ? "-" : "", R(a), (uint32_t)bits(w, 20, 32), x ? "cc" : "0u", wcc ? " cc = carry;" : "");
++        else sp(&c->body, "    { ulong sum = ulong(%s%s) + ulong(0x%08xu)%s;%s\n", bits(w, 56, 1) ? "-" : "", R(a), (uint32_t)bits(w, 20, 32),
++                x ? " + ulong(cc)" : "", wcc ? " cc = uint(sum >> 32) & 1u;" : "");
+         if (d != RZ) { c->reg_used[d] = 1; sp(&c->body, "      r%d = uint(sum);\n", d); }
+         sp(&c->body, "    }\n");
+     } else if (OPM(0x5cc0000000000000ull, 0xfff0000000000000ull) || OPM(0x4cc0000000000000ull, 0xfff0000000000000ull) ||
+@@ -1177,9 +1182,13 @@ static void emit_insn(Ctx *c, uint64_t w, uint32_t pc) {
+         bool wcc3 = bits(w, 47, 1), x3 = bits(w, 48, 1);
+         if (wcc3 || x3) {  // carry in/out (64-bit address math)
+             c->uses_cc = true;
+-            sp(&c->body, "    { ulong sum = ulong(%s%s) + ulong(%s%s) + ulong(%s%s)%s;\n", bits(w, 51, 1) ? "-" : "", R(a),
+-               bits(w, 50, 1) ? "-" : "", B(false), bits(w, 49, 1) ? "-" : "", R((int)bits(w, 39, 8)), x3 ? " + ulong(cc)" : "");
+-            if (wcc3) sp(&c->body, "      cc = uint(sum >> 32) & 1u;\n");
++            if (c->glsl && !maxwell_shader_int64)
++                sp(&c->body, "    { uint carry; uint sum = add3_32(%s%s, %s%s, %s%s, %s, carry);\n",
++                   bits(w, 51, 1) ? "-" : "", R(a), bits(w, 50, 1) ? "-" : "", B(false),
++                   bits(w, 49, 1) ? "-" : "", R((int)bits(w, 39, 8)), x3 ? "cc" : "0u");
++            else sp(&c->body, "    { ulong sum = ulong(%s%s) + ulong(%s%s) + ulong(%s%s)%s;\n", bits(w, 51, 1) ? "-" : "", R(a),
++                    bits(w, 50, 1) ? "-" : "", B(false), bits(w, 49, 1) ? "-" : "", R((int)bits(w, 39, 8)), x3 ? " + ulong(cc)" : "");
++            if (wcc3) sp(&c->body, c->glsl && !maxwell_shader_int64 ? "      cc = carry;\n" : "      cc = uint(sum >> 32) & 1u;\n");
+             if (d != RZ) { c->reg_used[d] = 1; sp(&c->body, "      r%d = uint(sum);\n", d); }
+             sp(&c->body, "    }\n");
+         } else {
+@@ -1443,6 +1452,12 @@ static void emit_insn(Ctx *c, uint64_t w, uint32_t pc) {
+         const char *hi = R((int)bits(w, 39, 8));
+         int width = bits(w, 38, 1) ? 64 : 32;
+         bool s64 = bits(w, 37, 2) == 3, wrap = bits(w, 50, 1);
++        if (c->glsl && !maxwell_shader_int64) {
++            sp(&c->body, wrap ? "    { uint s = %s & %du;\n" : "    { uint s = min(%s, %du);\n", sh, wrap ? width - 1 : width);
++            if (d != RZ) { c->reg_used[d] = 1;
++                sp(&c->body, "      r%d = shf32(%s, %s, s, %s, %s);\n", d, R(a), hi,
++                   right ? "true" : "false", right && width == 64 && s64 ? "true" : "false"); }
++        } else {
+         sp(&c->body, wrap ? "    { uint s = %s & %du; ulong v = (ulong(%s) << 32) | ulong(%s);\n"
+                           : "    { uint s = min(%s, %du); ulong v = (ulong(%s) << 32) | ulong(%s);\n",
+            sh, wrap ? width - 1 : width, hi, R(a));
+@@ -1452,6 +1467,7 @@ static void emit_insn(Ctx *c, uint64_t w, uint32_t pc) {
+         else if (width == 64) sprintf(t, "s >= 64u ? 0u : uint((v << s) >> 32)");
+         else sprintf(t, "uint((v << s) >> 32)");
+         if (d != RZ) { c->reg_used[d] = 1; sp(&c->body, "      r%d = %s;\n", d, t); }
++        }
+         sp(&c->body, "    }\n");
+     } else if (OPM(0xeed0000000000000ull, 0xfff8000000000000ull) || OPM(0xeed8000000000000ull, 0xfff8000000000000ull)) {  // LDG / STG
+         bool store = bits(w, 51, 1);
+@@ -1459,6 +1475,32 @@ static void emit_insn(Ctx *c, uint64_t w, uint32_t pc) {
+         int size = (int)bits(w, 48, 3);
+         int64_t off = sbits(w, 20, 24);
+         c->info->uses_gmem = true;
++        if (c->glsl && maxwell_gmem_mirror) {
++            if (store) { c->info->gmem_stores = true; fail(c, "read-only Android mirror does not support shader global stores"); return; }
++            c->info->uses_gmem_map = true;
++            // Add the signed immediate to the low/high pair, then subtract the heap base with borrow.
++            // All arithmetic is uint32: this path works without shaderInt64 or device buffer addresses.
++            sp(&c->body, "    { uint al = %s, ah = %s; uint lo = al + 0x%08xu;\n",
++               a == RZ ? "0u" : R(a), a == RZ || !wide ? "0u" : R(a + 1), (uint32_t)off);
++            sp(&c->body, "      uint hi = ah + %uu + uint(lo < al); uint ga = lo - 0x%08xu;\n",
++               off < 0 ? UINT32_MAX : 0u, (uint32_t)maxwell_gmem_base);
++            sp(&c->body, "      bool ok = hi - 0x%08xu - uint(lo < 0x%08xu) == 0u && ga < 0x%08xu;\n",
++               (uint32_t)(maxwell_gmem_base >> 32), (uint32_t)maxwell_gmem_base, (uint32_t)maxwell_gmem_size);
++            if (size < 4) {
++                static const char *const small[] = {"(v >> sh) & 0xFFu", "uint(sx8(v >> sh))", "(v >> sh) & 0xFFFFu", "uint(sx16(v >> sh))"};
++                if (d != RZ) { c->reg_used[d] = 1;
++                    sp(&c->body, "      uint v = ok ? gload(ga) : 0u; uint sh = (ga & %uu) * 8u; r%d = %s;\n",
++                       size < 2 ? 3u : 2u, d, small[size]); }
++            } else {
++                int words = size == 5 ? 2 : size >= 6 ? 4 : 1;
++                for (int k = 0; k < words; ++k) if (d != RZ && d + k < RZ) {
++                    c->reg_used[d + k] = 1;
++                    sp(&c->body, "      r%d = ok ? gload(ga + %uu) : 0u;\n", d + k, (unsigned)k * 4);
++                }
++            }
++            sp(&c->body, "    }\n");
++            goto instruction_done;
++        }
+         char addr[256];
+         if (a == RZ) sprintf(addr, "ulong(%lld)", (long long)off);
+         else if (wide) sprintf(addr, "((ulong(%s) << 32 | ulong(%s)) + ulong(%lld))", R(a + 1), R(a), (long long)off);
+@@ -1649,6 +1691,7 @@ static void emit_insn(Ctx *c, uint64_t w, uint32_t pc) {
+     } else {
+         fail(c, "unknown instruction %016llx at %#x", (unsigned long long)w, pc);
+     }
++instruction_done:
+     (void)op13;
+     if (guarded) sp(&c->body, "  }\n");
+ }
+@@ -1863,7 +1906,22 @@ static ShaderInfo *glsl_finish(Ctx *c, bool any_branch, bool dbg) {
+     if (c->fail) { free(body.buf); free(c->body.buf); free(c); return info; }
+     int set = stage == STAGE_FRAGMENT ? 1 : 0;
+     Str s = {0};
+-    sp(&s, "%s", glsl_prelude);
++    if (maxwell_shader_int64) sp(&s, "%s", glsl_prelude);
++    else {
++        const char *after_version = strchr(glsl_prelude, '\n') + 1;
++        const char *after_int64 = strchr(after_version, '\n') + 1;
++        sp(&s, "#version 460\n// Android uint32 arithmetic + read-only GMap v1\n%s", after_int64);
++        sp(&s, "uint add32(uint a, uint b, uint ci, out uint co) { uint x, y; uint v = uaddCarry(a, b, x); "
++               "v = uaddCarry(v, ci, y); co = (x + y) & 1u; return v; }\n"
++               "uint add3_32(uint a, uint b, uint c, uint ci, out uint co) { uint x, y, z; uint v = uaddCarry(a, b, x); "
++               "v = uaddCarry(v, c, y); v = uaddCarry(v, ci, z); co = (x + y + z) & 1u; return v; }\n"
++               "uint shf32(uint lo, uint hi, uint s, bool right, bool signhi) { "
++               "if (right) { if (s >= 64u) return signhi ? uint(int(hi) >> 31) : 0u; "
++               "if (s >= 32u) return signhi ? uint(int(hi) >> (s - 32u)) : hi >> (s - 32u); "
++               "if (s == 0u) return lo; return (lo >> s) | (hi << (32u - s)); } "
++               "if (s >= 64u) return 0u; if (s >= 32u) return lo << (s - 32u); "
++               "if (s == 0u) return hi; return (hi << s) | (lo >> (32u - s)); }\n");
++    }
+     static int exact = -1;
+     if (exact < 0) exact = getenv("LARECOMP_VK_EXACT_H2F") && atoi(getenv("LARECOMP_VK_EXACT_H2F")) != 0;
+     sp(&s, "%s%s", !exact && (stage == STAGE_FRAGMENT || stage == STAGE_COMPUTE) ? glsl_h2f_native : glsl_h2f_exact,
+@@ -1899,6 +1957,14 @@ static ShaderInfo *glsl_finish(Ctx *c, bool any_branch, bool dbg) {
+     if (info->uses_gmem)
+         sp(&s, "layout(std430, set = %d, binding = %d) %sbuffer GMem { uint w[]; } gmem_;\n", set, GMEM_BUFFER_INDEX,
+            c->uses_gmem_store ? "" : "readonly ");
++    if (info->uses_gmem_map) {
++        sp(&s, "layout(std140, set = %d, binding = %d) uniform GMap { uvec4 gmap[%d]; };\n",
++           set, GMAP_BUFFER_INDEX, GMAP_MAX + 1);
++        sp(&s, "uint gload(uint g) { uint a = g & ~3u; uint n = min(gmap[%d].x, %uu); "
++               "for (uint i = 0u; i < n; ++i) { uint o = a - gmap[i].x; "
++               "if (a >= gmap[i].x && gmap[i].y >= 4u && o <= gmap[i].y - 4u) "
++               "return gmem_.w[gmap[i].z + (o >> 2)]; } return 0u; }\n", GMAP_MAX, GMAP_MAX);
++    }
+     if (c->uses_rscale && stage != STAGE_VERTEX) {
+         sp(&s, "layout(std140, set = %d, binding = 18) uniform RScale { vec4 rscale[65]; };\n", set);
+         info->uses_rscale = true;
+diff --git a/runtime/nvn/vulkan/device.c b/runtime/nvn/vulkan/device.c
+index 2547257..871fa5f 100644
+--- a/runtime/nvn/vulkan/device.c
++++ b/runtime/nvn/vulkan/device.c
+@@ -13,6 +13,10 @@
+ #include <windows.h>
+ #include <dwmapi.h>
+ #endif
++#ifdef __ANDROID__
++#include <adrenotools/driver.h>
++#include <dlfcn.h>
++#endif
+ 
+ #include "../../paths.h"
+ #include "../../settings.h"
+@@ -27,6 +31,67 @@ static SDL_Window *window;
+ static atomic_bool ui_ready;
+ static VkDebugUtilsMessengerEXT messenger;
+ 
++#ifdef __ANDROID__
++static bool custom_driver_on;
++static void *custom_driver_library;  // keep the private loader/hooks alive for the process
++
++static void driver_directory(char *out, size_t capacity, const char *path, const char *label) {
++    if (!path || path[0] != '/') FATAL("custom GPU driver %s must be an absolute directory\n", label);
++    size_t length = strlen(path);
++    if (length + 2 > capacity) FATAL("custom GPU driver %s path is too long\n", label);
++    memcpy(out, path, length);
++    if (out[length - 1] != '/') out[length++] = '/';
++    out[length] = 0;  // AdrenoTools concatenates the directory and library names
++    struct stat st;
++    if (stat(out, &st) != 0 || !S_ISDIR(st.st_mode))
++        FATAL("custom GPU driver %s directory is unavailable: %s\n", label, out);
++}
++
++static void require_driver_file(const char *directory, const char *name) {
++    char path[8192];
++    int length = snprintf(path, sizeof path, "%s%s", directory, name);
++    struct stat st;
++    if (length < 0 || (size_t)length >= sizeof path || stat(path, &st) != 0 ||
++        !S_ISREG(st.st_mode) || access(path, R_OK) != 0)
++        FATAL("requested custom GPU driver file is unavailable: %s%s\n", directory, name);
++}
++
++static bool load_custom_driver(void) {
++    const char *directory = getenv("LARECOMP_GPU_DRIVER_DIR");
++    const char *library = getenv("LARECOMP_GPU_DRIVER_LIB");
++    const char *hooks = getenv("LARECOMP_GPU_DRIVER_HOOKS");
++    if (!directory && !library && !hooks) return false;  // stock loader remains the default
++    if (!directory || !*directory || !library || !*library || strchr(library, '/') ||
++        !strcmp(library, ".") || !strcmp(library, ".."))
++        FATAL("custom GPU driver requires LARECOMP_GPU_DRIVER_DIR and a library basename in LARECOMP_GPU_DRIVER_LIB\n");
++    char driver_dir[4096], hook_dir[4096], executable[4096];
++    driver_directory(driver_dir, sizeof driver_dir, directory, "driver");
++    if (!hooks) {
++        if (!plat_exe_path(executable, sizeof executable) || strstr(executable, "!/"))
++            FATAL("custom GPU hooks need extracted native libraries (legacyPackaging)\n");
++        char *slash = strrchr(executable, '/');
++        if (!slash) FATAL("cannot locate the custom GPU hooks beside libmain.so\n");
++        slash[1] = 0;
++        hooks = executable;
++    }
++    driver_directory(hook_dir, sizeof hook_dir, hooks, "hooks");
++    require_driver_file(driver_dir, library);
++    require_driver_file(hook_dir, "libmain_hook.so");
++    require_driver_file(hook_dir, "libhook_impl.so");
++    // API30 has memfd support: no temporary patch directory, turbo, file redirects or GPU mapping flags.
++    custom_driver_library = adrenotools_open_libvulkan(RTLD_NOW | RTLD_LOCAL, ADRENOTOOLS_DRIVER_CUSTOM,
++        NULL, hook_dir, driver_dir, library, NULL, NULL);
++    PFN_vkGetInstanceProcAddr loader = custom_driver_library ?
++        (PFN_vkGetInstanceProcAddr)dlsym(custom_driver_library, "vkGetInstanceProcAddr") : NULL;
++    if (!loader) FATAL("requested custom GPU driver failed to load via AdrenoTools: %s%s\n", driver_dir, library);
++    volkInitializeCustom(loader);
++    if (!vkCreateInstance) FATAL("requested custom GPU driver has no vkCreateInstance\n");
++    custom_driver_on = true;
++    LOG("[vk] requested custom GPU driver: %s%s (hooks %s)\n", driver_dir, library, hook_dir);
++    return true;
++}
++#endif
++
+ // ================================================================== instance / device
+ static VKAPI_ATTR VkBool32 VKAPI_CALL debug_cb(VkDebugUtilsMessageSeverityFlagBitsEXT sev, VkDebugUtilsMessageTypeFlagsEXT type,
+                                                const VkDebugUtilsMessengerCallbackDataEXT *d, void *user) {
+@@ -38,8 +103,18 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debug_cb(VkDebugUtilsMessageSeverityFlagBi
+ 
+ // LARECOMP_VK_VALIDATION=1: Khronos validation layer (MSYS2 package vulkan-validation-layers)
+ static void create_instance(void) {
++#ifdef __ANDROID__
++    if (!load_custom_driver()) {
++        // SDL owns the stock loader and creates our surface: use that exact loader for volk too.
++        PFN_vkGetInstanceProcAddr loader = (PFN_vkGetInstanceProcAddr)SDL_Vulkan_GetVkGetInstanceProcAddr();
++        if (!loader) FATAL("SDL Vulkan loader: %s\n", SDL_GetError());
++        volkInitializeCustom(loader);
++        if (!vkCreateInstance) FATAL("SDL Vulkan loader has no vkCreateInstance\n");
++    }
++#endif
+     Uint32 n_sdl = 0;
+     const char *const *sdl_ext = SDL_Vulkan_GetInstanceExtensions(&n_sdl);
++    if (!sdl_ext) FATAL("SDL Vulkan instance extensions: %s\n", SDL_GetError());
+     const char *ext[16];
+     uint32_t n_ext = 0;
+     for (Uint32 i = 0; i < n_sdl && n_ext < 14; i++) ext[n_ext++] = sdl_ext[i];
+@@ -59,7 +134,15 @@ static void create_instance(void) {
+         validate = false;
+         r = vkCreateInstance(&ci, NULL, &g_vk.inst);
+     }
+-    if (r != VK_SUCCESS) FATAL("vkCreateInstance: %d (is a Vulkan 1.3 driver installed?)\n", r);
++    if (r != VK_SUCCESS) {
++#ifdef __ANDROID__
++        if (custom_driver_on) FATAL("requested custom GPU driver's vkCreateInstance failed: %d\n", r);
++#endif
++        FATAL("vkCreateInstance: %d (is a Vulkan 1.3 driver installed?)\n", r);
++    }
++#ifdef __ANDROID__
++    volkLoadInstance(g_vk.inst);
++#endif
+     if (validate) {
+         PFN_vkCreateDebugUtilsMessengerEXT f =
+             (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(g_vk.inst, "vkCreateDebugUtilsMessengerEXT");
+@@ -73,6 +156,23 @@ static void create_instance(void) {
+     }
+ }
+ 
++static bool create_surface(void) {
++#ifdef __ANDROID__
++    if (custom_driver_on) {
++        // SDL's stock loader cannot consume an instance belonging to AdrenoTools' private loader.
++        struct ANativeWindow *native = SDL_GetPointerProperty(SDL_GetWindowProperties(window),
++            SDL_PROP_WINDOW_ANDROID_WINDOW_POINTER, NULL);
++        if (!native) return SDL_SetError("custom GPU surface has no Android native window");
++        if (!vkCreateAndroidSurfaceKHR) return SDL_SetError("custom GPU driver has no vkCreateAndroidSurfaceKHR");
++        VkAndroidSurfaceCreateInfoKHR info = {.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR, .window = native};
++        VkResult result = vkCreateAndroidSurfaceKHR(g_vk.inst, &info, NULL, &g_vk.surface);
++        if (result != VK_SUCCESS) return SDL_SetError("custom GPU vkCreateAndroidSurfaceKHR: %d", result);
++        return true;
++    }
++#endif
++    return SDL_Vulkan_CreateSurface(window, g_vk.inst, NULL, &g_vk.surface);
++}
++
+ bool g_pipe_exec_stats;  // LARECOMP_PIPE_STATS and the driver has VK_KHR_pipeline_executable_properties
+ 
+ static bool has_ext(VkExtensionProperties *e, uint32_t n, const char *name) {
+@@ -102,6 +202,14 @@ static void pick_device(void) {
+     g_vk.phys = pd[best];
+     free(pd);
+     vkGetPhysicalDeviceProperties(g_vk.phys, &g_vk.props);
++#ifdef __ANDROID__
++    if (custom_driver_on) {
++        VkPhysicalDeviceDriverProperties driver = {.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES};
++        VkPhysicalDeviceProperties2 properties = {.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2, .pNext = &driver};
++        vkGetPhysicalDeviceProperties2(g_vk.phys, &properties);
++        LOG("[vk] custom GPU selection: %s (%s; driver id %u)\n", driver.driverName, driver.driverInfo, driver.driverID);
++    }
++#endif
+     uint32_t nq = 0;
+     vkGetPhysicalDeviceQueueFamilyProperties(g_vk.phys, &nq, NULL);
+     VkQueueFamilyProperties *qp = calloc(nq, sizeof *qp);
+@@ -150,6 +258,9 @@ static VkQueue present_q;  // the queue the scheduled images are presented on (c
+ static pthread_mutex_t sc_lk = PTHREAD_MUTEX_INITIALIZER;
+ static volatile bool g_sc_stale;  // (the present thread saw the swapchain out of date: the render thread recreates it)
+ static uint64_t g_sc_gen;  // swapchain generation (images acquired from an older one are not presented)
++#ifdef __ANDROID__
++static bool g_sc_turned;  // identity images differ from the panel transform: SUBOPTIMAL is expected
++#endif
+ 
+ static void create_device(void) {
+     uint32_t ne = 0;
+@@ -182,6 +293,15 @@ static void create_device(void) {
+     // features the backend relies on (all present on current desktop drivers)
+     VkPhysicalDeviceFeatures2 have = {.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2};
+     vkGetPhysicalDeviceFeatures2(g_vk.phys, &have);
++#ifdef __ANDROID__
++    maxwell_shader_int64 = have.features.shaderInt64 != VK_FALSE;
++    g_vk.gmem_mirror = !g_vk.host_import || !maxwell_shader_int64;
++    maxwell_gmem_mirror = g_vk.gmem_mirror;
++    if (g_vk.gmem_mirror) {
++        g_vk.host_import = false;
++        LOG("[vk] shader global memory: read-only bound-range snapshots (shaderInt64 %u)\n", maxwell_shader_int64);
++    }
++#endif
+     VkPhysicalDeviceVertexAttributeDivisorFeaturesEXT div = {
+         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VERTEX_ATTRIBUTE_DIVISOR_FEATURES_EXT,
+         .vertexAttributeInstanceRateDivisor = VK_TRUE, .vertexAttributeInstanceRateZeroDivisor = VK_FALSE};
+@@ -211,6 +331,62 @@ static void create_device(void) {
+     VkPhysicalDevicePresentIdFeaturesKHR pid = {.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRESENT_ID_FEATURES_KHR,
+                                                 .presentId = VK_TRUE, .pNext = &pw};
+     if (g_present_log) f.pNext = &pid;
++#ifdef __ANDROID__
++    // Advertising Vulkan 1.3 does not imply every optional feature requested above.
++    // Query the same core/available-extension structs, with an independent output chain.
++    VkPhysicalDeviceVertexAttributeDivisorFeaturesEXT hd = {
++        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VERTEX_ATTRIBUTE_DIVISOR_FEATURES_EXT};
++    VkPhysicalDeviceCustomBorderColorFeaturesEXT hc = {
++        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CUSTOM_BORDER_COLOR_FEATURES_EXT,
++        .pNext = g_vk.divisor ? &hd : NULL};
++    VkPhysicalDeviceVulkan13Features h13 = {.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
++        .pNext = g_vk.custom_border ? (void *)&hc : g_vk.divisor ? (void *)&hd : NULL};
++    VkPhysicalDeviceVulkan12Features h12 = {.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES, .pNext = &h13};
++    VkPhysicalDeviceVulkan11Features h11 = {.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES, .pNext = &h12};
++    VkPhysicalDeviceFaultFeaturesEXT hfault = {.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FAULT_FEATURES_EXT, .pNext = &h11};
++    VkPhysicalDeviceFeatures2 supported = {.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
++        .pNext = fault ? (void *)&hfault : (void *)&h11};
++    VkPhysicalDevicePipelineExecutablePropertiesFeaturesKHR hp = {
++        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_EXECUTABLE_PROPERTIES_FEATURES_KHR, .pNext = supported.pNext};
++    if (g_pipe_exec_stats) supported.pNext = &hp;
++    VkPhysicalDevicePresentWaitFeaturesKHR hw = {.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRESENT_WAIT_FEATURES_KHR,
++        .pNext = supported.pNext};
++    VkPhysicalDevicePresentIdFeaturesKHR hi = {.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRESENT_ID_FEATURES_KHR, .pNext = &hw};
++    if (g_present_log) supported.pNext = &hi;
++    vkGetPhysicalDeviceFeatures2(g_vk.phys, &supported);
++    if (!h13.dynamicRendering || !h13.synchronization2 || !h12.timelineSemaphore)
++        FATAL("Vulkan driver lacks required dynamicRendering, synchronization2 or timelineSemaphore\n");
++#define KEEP_FEATURE(request, support, field) do { \
++        if ((request).field && !(support).field) { \
++            LOG("[vk] driver lacks %s; disabled\n", #field); (request).field = VK_FALSE; \
++        } \
++    } while (0)
++    KEEP_FEATURE(f13, h13, shaderDemoteToHelperInvocation);
++    KEEP_FEATURE(f13, h13, shaderTerminateInvocation);
++    KEEP_FEATURE(f13, h13, maintenance4);
++    KEEP_FEATURE(f12, h12, shaderInt8);
++    KEEP_FEATURE(f12, h12, samplerMirrorClampToEdge);
++    KEEP_FEATURE(f12, h12, uniformAndStorageBuffer8BitAccess);
++    KEEP_FEATURE(f12, h12, storageBuffer8BitAccess);
++    KEEP_FEATURE(f12, h12, scalarBlockLayout);
++    KEEP_FEATURE(f11, h11, storageBuffer16BitAccess);
++    KEEP_FEATURE(div, hd, vertexAttributeInstanceRateDivisor);
++    KEEP_FEATURE(cbc, hc, customBorderColors);
++    KEEP_FEATURE(cbc, hc, customBorderColorWithoutFormat);
++    KEEP_FEATURE(ff, hfault, deviceFault);
++    KEEP_FEATURE(pe, hp, pipelineExecutableInfo);
++    KEEP_FEATURE(pid, hi, presentId);
++    KEEP_FEATURE(pw, hw, presentWait);
++#undef KEEP_FEATURE
++    // Extension names may stay enabled with false feature bits; runtime fast paths must agree.
++    g_vk.divisor = g_vk.divisor && div.vertexAttributeInstanceRateDivisor;
++    g_vk.custom_border = g_vk.custom_border && cbc.customBorderColors && cbc.customBorderColorWithoutFormat;
++    if (!g_vk.custom_border) cbc.customBorderColors = cbc.customBorderColorWithoutFormat = VK_FALSE;
++    g_fault_ext = fault && ff.deviceFault;
++    g_pipe_exec_stats = g_pipe_exec_stats && pe.pipelineExecutableInfo;
++    g_present_log = g_present_log && pid.presentId && pw.presentWait;
++    if (!g_present_log) pid.presentId = pw.presentWait = VK_FALSE;
++#endif
+     VkPhysicalDeviceFeatures *b = &f.features, *h = &have.features;
+     b->independentBlend = h->independentBlend;
+     b->dualSrcBlend = h->dualSrcBlend;
+@@ -245,6 +421,9 @@ static void create_device(void) {
+     VkDeviceCreateInfo di = {.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO, .pNext = &f, .queueCreateInfoCount = 1,
+                              .pQueueCreateInfos = qi, .enabledExtensionCount = n_ext, .ppEnabledExtensionNames = ext};
+     VK_CHECK(vkCreateDevice(g_vk.phys, &di, NULL, &g_vk.dev));
++#ifdef __ANDROID__
++    volkLoadDevice(g_vk.dev);
++#endif
+     vkGetDeviceQueue(g_vk.dev, g_vk.qfam, 0, &g_vk.queue);
+     present_q = g_vk.queue;
+     if (nqueues == 2 && !getenv("LARECOMP_ONE_QUEUE")) vkGetDeviceQueue(g_vk.dev, g_vk.qfam, 1, &present_q);
+@@ -252,6 +431,11 @@ static void create_device(void) {
+ 
+     VmaAllocatorCreateInfo ai = {.physicalDevice = g_vk.phys, .device = g_vk.dev, .instance = g_vk.inst,
+                                  .vulkanApiVersion = VK_API_VERSION_1_3};
++#ifdef __ANDROID__
++    VmaVulkanFunctions functions = {.vkGetInstanceProcAddr = vkGetInstanceProcAddr,
++                                   .vkGetDeviceProcAddr = vkGetDeviceProcAddr};
++    ai.pVulkanFunctions = &functions;
++#endif
+     VK_CHECK(vmaCreateAllocator(&ai, &g_vk.vma));
+ 
+     VkSemaphoreTypeCreateInfo st = {.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO,
+@@ -265,7 +449,7 @@ static void create_device(void) {
+     // pipeline cache: cache/vk_pipelines.bin (written by vk_pipeline_cache_save)
+     size_t sz = 0;
+     void *data = NULL;
+-    FILE *fp = fopen("cache/vk_pipelines.bin", "rb");
++    FILE *fp = fopen("cache/vk_pipelines_ro_map1.bin", "rb");
+     if (fp) {
+         fseek(fp, 0, SEEK_END);
+         sz = (size_t)ftell(fp);
+@@ -291,17 +475,26 @@ void vk_pipeline_cache_save(void) {  // (exit and exec.c's periodic save: one wr
+     void *data = malloc(sz);
+     if (vkGetPipelineCacheData(g_vk.dev, g_vk.pcache, &sz, data) == VK_SUCCESS) {
+         mkdir("cache", 0755);
+-        FILE *f = fopen("cache/vk_pipelines.bin.tmp", "wb");
++        FILE *f = fopen("cache/vk_pipelines_ro_map1.bin.tmp", "wb");
+         if (f) {
+             bool ok = fwrite(data, 1, sz, f) == sz;
+             fclose(f);
+-            if (ok) { remove("cache/vk_pipelines.bin"); rename("cache/vk_pipelines.bin.tmp", "cache/vk_pipelines.bin"); }
++            if (ok) { remove("cache/vk_pipelines_ro_map1.bin"); rename("cache/vk_pipelines_ro_map1.bin.tmp", "cache/vk_pipelines_ro_map1.bin"); }
+         }
+     }
+     free(data);    pthread_mutex_unlock(&lock);
+ }
+ 
+ // ================================================================== swapchain
++static bool acquire_by_fence(void) {
++    static int on = -1;
++    if (on < 0) {
++        const char *e = getenv("LARECOMP_VK_ACQUIRE_FENCE");
++        on = e && atoi(e) != 0;
++    }
++    return on != 0;
++}
++
+ static VkPresentModeKHR present_mode(void) {
+     // MAILBOX by default: the game paces itself (vi.c's emulated 60 Hz vsync), and with FIFO every submission
+     // queued behind the one waiting for a window image, so the game's fence waits followed the presentation engine:
+@@ -325,6 +518,15 @@ static void create_swapchain(void) {
+     int w, h;
+     SDL_GetWindowSizeInPixels(window, &w, &h);
+     VkExtent2D ext = caps.currentExtent.width != UINT32_MAX ? caps.currentExtent : (VkExtent2D){(uint32_t)w, (uint32_t)h};
++    VkSurfaceTransformFlagBitsKHR transform = caps.currentTransform;
++#ifdef __ANDROID__
++    // Like LAS Android's non-prerotated path: render the window-shaped image normally and let
++    // Android rotate the layer. currentTransform would assert we already rotated our vertices.
++    if (caps.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR)
++        transform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
++    else if (transform != VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR)
++        FATAL("Android surface requires renderer pre-rotation; identity transform is unavailable\n");
++#endif
+     if (!ext.width || !ext.height) return;  // minimised
+     uint32_t nf = 0;
+     vkGetPhysicalDeviceSurfaceFormatsKHR(g_vk.phys, g_vk.surface, &nf, NULL);
+@@ -338,23 +540,43 @@ static void create_swapchain(void) {
+     // (+ 5: frame interpolation keeps a present's images drawn and acquired until their time - device.c backend_present)
+     uint32_t count = caps.minImageCount + 5;
+     if (caps.maxImageCount && count > caps.maxImageCount) count = caps.maxImageCount;
+-    if (count > 8) count = 8;
++    if (count > 8) count = 8;  // requested minimum only; actual storage covers every returned image below
+     VkSwapchainKHR old = g_vk.swapchain;
+     VkSwapchainCreateInfoKHR ci = {
+         .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR, .surface = g_vk.surface, .minImageCount = count,
+         .imageFormat = sf.format, .imageColorSpace = sf.colorSpace, .imageExtent = ext, .imageArrayLayers = 1,
+         .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+-        .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE, .preTransform = caps.currentTransform,
++        .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE, .preTransform = transform,
+         .compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR, .presentMode = present_mode(), .clipped = VK_TRUE,
+         .oldSwapchain = old};
+     VK_CHECK(vkCreateSwapchainKHR(g_vk.dev, &ci, NULL, &g_vk.swapchain));
++#ifdef __ANDROID__
++    g_sc_turned = transform != caps.currentTransform;
++    LOG("[vk] swapchain %ux%u (surface %ux%u, current transform %#x, selected %#x; window %dx%d px)\n",
++        ext.width, ext.height, caps.currentExtent.width, caps.currentExtent.height,
++        caps.currentTransform, transform, w, h);
++#endif
+     for (uint32_t i = 0; i < g_vk.sc_count; i++) vkDestroyImageView(g_vk.dev, g_vk.sc_views[i], NULL);
+     if (old) vkDestroySwapchainKHR(g_vk.dev, old, NULL);
+     g_vk.sc_format = sf.format;
+     g_vk.sc_extent = ext;
+-    vkGetSwapchainImagesKHR(g_vk.dev, g_vk.swapchain, &g_vk.sc_count, NULL);
+-    if (g_vk.sc_count > 8) g_vk.sc_count = 8;
+-    vkGetSwapchainImagesKHR(g_vk.dev, g_vk.swapchain, &g_vk.sc_count, g_vk.sc_images);
++    uint32_t actual_count = 0;
++    VK_CHECK(vkGetSwapchainImagesKHR(g_vk.dev, g_vk.swapchain, &actual_count, NULL));
++    if (!actual_count || actual_count > VK_SWAPCHAIN_MAX_IMAGES)
++        FATAL("swapchain returned %u images; supported count is 1..%u\n", actual_count, VK_SWAPCHAIN_MAX_IMAGES);
++    g_vk.sc_count = actual_count;
++    VK_CHECK(vkGetSwapchainImagesKHR(g_vk.dev, g_vk.swapchain, &g_vk.sc_count, g_vk.sc_images));
++    if (!g_vk.sc_count || g_vk.sc_count > VK_SWAPCHAIN_MAX_IMAGES)
++        FATAL("invalid retrieved swapchain image count %u\n", g_vk.sc_count);
++    static bool acquire_logged;
++    if (!acquire_logged) {
++        acquire_logged = true;
++        LOG("[vk] acquisition %s; swapchain images %u, present mode %s (%d)\n",
++            acquire_by_fence() ? "CPU fence" : "GPU semaphore", g_vk.sc_count,
++            ci.presentMode == VK_PRESENT_MODE_MAILBOX_KHR ? "mailbox" :
++            ci.presentMode == VK_PRESENT_MODE_FIFO_KHR ? "fifo" :
++            ci.presentMode == VK_PRESENT_MODE_IMMEDIATE_KHR ? "immediate" : "other", ci.presentMode);
++    }
+     for (uint32_t i = 0; i < g_vk.sc_count; i++) {
+         VkImageViewCreateInfo vi = {.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO, .image = g_vk.sc_images[i],
+                                     .viewType = VK_IMAGE_VIEW_TYPE_2D, .format = sf.format,
+@@ -372,10 +594,10 @@ static void recreate_swapchain(void) {
+     pthread_mutex_unlock(&sc_lk);
+ }
+ // Acquire a window image without waiting while holding sc_lk (the present thread may need it to free one)
+-static VkResult acquire_image(VkSemaphore sem, uint32_t *img) {
++static VkResult acquire_image(VkSemaphore sem, VkFence fence, uint32_t *img) {
+     for (int tries = 0;; tries++) {
+         pthread_mutex_lock(&sc_lk);
+-        VkResult r = vkAcquireNextImageKHR(g_vk.dev, g_vk.swapchain, 0, sem, VK_NULL_HANDLE, img);
++        VkResult r = vkAcquireNextImageKHR(g_vk.dev, g_vk.swapchain, 0, sem, fence, img);
+         pthread_mutex_unlock(&sc_lk);
+         if (r != VK_NOT_READY && r != VK_TIMEOUT) return r;
+         if (tries > 20000) return r;  // (~4 s: something is wrong; the caller skips the image)
+@@ -386,7 +608,7 @@ static VkResult acquire_image(VkSemaphore sem, uint32_t *img) {
+ // ================================================================== frames (start screen and game)
+ // Acquire semaphores rotate per frame in flight; a slot is reused once the submission that waited on it is done.
+ #define FRAMES 10
+-static VkSemaphore acquire_sem[FRAMES], done_sem[8];
++static VkSemaphore acquire_sem[FRAMES], done_sem[VK_SWAPCHAIN_MAX_IMAGES];
+ static uint64_t slot_seq[FRAMES];
+ static int slot;
+ 
+@@ -412,6 +634,12 @@ static void image_barrier(VkCommandBuffer cb, VkImage img, VkImageLayout from, V
+ typedef struct { uint32_t image; VkSemaphore acquired; bool ok; } Frame;
+ static Frame cur_frame;
+ 
++static void check_swapchain_image(uint32_t image) {
++    if (image >= g_vk.sc_count || image >= VK_SWAPCHAIN_MAX_IMAGES)
++        FATAL("swapchain image index %u outside actual count %u (capacity %u)\n",
++              image, g_vk.sc_count, VK_SWAPCHAIN_MAX_IMAGES);
++}
++
+ // Acquire the next window image and begin rendering into it (cleared to `clear`). Returns false when there is
+ // nothing to draw into (minimised window).
+ bool vk_frame_begin(const float clear[4]) {
+@@ -425,13 +653,23 @@ bool vk_frame_begin(const float clear[4]) {
+     if (trace < 0) trace = getenv("LARECOMP_VK_TRACE") != NULL;
+     if (trace) LOG("[vk] frame begin %dx%d (swapchain %ux%u)\n", w, h, g_vk.sc_extent.width, g_vk.sc_extent.height);
+     slot = (slot + 1) % FRAMES;
+-    if (!acquire_sem[slot]) acquire_sem[slot] = binary_semaphore();
++    // LARECOMP_VK_ACQUIRE_FENCE=1: LAS Android's CPU-wait acquisition for diagnostics.
++    // The original semaphore path remains the default.
++    bool by_fence = acquire_by_fence();
++    static VkFence acquire_fence;
++    if (by_fence && !acquire_fence) {
++        VkFenceCreateInfo fi = {.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO};
++        VK_CHECK(vkCreateFence(g_vk.dev, &fi, NULL, &acquire_fence));
++    }
++    if (!by_fence && !acquire_sem[slot]) acquire_sem[slot] = binary_semaphore();
+     vk_wait_seq(slot_seq[slot]);
+     if (g_sc_stale) recreate_swapchain();
+-    VkResult r = acquire_image(acquire_sem[slot], &cur_frame.image);
++    VkSemaphore asem = by_fence ? VK_NULL_HANDLE : acquire_sem[slot];
++    VkFence afence = by_fence ? acquire_fence : VK_NULL_HANDLE;
++    VkResult r = acquire_image(asem, afence, &cur_frame.image);
+     if (r == VK_ERROR_OUT_OF_DATE_KHR) {
+         recreate_swapchain();
+-        r = acquire_image(acquire_sem[slot], &cur_frame.image);
++        r = acquire_image(asem, afence, &cur_frame.image);
+     }
+     static unsigned acquire_fails;  // (a window the driver keeps reporting out of date: logged once per 600, not every frame)
+     if (r != VK_SUCCESS && r != VK_SUBOPTIMAL_KHR) {
+@@ -439,8 +677,13 @@ bool vk_frame_begin(const float clear[4]) {
+         return false;
+     }
+     acquire_fails = 0;
++    if (by_fence) {
++        VK_CHECK(vkWaitForFences(g_vk.dev, 1, &acquire_fence, VK_TRUE, UINT64_MAX));
++        VK_CHECK(vkResetFences(g_vk.dev, 1, &acquire_fence));
++    }
++    check_swapchain_image(cur_frame.image);
+     if (trace) LOG("[vk] acquired image %u\n", cur_frame.image);
+-    cur_frame.acquired = acquire_sem[slot];
++    cur_frame.acquired = asem;
+     slot_seq[slot] = vk_pending_seq();
+     VkCommandBuffer cb = vk_cmd();
+     image_barrier(cb, g_vk.sc_images[cur_frame.image], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+@@ -525,6 +768,7 @@ static void recreate_swapchain(void);
+ // Present window image img (drawn and submitted, done_sem[img] signalled when done) on queue q; frame / image / nimg:
+ // what it is (LARECOMP_PRESENT_LOG). From the present thread (other_thread) an out-of-date swapchain is only noted.
+ static void present_swap_image(uint32_t img, VkQueue q, uint64_t frame, int image, int nimg, bool other_thread) {
++    check_swapchain_image(img);
+     VkPresentInfoKHR pi = {.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR, .waitSemaphoreCount = 1, .pWaitSemaphores = &done_sem[img],
+                            .swapchainCount = 1, .pSwapchains = &g_vk.swapchain, .pImageIndices = &img};
+     static int trace = -1;
+@@ -549,6 +793,9 @@ static void present_swap_image(uint32_t img, VkQueue q, uint64_t frame, int imag
+     uint64_t tpres = SDL_GetTicksNS();
+     pthread_mutex_lock(&sc_lk);
+     VkResult r = vkQueuePresentKHR(q, &pi);
++#ifdef __ANDROID__
++    bool expected_suboptimal = g_sc_turned;
++#endif
+     pthread_mutex_unlock(&sc_lk);
+     if (g_present_log) {
+         pthread_mutex_lock(&pl_lk);
+@@ -561,7 +808,13 @@ static void present_swap_image(uint32_t img, VkQueue q, uint64_t frame, int imag
+         pthread_mutex_unlock(&pl_lk);
+     }
+     if (trace) LOG("[vk] presented: %d\n", r);
+-    if (r == VK_ERROR_OUT_OF_DATE_KHR || r == VK_SUBOPTIMAL_KHR) {
++    bool needs_recreate = r == VK_ERROR_OUT_OF_DATE_KHR || r == VK_SUBOPTIMAL_KHR;
++#ifdef __ANDROID__
++    // The compositor may report the intentional identity/current-transform difference forever.
++    // Window size checks and OUT_OF_DATE still recreate the swapchain when required.
++    if (r == VK_SUBOPTIMAL_KHR && expected_suboptimal) needs_recreate = false;
++#endif
++    if (needs_recreate) {
+         if (other_thread) g_sc_stale = true;
+         else recreate_swapchain();
+     }
+@@ -1223,7 +1476,7 @@ void ui_window_init(void) {
+     // the Fullscreen setting applies from the start screen on (not only once the game runs); test windows stay windows
+     if (g_settings.fullscreen && !getenv("LARECOMP_WINDOW") && !getenv("LARECOMP_HIDDEN")) SDL_SetWindowFullscreen(window, true);
+     create_instance();
+-    if (!SDL_Vulkan_CreateSurface(window, g_vk.inst, NULL, &g_vk.surface)) FATAL("SDL_Vulkan_CreateSurface: %s\n", SDL_GetError());
++    if (!create_surface()) FATAL("Vulkan surface: %s\n", SDL_GetError());
+     pick_device();
+     create_device();
+     create_swapchain();
+@@ -1258,10 +1511,20 @@ void backend_clear_window(void) {
+ int ui_run(void) {
+     ui_window_init();
+     atomic_store(&ui_ready, true);
++#ifdef __ANDROID__
++    LOG("[ui] Android event polling; idle sleep 4 ms\n");
++#endif
+     for (;;) {
+         if (rt_reboot_requested()) return rt_reboot_requested();  // (runtime/main.c tears the game down)
+         SDL_Event e;
++#ifdef __ANDROID__
++        // Like LAS Android: SDL_WaitEventTimeout spins while polling joysticks on this host.
++        bool any = SDL_PollEvent(&e);
++        if (!any) SDL_Delay(4);
++        for (bool got = any; got; got = SDL_PollEvent(&e)) {
++#else
+         while (SDL_WaitEventTimeout(&e, 16)) {
++#endif
+             if (e.type == SDL_EVENT_QUIT) {
+                 LOG("window closed\n");
+                 exit(0);
+diff --git a/runtime/nvn/vulkan/exec.c b/runtime/nvn/vulkan/exec.c
+index 391b308..f4c6199 100644
+--- a/runtime/nvn/vulkan/exec.c
++++ b/runtime/nvn/vulkan/exec.c
+@@ -1,6 +1,8 @@
+ // Executes recorded NVN command lists with Vulkan (port of renderer.m; same structure, same behaviour).
+ #include <SDL3/SDL_cpuinfo.h>
++#if defined(__x86_64__) || defined(__i386__)
+ #include <immintrin.h>
++#endif
+ #include <SDL3/SDL_timer.h>
+ #include <float.h>
+ #include <math.h>
+@@ -377,6 +379,7 @@ VkDescriptorSet vk_alloc_set(VkDescriptorSetLayout layout) {
+ // ================================================================== transient memory ring
+ // The largest index of a draw (bounds the vertex data copied for it), ignoring the restart value: AVX2 where the CPU has it (the
+ // game code needs it too), a plain loop elsewhere. A draw scans a few thousand indices: ~1.4 us scalar, ~0.15 us here.
++#if defined(__x86_64__) || defined(__i386__)
+ __attribute__((target("avx2"))) static uint32_t scan_max16_avx2(const uint16_t *q, uint32_t n, uint16_t restart) {
+     __m256i acc = _mm256_setzero_si256(), rs = _mm256_set1_epi16((short)restart);
+     uint32_t i = 0;
+@@ -405,16 +408,23 @@ __attribute__((target("avx2"))) static uint32_t scan_max32_avx2(const uint32_t *
+     for (; i < n; i++) if (q[i] != restart && q[i] > m) m = q[i];
+     return m;
+ }
++#endif
+ static uint32_t scan_max_index_(const void *src, uint32_t isz, uint32_t n, uint32_t restart) {
++#if defined(__x86_64__) || defined(__i386__)
+     static int avx2 = -1;
+     if (avx2 < 0) avx2 = __builtin_cpu_supports("avx2");
++#endif
+     uint32_t m = 0;
+     if (isz == 2) {
++#if defined(__x86_64__) || defined(__i386__)
+         if (avx2) return scan_max16_avx2(src, n, (uint16_t)restart);
++#endif
+         const uint16_t *q = src;
+         for (uint32_t i = 0; i < n; i++) if (q[i] > m && q[i] != (uint16_t)restart) m = q[i];
+     } else {
++#if defined(__x86_64__) || defined(__i386__)
+         if (avx2) return scan_max32_avx2(src, n, restart);
++#endif
+         const uint32_t *q = src;
+         for (uint32_t i = 0; i < n; i++) if (q[i] > m && q[i] != restart) m = q[i];
+     }
+@@ -670,7 +680,15 @@ static void acopy_drain(void) {
+     if (atomic_load(&acq_done) >= want) return;
+     PROF_T0();
+     while (acopy_take_one()) {}
+-    while (atomic_load(&acq_done) < want) __builtin_ia32_pause();
++    while (atomic_load(&acq_done) < want) {
++#if defined(__x86_64__) || defined(__i386__)
++        __builtin_ia32_pause();
++#elif defined(__aarch64__)
++        __asm__ volatile("yield");
++#else
++        SDL_Delay(0);
++#endif
++    }
+     PROF_ADD(prof_gcpy_wait_ns);
+ }
+ static void acopy_push(void *dst, const void *src, uint64_t n) {
+@@ -2820,6 +2838,71 @@ static VkDescriptorBufferInfo gmem_info(void) {
+     return (VkDescriptorBufferInfo){s.buf, s.off, sizeof zero};
+ }
+ 
++// Read-only equivalent of LAS Android's mirror_table: pack the bound ranges, not the entire
++// heap, into the existing submission-owned ring. No GPU writes/readbacks are implemented here.
++static void mirror_flush_span(VkSpan span, uint64_t bytes) {
++    for (int i = 0; i < pools[0].n; ++i)
++        if (pools[0].c[i].buf == span.buf) {
++            VK_CHECK(vmaFlushAllocation(g_vk.vma, pools[0].c[i].mem, span.off, bytes));
++            return;
++        }
++    FATAL("read-only shader mirror: snapshot is not in the submission ring\n");
++}
++
++static VkDescriptorBufferInfo mirror_info(int stage, uint32_t table[GMAP_MAX + 1][4]) {
++    Range ranges[GMAP_MAX];
++    int n = 0;
++    memset(table, 0, sizeof(uint32_t) * (GMAP_MAX + 1) * 4);
++    for (int i = 0; i < (stage == STAGE_COMPUTE ? 32 : 16); ++i) {
++        Range r = i < 16 ? st.sbuf[stage][i] : st.ubuf[stage][i - 16];
++        if (!r.addr || !r.size) continue;
++        if (r.addr < HEAP_BASE || r.addr - HEAP_BASE >= HEAP_MAX || r.size > HEAP_MAX - (r.addr - HEAP_BASE))
++            FATAL("read-only shader mirror: stage %d range %llx+%llx outside guest heap\n", stage,
++                  (unsigned long long)r.addr, (unsigned long long)r.size);
++        uint64_t end = (r.addr + r.size + 3) & ~3ull;
++        r.addr &= ~3ull;
++        r.size = end - r.addr;
++        int at = n++;
++        while (at && ranges[at - 1].addr > r.addr) { ranges[at] = ranges[at - 1]; --at; }
++        ranges[at] = r;
++    }
++    int count = 0;
++    for (int i = 0; i < n; ++i) {
++        if (count && ranges[i].addr <= ranges[count - 1].addr + ranges[count - 1].size) {
++            uint64_t end = ranges[i].addr + ranges[i].size;
++            if (end > ranges[count - 1].addr + ranges[count - 1].size)
++                ranges[count - 1].size = end - ranges[count - 1].addr;
++        } else ranges[count++] = ranges[i];
++    }
++    uint64_t bytes = 0, limit = g_vk.props.limits.maxStorageBufferRange;
++    if (limit > (16ull << 20)) limit = 16ull << 20;
++    for (int i = 0; i < count; ++i) {
++        if (ranges[i].size > limit || bytes > limit - ranges[i].size)
++            FATAL("read-only shader mirror exceeds the bounded storage snapshot (%llu bytes)\n", (unsigned long long)limit);
++        bytes += ranges[i].size;
++    }
++    if (limit < 16) FATAL("read-only shader mirror: storage buffer range limit is too small\n");
++    uint64_t align = g_vk.props.limits.minStorageBufferOffsetAlignment;
++    VkSpan span = vk_transient(bytes ? bytes : 16, align > 16 ? align : 16);
++    uint64_t offset = 0;
++    for (int i = 0; i < count; ++i) {
++        memcpy((uint8_t *)span.ptr + offset, (const void *)(uintptr_t)ranges[i].addr, ranges[i].size);
++        table[i][0] = (uint32_t)(ranges[i].addr - HEAP_BASE);
++        table[i][1] = (uint32_t)ranges[i].size;
++        table[i][2] = (uint32_t)(offset >> 2);
++        offset += ranges[i].size;
++    }
++    if (!bytes) memset(span.ptr, 0, 16);
++    table[GMAP_MAX][0] = (uint32_t)count;
++    // Unlike the desktop heap import, this is a host-written ring allocation; flush if noncoherent.
++    mirror_flush_span(span, bytes ? bytes : 16);
++    static int logged[6];
++    if (logged[stage]++ < 4 || g_debug_frame)
++        LOG("[vk] read-only shader mirror stage %d: %d ranges, %llu bytes, storage alignment %llu\n",
++            stage, count, (unsigned long long)bytes, (unsigned long long)align);
++    return (VkDescriptorBufferInfo){span.buf, span.off, bytes ? bytes : 16};
++}
++
+ // Sorted, merged guest memory intervals; the render thread is the only user. rs_note returns whether the set changed.
+ typedef struct { struct { uint64_t a, e; } r[512]; int n; } RangeSet;
+ static bool rs_note(RangeSet *s, uint64_t a, uint64_t n) {
+@@ -3006,6 +3089,9 @@ static VkDescriptorSet stage_set(Prog *p, VkDescriptorSetLayout layout, uint32_t
+     VkWriteDescriptorSet w[MAX_BIND];
+     VkDescriptorBufferInfo bi[MAX_BIND];
+     VkDescriptorImageInfo ii[MAX_BIND];
++    uint32_t mirror_table[GMAP_MAX + 1][4];
++    VkDescriptorBufferInfo mirrored = {0};
++    if (si->uses_gmem_map) mirrored = mirror_info(stage, mirror_table);
+     int n = 0;
+     int sg = stage == 1 ? 1 : 0;
+     float rs[65][4] = {{1, 1, 0, 0}};
+@@ -3033,7 +3119,13 @@ static VkDescriptorSet stage_set(Prog *p, VkDescriptorSetLayout layout, uint32_t
+             bi[n] = mvo_prev_info(stage, si, (int)b->binding - 100, gx, gy, gz);  // (motion vectors: the previous frame's)
+             w[n].pBufferInfo = &bi[n];
+         } else if (b->type == VK_DESCRIPTOR_TYPE_STORAGE_BUFFER) {
+-            bi[n] = gmem_info();
++            bi[n] = si->uses_gmem_map ? mirrored : gmem_info();
++            w[n].pBufferInfo = &bi[n];
++        } else if (b->type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER && b->binding == GMAP_BUFFER_INDEX && si->uses_gmem_map) {
++            uint64_t alignment = g_vk.props.limits.minUniformBufferOffsetAlignment;
++            VkSpan map_span = vk_transient_copy(mirror_table, sizeof mirror_table, alignment > 256 ? alignment : 256);
++            mirror_flush_span(map_span, sizeof mirror_table);
++            bi[n] = ubo_span(map_span, sizeof mirror_table);
+             w[n].pBufferInfo = &bi[n];
+         } else {
+             continue;  // rscale / tint: written below, once the textures (and their scales) are known
+diff --git a/runtime/nvn/vulkan/shaders.c b/runtime/nvn/vulkan/shaders.c
+index cb30bc1..b2cbf0b 100644
+--- a/runtime/nvn/vulkan/shaders.c
++++ b/runtime/nvn/vulkan/shaders.c
+@@ -20,7 +20,7 @@ static shaderc_shader_kind kind_of(int stage) {
+ // SPIR-V disk cache: cache/spirv/<hash of stage + source>.spv, so a known shader costs a file read instead of a
+ // GLSL compile (the driver's pipeline cache only covers the step after this one).
+ static uint64_t src_hash(const char *src, int stage) {
+-    uint64_t h = (0xcbf29ce484222325ull ^ (uint64_t)stage) + 3;  // + version of the post-processing (no_contraction)
++    uint64_t h = (0xcbf29ce484222325ull ^ (uint64_t)stage) + 4;  // read-only GMap/32-bit lowering + no_contraction
+     for (const char *p = src; *p; p++) { h ^= (uint8_t)*p; h *= 0x100000001B3ull; }
+     return h;
+ }
+diff --git a/runtime/nvn/vulkan/vk.h b/runtime/nvn/vulkan/vk.h
+index 3f553e9..3c0617f 100644
+--- a/runtime/nvn/vulkan/vk.h
++++ b/runtime/nvn/vulkan/vk.h
+@@ -9,7 +9,11 @@
+ #pragma once
+ #include <stdbool.h>
+ #include <stdint.h>
++#ifdef __ANDROID__
++#include <volk.h>  // API30 imports do not expose all Vulkan 1.3 commands
++#else
+ #include <vulkan/vulkan.h>
++#endif
+ #if __has_include(<vma/vk_mem_alloc.h>)
+ #include <vma/vk_mem_alloc.h>
+ #else
+@@ -24,6 +28,9 @@ void vk_pipeline_cache_save(void);  // cache/vk_pipelines.bin (any thread)
+ #define VK_CHECK(x) do { VkResult r_ = (x); if (r_ != VK_SUCCESS) { if (r_ == VK_ERROR_DEVICE_LOST) vk_device_fault_report(); \
+     FATAL("%s failed: %d (%s:%d)\n", #x, r_, __FILE__, __LINE__); } } while (0)
+ 
++// minImageCount is a request: Android may return more images than requested.
++#define VK_SWAPCHAIN_MAX_IMAGES 32
++
+ typedef struct {
+     VkInstance inst;
+     VkPhysicalDevice phys;
+@@ -36,14 +43,15 @@ typedef struct {
+     VkSemaphore timeline;      // value = last completed submission number
+     VkCommandPool pool;        // render thread only
+     bool custom_border, divisor, host_import;
++    bool gmem_mirror;  // bounded read-only stage snapshots when a whole-heap import is unavailable
+     // window
+     VkSurfaceKHR surface;
+     VkSwapchainKHR swapchain;
+     VkFormat sc_format;
+     VkExtent2D sc_extent;
+     uint32_t sc_count;
+-    VkImage sc_images[8];
+-    VkImageView sc_views[8];
++    VkImage sc_images[VK_SWAPCHAIN_MAX_IMAGES];
++    VkImageView sc_views[VK_SWAPCHAIN_MAX_IMAGES];
+ } VkG;
+ extern VkG g_vk;
+ 
+diff --git a/runtime/nvn/vulkan/vma.cpp b/runtime/nvn/vulkan/vma.cpp
+index 687dd1b..21cb9c6 100644
+--- a/runtime/nvn/vulkan/vma.cpp
++++ b/runtime/nvn/vulkan/vma.cpp
+@@ -1,7 +1,12 @@
+ // Vulkan Memory Allocator implementation (header-only library, MSYS2 package vulkan-memory-allocator).
+ #define VMA_IMPLEMENTATION
++#ifdef __ANDROID__
++#define VMA_STATIC_VULKAN_FUNCTIONS 0
++#define VMA_DYNAMIC_VULKAN_FUNCTIONS 1
++#else
+ #define VMA_STATIC_VULKAN_FUNCTIONS 1
+ #define VMA_DYNAMIC_VULKAN_FUNCTIONS 0
++#endif
+ #if __has_include(<vma/vk_mem_alloc.h>)
+ #include <vma/vk_mem_alloc.h>
+ #else

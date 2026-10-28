@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "metadata_only": true,
+  "profiles": [
+    {
+      "game_version_identity": "f6e6736526a90b9df33774a4722fd127586c0ac2321e6e714ddd03c376bdbe64",
+      "file": "f6e6736526a90b9df33774a4722fd127586c0ac2321e6e714ddd03c376bdbe64.bin",
+      "sha256": "db6ad8be38ef07a6e2503ebfb78e785a5afc9fef2bd9ee829b54e73cfbc3430a",
+      "records": 475
+    },
+    {
+      "game_version_identity": "2b383a1f55b386333b29f973cfc6d05f6e1114a1612294f2c33b70814a3abb62",
+      "file": "2b383a1f55b386333b29f973cfc6d05f6e1114a1612294f2c33b70814a3abb62.bin",
+      "sha256": "a24e19ddc44bd4d10c0d021b3fe6cd7b63f9b91c5f41dcf90f8c96dee1174cc2",
+      "records": 1803
+    }
+  ]
+}

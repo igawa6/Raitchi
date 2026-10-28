@@ -1,0 +1,290 @@
+// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+// SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
+// SPDX-License-Identifier: GPL-2.0-or-later
+
+#pragma once
+
+#include <limits>
+
+#include <boost/container/small_vector.hpp>
+
+#include "video_core/buffer_cache/buffer_cache_base.h"
+#include "video_core/buffer_cache/memory_tracker_base.h"
+#include "video_core/buffer_cache/usage_tracker.h"
+#include "video_core/engines/maxwell_3d.h"
+#include "video_core/renderer_vulkan/vk_compute_pass.h"
+#include "video_core/renderer_vulkan/vk_multi_range_buffer.h"
+#include "video_core/renderer_vulkan/vk_staging_buffer_pool.h"
+#include "video_core/renderer_vulkan/vk_update_descriptor.h"
+#include "video_core/surface.h"
+#include "video_core/vulkan_common/vulkan_memory_allocator.h"
+#include "video_core/vulkan_common/vulkan_wrapper.h"
+
+namespace Vulkan {
+
+class Device;
+class DescriptorPool;
+class Scheduler;
+struct HostVertexBinding;
+
+class BufferCacheRuntime;
+
+class Buffer : public VideoCommon::BufferBase {
+public:
+    explicit Buffer(BufferCacheRuntime&, VideoCommon::NullBufferParams null_params);
+    explicit Buffer(BufferCacheRuntime& runtime, VAddr cpu_addr_, u64 size_bytes_,
+                    bool sparse_compatible_);
+
+    [[nodiscard]] VkBufferView View(u32 offset, u32 size, VideoCore::Surface::PixelFormat format);
+
+    [[nodiscard]] VkBuffer Handle() const noexcept {
+        return *buffer;
+    }
+
+    [[nodiscard]] VkDeviceAddress DeviceAddress() const noexcept {
+        return device_address;
+    }
+
+    [[nodiscard]] bool IsSparseCompatible() const noexcept {
+        return sparse_compatible;
+    }
+
+    [[nodiscard]] vk::MemoryLocation Location() const noexcept {
+        return buffer.Location();
+    }
+
+    [[nodiscard]] bool IsRegionUsed(u64 offset, u64 size) const noexcept {
+        return tracker.IsUsed(offset, size);
+    }
+
+    void MarkUsage(u64 offset, u64 size) noexcept;
+
+    void ResetUsageTracking() noexcept {
+        tracker.Reset();
+    }
+
+    [[nodiscard]] u64 LastUsageTick() const noexcept {
+        return last_usage_tick;
+    }
+
+    operator VkBuffer() const noexcept {
+        return *buffer;
+    }
+
+private:
+    struct BufferView {
+        u32 offset;
+        u32 size;
+        VideoCore::Surface::PixelFormat format;
+        vk::BufferView handle;
+    };
+
+    const Device* device{};
+    Scheduler* scheduler{};
+    vk::Buffer buffer;
+    std::vector<BufferView> views;
+    VideoCommon::UsageTracker tracker;
+    VkDeviceAddress device_address{};
+    u64 last_usage_tick{};
+    bool is_null{};
+    bool sparse_compatible{};
+};
+
+class QuadArrayIndexBuffer;
+class QuadStripIndexBuffer;
+
+class BufferCacheRuntime {
+    friend Buffer;
+
+    using PrimitiveTopology = Tegra::Engines::Maxwell3D::Regs::PrimitiveTopology;
+    using IndexFormat = Tegra::Engines::Maxwell3D::Regs::IndexFormat;
+
+public:
+    explicit BufferCacheRuntime(const Device& device_, MemoryAllocator& memory_manager_,
+                                Scheduler& scheduler_, StagingBufferPool& staging_pool_,
+                                GuestDescriptorQueue& guest_descriptor_queue,
+                                ComputePassDescriptorQueue& compute_pass_descriptor_queue,
+                                DescriptorPool& descriptor_pool);
+
+    void TickFrame(Common::SlotVector<Buffer>& slot_buffers) noexcept;
+
+    u64 CurrentTick();
+
+    bool IsFree(u64 tick);
+
+    void Wait(u64 tick);
+
+    void Finish();
+
+    u64 GetDeviceLocalMemory() const;
+
+    u64 GetDeviceMemoryUsage() const;
+
+    bool CanReportMemoryUsage() const;
+
+    u32 GetUniformBufferAlignment() const;
+
+    u32 GetStorageBufferAlignment() const;
+
+    [[nodiscard]] StagingBufferRef UploadStagingBuffer(size_t size);
+
+    [[nodiscard]] StagingBufferRef DownloadStagingBuffer(size_t size, bool deferred = false);
+
+    bool CanReorderUpload(const Buffer& buffer, std::span<const VideoCommon::BufferCopy> copies);
+
+    void FreeDeferredStagingBuffer(StagingBufferRef& ref);
+
+    void PreCopyBarrier();
+
+    void CopyBuffer(VkBuffer dst_buffer, VkBuffer src_buffer,
+                    std::span<const VideoCommon::BufferCopy> copies, bool barrier,
+                    bool can_reorder_upload = false);
+
+    void PostCopyBarrier();
+
+    void ClearBuffer(VkBuffer dest_buffer, u32 offset, size_t size, u32 value);
+
+    void BindIndexBuffer(PrimitiveTopology topology, IndexFormat index_format, u32 num_indices,
+                         u32 base_vertex, VkBuffer buffer, u32 offset, u32 size);
+
+    void BindQuadIndexBuffer(PrimitiveTopology topology, u32 first, u32 count);
+
+    void BindVertexBuffer(u32 index, VkBuffer buffer, u32 offset, u32 size, u32 stride);
+
+    void BindVertexBuffers(VideoCommon::HostBindings<Buffer>& bindings);
+
+    void BindTransformFeedbackBuffer(u32 index, VkBuffer buffer, u32 offset, u32 size);
+
+    void BindTransformFeedbackBuffers(VideoCommon::HostBindings<Buffer>& bindings);
+
+    std::span<u8> BindMappedUniformBuffer([[maybe_unused]] size_t stage,
+                                          [[maybe_unused]] u32 binding_index,
+                                          u32 size) {
+        const StagingBufferRef ref = staging_pool.Request(size, MemoryUsage::Upload);
+        guest_descriptor_queue.AddBuffer(ref.buffer, ref.device_address,
+                                         static_cast<u32>(ref.offset), size);
+        return ref.mapped_span;
+    }
+
+    [[nodiscard]] VkDeviceSize SparseAlignmentFor(bool sparse_compatible) const noexcept {
+        if (!sparse_compatible || !multi_range_buffers.use_sparse) {
+            return 0;
+        }
+        return multi_range_buffers.block_size;
+    }
+
+    [[nodiscard]] bool PrefersSparseSources() const noexcept {
+        return multi_range_buffers.use_sparse;
+    }
+
+    void ResetMultiRange() noexcept {
+        multi_range_sources.clear();
+        multi_range_total = 0;
+    }
+
+    void PushMultiRangeSource(const Buffer& buffer, u32 offset, u32 size) {
+        const vk::MemoryLocation location = buffer.Location();
+        multi_range_sources.push_back(MultiRangeSource{
+            .handle = buffer.Handle(),
+            .memory = location.memory,
+            .memory_offset = location.offset,
+            .offset = offset,
+            .size = size,
+            .write_tick = buffer.getWriteTick(),
+            .memory_type = location.memory_type,
+        });
+        multi_range_total += size;
+    }
+
+    bool BindMultiRangeStorageBuffer(u64 key, bool is_written);
+
+    void InvalidateMultiRange(u64 key) {
+        multi_range_buffers.Invalidate(key);
+    }
+
+    void OnBufferDeleted(const Buffer& buffer) {
+        multi_range_buffers.DropOwner(scheduler, buffer.Handle());
+    }
+
+    void BindUniformBuffer(const Buffer& buffer, u32 offset, u32 size) {
+        BindBuffer(buffer, offset, size);
+    }
+
+    void BindStorageBuffer(const Buffer& buffer, u32 offset, u32 size,
+                           [[maybe_unused]] bool is_written) {
+        BindBuffer(buffer, offset, size);
+    }
+
+    void BindTextureBuffer(Buffer& buffer, u32 offset, u32 size,
+                           VideoCore::Surface::PixelFormat format) {
+        guest_descriptor_queue.AddTexelBuffer(buffer.View(offset, size, format),
+                                              buffer.DeviceAddress(), offset, size,
+                                              TexelBufferFormat(format));
+    }
+
+    bool ShouldLimitDynamicStorageBuffers() const {
+        return limit_dynamic_storage_buffers;
+    }
+
+    u32 GetMaxDynamicStorageBuffers() const {
+        return max_dynamic_storage_buffers;
+    }
+
+private:
+    void BindBuffer(const Buffer& buffer, u32 offset, u32 size) {
+        const VkBuffer handle = buffer.Handle();
+        if (handle == VK_NULL_HANDLE) {
+            guest_descriptor_queue.AddBuffer(handle, 0, 0, VK_WHOLE_SIZE);
+        } else {
+            guest_descriptor_queue.AddBuffer(handle, buffer.DeviceAddress(), offset, size);
+        }
+    }
+
+    VkFormat TexelBufferFormat(VideoCore::Surface::PixelFormat format) const;
+
+    void ReserveNullBuffer();
+    vk::Buffer CreateNullBuffer();
+
+    const Device& device;
+    MemoryAllocator& memory_allocator;
+    Scheduler& scheduler;
+    StagingBufferPool& staging_pool;
+    GuestDescriptorQueue& guest_descriptor_queue;
+
+    std::shared_ptr<QuadArrayIndexBuffer> quad_array_index_buffer;
+    std::shared_ptr<QuadStripIndexBuffer> quad_strip_index_buffer;
+
+    vk::Buffer null_buffer;
+
+    std::unique_ptr<Uint8Pass> uint8_pass;
+    QuadIndexedPass quad_index_pass;
+
+    MultiRangeBufferCache multi_range_buffers;
+    boost::container::small_vector<MultiRangeSource, 16> multi_range_sources;
+    VkDeviceSize multi_range_total{};
+
+    bool limit_dynamic_storage_buffers = false;
+    u32 max_dynamic_storage_buffers = (std::numeric_limits<u32>::max)();
+};
+
+struct BufferCacheParams {
+    using Runtime = Vulkan::BufferCacheRuntime;
+    using Buffer = Vulkan::Buffer;
+    using Async_Buffer = Vulkan::StagingBufferRef;
+    using MemoryTracker = VideoCommon::MemoryTrackerBase<Tegra::MaxwellDeviceMemoryManager>;
+
+    static constexpr bool IS_OPENGL = false;
+    static constexpr bool HAS_PERSISTENT_UNIFORM_BUFFER_BINDINGS = false;
+    static constexpr bool HAS_FULL_INDEX_AND_PRIMITIVE_SUPPORT = false;
+    static constexpr bool NEEDS_BIND_UNIFORM_INDEX = false;
+    static constexpr bool NEEDS_BIND_STORAGE_INDEX = false;
+    static constexpr bool USE_MEMORY_MAPS = true;
+    static constexpr bool SEPARATE_IMAGE_BUFFER_BINDINGS = false;
+    static constexpr bool USE_MEMORY_MAPS_FOR_UPLOADS = true;
+};
+
+using BufferCache = VideoCommon::BufferCache<BufferCacheParams>;
+
+} // namespace Vulkan

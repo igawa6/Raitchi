@@ -1,0 +1,617 @@
+// SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+package org.yuzu.yuzu_emu.ui
+
+import android.content.Context
+import android.graphics.Rect
+import android.util.AttributeSet
+import android.view.View
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.PagerSnapHelper
+import androidx.recyclerview.widget.RecyclerView
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.pow
+import kotlin.math.sin
+import org.yuzu.yuzu_emu.R
+import org.yuzu.yuzu_emu.adapters.GameAdapter
+import androidx.core.view.doOnNextLayout
+import androidx.core.view.ViewCompat
+import org.yuzu.yuzu_emu.YuzuApplication
+import androidx.preference.PreferenceManager
+import androidx.core.view.WindowInsetsCompat
+import org.yuzu.yuzu_emu.utils.FullscreenHelper
+/**
+ * CarouselRecyclerView encapsulates all carousel content for the games UI.
+ * It manages overlapping cards, center snapping, custom drawing order,
+ * joypad & fling navigation and mid-screen swipe-to-refresh.
+ */
+class CarouselRecyclerView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyle: Int = 0
+) : RecyclerView(context, attrs, defStyle) {
+
+    private var overlapFactor: Float = 0f
+    private var overlapPx: Int = 0
+    private var bottomInset: Int = 0
+    private var latestWindowInsets: WindowInsetsCompat? = null
+    private var cardGeometryInitialized: Boolean = false
+    private var overlapDecoration: OverlappingDecoration? = null
+    private var pagerSnapHelper: PagerSnapHelper? = null
+    private var scalingScrollListener: OnScrollListener? = null
+    private var savedItemAnimator: RecyclerView.ItemAnimator? = null
+
+    companion object {
+        private const val CAROUSEL_CARD_SIZE_FACTOR = "CarouselCardSizeMultiplier"
+        private const val CAROUSEL_BORDERCARDS_SCALE = "CarouselBorderCardsScale"
+        private const val CAROUSEL_BORDERCARDS_ALPHA = "CarouselBorderCardsAlpha"
+        private const val CAROUSEL_OVERLAP_FACTOR = "CarouselOverlapFactor"
+        private const val CAROUSEL_MAX_FLING_COUNT = "CarouselMaxFlingCount"
+        private const val CAROUSEL_FLING_MULTIPLIER = "CarouselFlingMultiplier"
+        private const val CAROUSEL_ARC_ANGLE_STEP_DEGREES = 15.0
+        private const val CAROUSEL_ARC_MAX_ANGLE_DEGREES = 165.0
+        private const val CAROUSEL_ARC_DEPTH_MAX_ANGLE_DEGREES = 85.0
+        private const val CAROUSEL_ARC_DEPTH_STRETCH = 5.0f
+        private const val CAROUSEL_ARC_X_DEPTH_FACTOR = 0.55f
+        private const val CAROUSEL_ARC_FADE_OUT_START_DEGREES = 60.0
+        private const val CAROUSEL_ARC_FADE_OUT_END_DEGREES = 95.0
+        const val CAROUSEL_LAST_SCROLL_POSITION = "CarouselLastScrollPosition"
+        const val CAROUSEL_VIEW_TYPE_PORTRAIT = "GamesViewTypePortrait"
+        const val CAROUSEL_VIEW_TYPE_LANDSCAPE = "GamesViewTypeLandscape"
+    }
+
+    private val preferences =
+        PreferenceManager.getDefaultSharedPreferences(YuzuApplication.appContext)
+
+    private val carouselAdapterObserver = object : RecyclerView.AdapterDataObserver() {
+        override fun onChanged() {
+            if (!pendingScrollAfterReload) return
+            doOnNextLayout {
+                refreshView()
+                pendingScrollAfterReload = false
+            }
+        }
+    }
+
+    private val isCarouselMode: Boolean
+        get() {
+            val lm = layoutManager as? LinearLayoutManager
+            return lm != null &&
+               lm.orientation == RecyclerView.HORIZONTAL &&
+               lm !is androidx.recyclerview.widget.GridLayoutManager
+    }
+
+    var flingMultiplier: Float = 1f
+
+    var pendingScrollAfterReload: Boolean = false
+
+    var useCustomDrawingOrder: Boolean = false
+        set(value) {
+            field = value
+            setChildrenDrawingOrderEnabled(value)
+            invalidate()
+        }
+
+    init {
+        setChildrenDrawingOrderEnabled(true)
+        ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
+            latestWindowInsets = insets
+            updateCardGeometry()
+            applyCarouselPadding()
+            insets
+        }
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        ViewCompat.requestApplyInsets(this)
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        if (w != oldw || h != oldh) {
+            updateCardGeometry()
+            applyCarouselPadding()
+        }
+    }
+
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        super.onLayout(changed, left, top, right, bottom)
+        if (isCarouselMode) updateChildScalesAndAlpha()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            ViewCompat.requestApplyInsets(this)
+            post { updateCardGeometry() }
+        }
+    }
+
+    override fun setAdapter(adapter: Adapter<*>?) {
+        val oldAdapter = this.adapter as? GameAdapter
+
+        if (oldAdapter !== adapter) {
+            oldAdapter?.unregisterAdapterDataObserver(carouselAdapterObserver)
+        }
+
+        super.setAdapter(adapter)
+
+        (adapter as? GameAdapter)?.registerAdapterDataObserver(carouselAdapterObserver)
+        updateCardGeometry()
+        applyCarouselPadding()
+    }
+
+    private fun calculateCenter(width: Int, paddingStart: Int, paddingEnd: Int): Int {
+        return paddingStart + (width - paddingStart - paddingEnd) / 2
+    }
+
+    private fun getRecyclerViewCenter(): Float {
+        return calculateCenter(width, paddingLeft, paddingRight).toFloat()
+    }
+
+    private fun getLayoutManagerCenter(layoutManager: RecyclerView.LayoutManager): Int {
+        if (isCarouselMode) {
+            return calculateCenter(
+                layoutManager.width,
+                layoutManager.paddingStart,
+                layoutManager.paddingEnd
+            )
+        } else {
+            return width / 2
+        }
+    }
+
+    private fun getChildDistanceToCenter(view: View): Float {
+        return 0.5f * (view.left + view.right) - getRecyclerViewCenter()
+    }
+
+    fun restoreScrollState(position: Int = 0, attempts: Int = 0) {
+        if (!isCarouselMode) return
+
+        val lm = layoutManager as? LinearLayoutManager ?: return
+        if (lm.findLastVisibleItemPosition() == RecyclerView.NO_POSITION && attempts < 10) {
+            post { restoreScrollState(position, attempts + 1) }
+            return
+        }
+        scrollToPosition(position)
+    }
+
+    fun getClosestChildPosition(fullRange: Boolean = false): Int {
+        if (!isCarouselMode) {
+            return RecyclerView.NO_POSITION
+        }
+
+        val lm = layoutManager as? LinearLayoutManager ?: return RecyclerView.NO_POSITION
+        var minDistance = Int.MAX_VALUE
+        var closestPosition = RecyclerView.NO_POSITION
+        val start = if (fullRange) 0 else lm.findFirstVisibleItemPosition()
+        val end = if (fullRange) lm.childCount - 1 else lm.findLastVisibleItemPosition()
+        for (i in start..end) {
+            val child = lm.findViewByPosition(i) ?: continue
+            val distance = kotlin.math.abs(getChildDistanceToCenter(child).toInt())
+            if (distance < minDistance) {
+                minDistance = distance
+                closestPosition = i
+            }
+        }
+        return closestPosition
+    }
+
+    fun updateChildScalesAndAlpha() {
+        for (i in 0 until childCount) {
+            val child = getChildAt(i) ?: continue
+            updateChildScaleAndAlphaForPosition(child)
+        }
+    }
+
+    fun updateChildScaleAndAlphaForPosition(child: View) {
+        val cardSize = (adapter as? GameAdapter ?: return).cardSize
+        val position = getChildViewHolder(child).bindingAdapterPosition
+        if (position == RecyclerView.NO_POSITION || cardSize <= 0) {
+            return // No valid position or card size
+        }
+        val layoutParams = child.layoutParams
+        if (layoutParams.width != cardSize || layoutParams.height != cardSize) {
+            child.layoutParams = layoutParams.apply {
+                width = cardSize
+                height = cardSize
+            }
+        }
+
+        val signedDistance = getChildDistanceToCenter(child)
+        val itemStep = (cardSize - overlapPx).toFloat().coerceAtLeast(1f)
+        val angleStep = Math.toRadians(CAROUSEL_ARC_ANGLE_STEP_DEGREES).toFloat()
+        val maxAngle = Math.toRadians(CAROUSEL_ARC_MAX_ANGLE_DEGREES).toFloat()
+        val depthMaxAngle = Math.toRadians(CAROUSEL_ARC_DEPTH_MAX_ANGLE_DEGREES).toFloat()
+        val fadeOutStartAngle = Math.toRadians(CAROUSEL_ARC_FADE_OUT_START_DEGREES).toFloat()
+        val fadeOutEndAngle = Math.toRadians(CAROUSEL_ARC_FADE_OUT_END_DEGREES).toFloat()
+        val angle = (signedDistance / itemStep * angleStep).coerceIn(-maxAngle, maxAngle)
+        val arcRadius = itemStep / angleStep
+        val arcX = sin(angle) * arcRadius
+        val absoluteAngle = abs(angle)
+        val rawDepthInput = ((1f - cos(absoluteAngle)) / (1f - cos(depthMaxAngle)))
+            .coerceIn(0f, 1f)
+        val easedDepthTail = Math.pow(
+            (1f - rawDepthInput).toDouble(),
+            CAROUSEL_ARC_DEPTH_STRETCH.toDouble()
+        ).toFloat()
+        val depthInput = (1f - easedDepthTail).coerceIn(0f, 1f)
+        val projectedArcX = arcX * (1f - rawDepthInput * CAROUSEL_ARC_X_DEPTH_FACTOR)
+
+        child.animate().cancel()
+        child.translationX = projectedArcX - signedDistance
+
+        val internalBorderScale = resources.getFraction(R.fraction.carousel_bordercards_scale, 1, 1)
+        val borderScale = preferences.getFloat(CAROUSEL_BORDERCARDS_SCALE, internalBorderScale).coerceIn(
+            0f,
+            1f
+        )
+
+        val shapedScaling = 1f - depthInput
+        val scale = (borderScale + (1f - borderScale) * shapedScaling).coerceIn(0f, 1f)
+
+        val internalBordersAlpha = resources.getFraction(
+            R.fraction.carousel_bordercards_alpha,
+            1,
+            1
+        )
+        val borderAlpha = preferences.getFloat(CAROUSEL_BORDERCARDS_ALPHA, internalBordersAlpha).coerceIn(
+            0f,
+            1f
+        )
+        val shapedAlpha = cos(depthInput * Math.PI).toFloat()
+        val baseAlpha = (borderAlpha + (1f - borderAlpha) * shapedAlpha).coerceIn(0f, 1f)
+        val rearPresence = (1f - (absoluteAngle - fadeOutStartAngle) /
+            (fadeOutEndAngle - fadeOutStartAngle)).coerceIn(0f, 1f)
+        val alpha = (baseAlpha * rearPresence).coerceIn(0f, 1f)
+
+        child.alpha = alpha
+        child.scaleX = scale
+        child.scaleY = scale
+    }
+
+    fun focusCenteredCard() {
+        val centeredPos = getClosestChildPosition()
+        if (centeredPos != RecyclerView.NO_POSITION) {
+            val vh = findViewHolderForAdapterPosition(centeredPos)
+            vh?.itemView?.let { child ->
+                child.isFocusable = true
+                child.isFocusableInTouchMode = true
+                child.requestFocus()
+            }
+        }
+    }
+
+    fun refreshView() {
+        if (isCarouselMode) {
+            updateChildScalesAndAlpha()
+            focusCenteredCard()
+        }
+    }
+
+    private fun resolveBottomInset(windowInsets: WindowInsetsCompat): Int {
+        val navigationBottom = if (FullscreenHelper.isFullscreenEnabled(context)) {
+            0
+        } else {
+            windowInsets.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.navigationBars()).bottom
+        }
+        val gestureInsets = windowInsets.getInsetsIgnoringVisibility(
+            WindowInsetsCompat.Type.systemGestures()
+        )
+        val cutoutInsets = windowInsets.getInsetsIgnoringVisibility(
+            WindowInsetsCompat.Type.displayCutout()
+        )
+        return maxOf(navigationBottom, gestureInsets.bottom, cutoutInsets.bottom)
+    }
+
+    private fun updateCardGeometry() {
+        if (!isCarouselMode || height <= 0) return
+
+        val gameAdapter = adapter as? GameAdapter ?: return
+        val windowInsets = latestWindowInsets ?: ViewCompat.getRootWindowInsets(this) ?: return
+
+        if (cardGeometryInitialized && !hasWindowFocus()) return
+
+        val newBottomInset = resolveBottomInset(windowInsets).coerceIn(0, height)
+        val internalFactor = resources.getFraction(R.fraction.carousel_card_size_factor, 1, 1)
+        val userFactor = preferences.getFloat(CAROUSEL_CARD_SIZE_FACTOR, internalFactor).coerceIn(
+            0f,
+            1f
+        )
+        val screenWidth = resources.displayMetrics.widthPixels.toFloat()
+        val screenHeight = resources.displayMetrics.heightPixels.toFloat()
+        val aspectFactor = ((screenWidth / screenHeight) / (20f / 9f))
+            .pow(0.75f)
+            .coerceIn(0.5f, 1f)
+        val newCardSize = minOf(
+            (height * userFactor).toInt(),
+            height - newBottomInset,
+            (height * aspectFactor).toInt()
+        )
+        if (newCardSize <= 0) return
+        val insetChanged = bottomInset != newBottomInset
+        val cardSizeChanged = gameAdapter.cardSize != newCardSize
+
+        bottomInset = newBottomInset
+        cardGeometryInitialized = true
+
+        if (cardSizeChanged) gameAdapter.setCardSize(newCardSize)
+        if (insetChanged || cardSizeChanged) setupCarousel(true)
+    }
+
+    private fun applyCarouselPadding() {
+        if (!isCarouselMode) return
+
+        val gameAdapter = adapter as? GameAdapter ?: return
+        val cardSize = gameAdapter.cardSize
+        if (cardSize <= 0 || bottomInset < 0) return
+
+        val topPadding = ((height - bottomInset - cardSize) / 2).coerceAtLeast(0)
+        val sidePadding = (width - cardSize) / 2
+        if (paddingLeft != sidePadding || paddingTop != topPadding ||
+            paddingRight != sidePadding || paddingBottom != 0
+        ) {
+            setPadding(sidePadding, topPadding, sidePadding, 0)
+        }
+        clipToPadding = false
+    }
+
+    fun setupCarousel(enabled: Boolean) {
+        if (enabled) {
+            val gameAdapter = adapter as? GameAdapter ?: return
+            if (gameAdapter.cardSize == 0) return
+            if (bottomInset < 0) return
+
+            itemAnimator?.let {
+                if (savedItemAnimator == null) {
+                    savedItemAnimator = it
+                }
+                itemAnimator = null
+            }
+
+            useCustomDrawingOrder = true
+            val cardSize = gameAdapter.cardSize
+
+            val internalOverlapFactor = resources.getFraction(R.fraction.carousel_overlap_factor,1,1)
+            overlapFactor = preferences.getFloat(CAROUSEL_OVERLAP_FACTOR, internalOverlapFactor).coerceIn(0f,1f)
+            overlapPx = (cardSize * overlapFactor).toInt()
+
+            val internalFlingMultiplier = resources.getFraction(R.fraction.carousel_fling_multiplier,1,1)
+            flingMultiplier = preferences.getFloat(
+                CAROUSEL_FLING_MULTIPLIER,
+                internalFlingMultiplier
+            ).coerceIn(1f, 5f)
+
+            // Add overlap decoration if not present
+            if (overlapDecoration == null) {
+                overlapDecoration = OverlappingDecoration(overlapPx)
+                addItemDecoration(overlapDecoration!!)
+            }
+
+            // Gradual scaling on scroll
+            if (scalingScrollListener == null) {
+                scalingScrollListener = object : OnScrollListener() {
+                    override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                        super.onScrolled(recyclerView, dx, dy)
+                        updateChildScalesAndAlpha()
+                    }
+                }
+                addOnScrollListener(scalingScrollListener!!)
+            }
+
+            applyCarouselPadding()
+
+            if (pagerSnapHelper == null) {
+                pagerSnapHelper = CenterPagerSnapHelper()
+                pagerSnapHelper!!.attachToRecyclerView(this)
+            }
+        } else {
+            // Remove overlap decoration
+            overlapDecoration?.let { removeItemDecoration(it) }
+            overlapDecoration = null
+            // Remove scaling scroll listener
+            scalingScrollListener?.let { removeOnScrollListener(it) }
+            scalingScrollListener = null
+            // Detach PagerSnapHelper
+            pagerSnapHelper?.attachToRecyclerView(null)
+            pagerSnapHelper = null
+            savedItemAnimator?.let {
+                if (itemAnimator == null) {
+                    itemAnimator = it
+                }
+                savedItemAnimator = null
+            }
+            cardGeometryInitialized = false
+            useCustomDrawingOrder = false
+            // Reset padding and fling
+            setPadding(0, 0, 0, 0)
+            clipToPadding = true
+            flingMultiplier = 1f
+            // Reset scaling
+            for (i in 0 until childCount) {
+                val child = getChildAt(i)
+                child?.translationX = 0f
+                child?.scaleX = 1f
+                child?.scaleY = 1f
+                child?.alpha = 1f
+            }
+        }
+    }
+
+    override fun onScrollStateChanged(state: Int) {
+        super.onScrollStateChanged(state)
+        if (state == RecyclerView.SCROLL_STATE_IDLE && isCarouselMode) {
+            focusCenteredCard()
+        }
+    }
+
+    override fun scrollToPosition(position: Int) {
+        if (isCarouselMode) {
+            (layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(position, overlapPx)
+            doOnNextLayout {
+                refreshView()
+            }
+        } else {
+        super.scrollToPosition(position)
+        }
+    }
+
+    /** Scrolls a search result without moving focus away from the search field. */
+    fun scrollToPositionPreservingFocus(position: Int) {
+        if (isCarouselMode) {
+            (layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(position, overlapPx)
+            doOnNextLayout { updateChildScalesAndAlpha() }
+        } else {
+            super.scrollToPosition(position)
+        }
+    }
+
+    private var lastFocusSearchTime: Long = 0
+    override fun focusSearch(focused: View, direction: Int): View? {
+        if (!isCarouselMode) {
+            return super.focusSearch(focused, direction)
+        }
+        val vh = findContainingViewHolder(focused) ?: return super.focusSearch(focused, direction)
+        val itemCount = adapter?.itemCount ?: return super.focusSearch(focused, direction)
+        val position = vh.bindingAdapterPosition
+
+        return when (direction) {
+            View.FOCUS_LEFT -> {
+                if (position > 0) {
+                    val now = System.currentTimeMillis()
+                    val repeatDetected = (now - lastFocusSearchTime) < resources.getInteger(
+                        R.integer.carousel_focus_search_repeat_threshold_ms
+                    )
+                    lastFocusSearchTime = now
+                    if (!repeatDetected) { // ensures the first run
+                        val offset = focused.width - overlapPx
+                        smoothScrollBy(-offset, 0)
+                    }
+                    findViewHolderForAdapterPosition(position - 1)?.itemView ?: super.focusSearch(
+                        focused,
+                        direction
+                    )
+                } else {
+                    focused
+                }
+            }
+            View.FOCUS_RIGHT -> {
+                if (position < itemCount - 1) {
+                    findViewHolderForAdapterPosition(position + 1)?.itemView ?: super.focusSearch(
+                        focused,
+                        direction
+                    )
+                } else {
+                    focused
+                }
+            }
+            // Prevent focus from escaping to external UI elements when forced snapping was removed
+            View.FOCUS_DOWN -> focused
+            else -> super.focusSearch(focused, direction)
+        }
+    }
+
+    // Custom fling multiplier for carousel
+    override fun fling(velocityX: Int, velocityY: Int): Boolean {
+        val newVelocityX = (velocityX * flingMultiplier).toInt()
+        val newVelocityY = (velocityY * flingMultiplier).toInt()
+        return super.fling(newVelocityX, newVelocityY)
+    }
+
+    // Custom drawing order for carousel (for alpha fade)
+    override fun getChildDrawingOrder(childCount: Int, i: Int): Int {
+        if (!useCustomDrawingOrder || childCount == 0) return i
+        val children = (0 until childCount).map { idx ->
+            val distance = abs(getChildDistanceToCenter(getChildAt(idx)))
+            Pair(idx, distance)
+        }
+        val sorted = children.sortedWith(
+            compareByDescending<Pair<Int, Float>> { it.second }
+                .thenBy { it.first }
+        )
+        return sorted[i].first
+    }
+
+    inner class OverlappingDecoration(private val overlap: Int) : ItemDecoration() {
+        override fun getItemOffsets(
+            outRect: Rect,
+            view: View,
+            parent: RecyclerView,
+            state: State
+        ) {
+            val position = parent.getChildAdapterPosition(view)
+            if (position > 0) {
+                outRect.left = -overlap
+            }
+        }
+    }
+
+    inner class VerticalCenterDecoration : ItemDecoration() {
+        override fun getItemOffsets(
+            outRect: android.graphics.Rect,
+            view: View,
+            parent: RecyclerView,
+            state: RecyclerView.State
+        ) {
+            val parentHeight = parent.height
+            val childHeight = view.layoutParams.height.takeIf { it > 0 }
+                ?: view.measuredHeight.takeIf { it > 0 }
+                ?: view.height
+
+            if (parentHeight > 0 && childHeight > 0) {
+                val verticalPadding = ((parentHeight - childHeight) / 2).coerceAtLeast(0)
+                outRect.top = verticalPadding
+                outRect.bottom = verticalPadding
+            }
+        }
+    }
+
+    inner class CenterPagerSnapHelper : PagerSnapHelper() {
+
+        // NEEDED: fixes center snapping, but introduces ghost movement
+        override fun findSnapView(layoutManager: RecyclerView.LayoutManager): View? {
+            if (!isCarouselMode) return null
+            return layoutManager.findViewByPosition(getClosestChildPosition())
+        }
+
+        // NEEDED: fixes ghost movement when snapping, but breaks inertial scrolling
+        override fun calculateDistanceToFinalSnap(
+            layoutManager: RecyclerView.LayoutManager,
+            targetView: View
+        ): IntArray? {
+            if (!isCarouselMode) {
+                return super.calculateDistanceToFinalSnap(layoutManager, targetView)
+            }
+
+            val out = IntArray(2)
+            out[0] = getChildDistanceToCenter(targetView).toInt()
+            out[1] = 0
+            return out
+        }
+
+        // NEEDED: fixes inertial scrolling (broken by calculateDistanceToFinalSnap)
+        override fun findTargetSnapPosition(
+            layoutManager: RecyclerView.LayoutManager,
+            velocityX: Int,
+            velocityY: Int
+        ): Int {
+            if (!isCarouselMode) return RecyclerView.NO_POSITION
+
+            val closestPosition = this@CarouselRecyclerView.getClosestChildPosition()
+            if (closestPosition == RecyclerView.NO_POSITION) return RecyclerView.NO_POSITION
+
+            val internalMaxFling = resources.getInteger(R.integer.carousel_max_fling_count)
+            val maxFling = preferences.getInt(CAROUSEL_MAX_FLING_COUNT, internalMaxFling).coerceIn(
+                1,
+                10
+            )
+            val rawFlingCount = if (velocityX == 0) 0 else velocityX / 2000
+            val flingCount = rawFlingCount.coerceIn(-maxFling, maxFling)
+            val targetPos = (closestPosition + flingCount).coerceIn(0, layoutManager.itemCount - 1)
+            return targetPos
+        }
+    }
+}

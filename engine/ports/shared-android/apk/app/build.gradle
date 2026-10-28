@@ -1,0 +1,34 @@
+// Packaging only. Native code is built once by build_shared_android.py.
+plugins { id 'com.android.application' }
+def workspace = rootProject.ext.workspaceRoot
+layout.buildDirectory = new File(workspace, 'build/shared-android/apk/app')
+android {
+    // Keep pinned JNI/Java class names; applicationId alone chooses the sandbox.
+    namespace 'com.lasrecomp.android'
+    compileSdk 36
+    defaultConfig {
+        applicationId 'com.recomp.shared.test'
+        minSdk 30
+        targetSdk 36
+        versionCode 1
+        versionName '0.1-shared-test'
+        ndk { abiFilters 'arm64-v8a' }
+    }
+    sourceSets.main {
+        java.srcDirs += new File(workspace, 'work/las-baseline/build/android/SDL3/android-project/app/src/main/java')
+        jniLibs.srcDirs = [new File(workspace, 'build/shared-android/apk-inputs/jniLibs')]
+        assets.srcDirs = [new File(workspace, 'build/shared-android/apk-inputs/assets')]
+    }
+    packaging {
+        jniLibs {
+            useLegacyPackaging true
+            // Preserve the exact verified runtime/dependency bytes in the APK.
+            keepDebugSymbols += ['**/*.so']
+        }
+    }
+    buildTypes { debug { minifyEnabled false } }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

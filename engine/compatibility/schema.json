@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Raitchi compatibility report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "game", "build", "device", "test", "result"],
+  "properties": {
+    "schema": {"const": 1},
+    "game": {
+      "type": "object", "additionalProperties": false,
+      "required": ["title", "program_id", "version", "content"],
+      "properties": {
+        "title": {"type": "string", "minLength": 1},
+        "program_id": {"type": "string", "pattern": "^0100[0-9A-F]{12}$"},
+        "version": {"type": "string", "minLength": 1},
+        "content": {"enum": ["base", "base+update", "base+dlc"]}
+      }
+    },
+    "build": {
+      "type": "object", "additionalProperties": false,
+      "required": ["app_version", "runtime_sha256", "source_commit"],
+      "properties": {
+        "app_version": {"type": "string"},
+        "runtime_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+        "apk_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+        "source_commit": {"type": ["string", "null"]}
+      }
+    },
+    "device": {
+      "type": "object", "additionalProperties": false,
+      "required": ["model", "soc", "gpu_driver", "android"],
+      "properties": {
+        "model": {"type": "string"},
+        "soc": {"type": "string"},
+        "gpu_driver": {"type": "string"},
+        "android": {"type": "string"},
+        "settings": {"type": "string"}
+      }
+    },
+    "test": {
+      "type": "object", "additionalProperties": false,
+      "required": ["date", "tester", "route", "observation"],
+      "properties": {
+        "date": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+        "tester": {"type": "string"},
+        "route": {"type": "string", "minLength": 10},
+        "observation": {"enum": ["observed", "carried-over"]},
+        "fps": {"type": ["number", "null"]},
+        "session_seconds": {"type": ["number", "null"]},
+        "save": {"enum": ["none", "loaded-existing", "created-new", "created-and-reloaded"]}
+      }
+    },
+    "result": {
+      "type": "object", "additionalProperties": false,
+      "required": ["state", "limitations"],
+      "properties": {
+        "state": {"enum": ["untested", "fails-startup", "boots", "renders", "interactive",
+                            "playable-tested-section", "completed"]},
+        "limitations": {"type": "array", "items": {"type": "string"}},
+        "issues": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  }
+}

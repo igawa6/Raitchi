@@ -1,0 +1,2 @@
+# Unified diff blank context lines contain a required space; check the applied source separately.
+ports/letsgo-android/*.patch whitespace=-blank-at-eol

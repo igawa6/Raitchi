@@ -1,0 +1,30 @@
+Raitchi Android app
+
+This branch starts from upstream Eden 989768aa46 and turns its Android app
+module (src/android/app, namespace org.yuzu.yuzu_emu) into the Raitchi
+frontend, application ID dev.igawa6.raitchi.
+
+Retained Eden screens: setup (permissions and prod.keys; no firmware needed),
+game folders and scanning, the game grid/list/carousel with search and sort,
+game info and properties (per-game settings), settings, and the GPU driver
+manager/fetcher. Emulation, input mapping, profiles, post-processing, firmware,
+add-ons and multiplayer code that Raitchi does not use are removed.
+
+Native boundary
+NativeLibrary is a Kotlin facade, not Eden's JNI. Package metadata (title,
+icon, program ID, version, module build identities) comes from the engine's
+small raitchiprepare library. Every scanned NSP/XCI stays visible; packages
+without a matching adapter show the reason. Tryable base games may start
+only after an untested-game warning; unsupported layouts remain blocked. Games
+are prepared and launched in the engine's :game process; libmain is never
+loaded in the app process.
+
+Build
+Built from the engine repository with tools/build_eden_shell.py. Builds are
+offline by default (--allow-downloads populates the Gradle cache). Release
+builds strip native libraries, use R8 resource shrinking and a locally
+generated test key; the build receipt records library and APK hashes.
+
+License
+GPL-3.0-or-later, as a derivative of Eden. Upstream notices are retained in
+adapted sources; see LICENSE.txt and LICENSES/.

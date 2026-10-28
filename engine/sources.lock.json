@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "captured_on": "2026-10-24",
+  "sources": [
+    {
+      "id": "las-android",
+      "url": "https://github.com/Nycolazs/LASRecomp-Android-Plus.git",
+      "path": "sources/las-android",
+      "commit": "cca791a3e7218e1dac95e7d4a11b8f97dba3ea51",
+      "role": "Android baseline and initial platform implementation"
+    },
+    {
+      "id": "las-upstream",
+      "url": "https://github.com/peiikai/LASRecomp.git",
+      "path": "sources/las-upstream",
+      "commit": "59b61fd3c65dcabd0feb62d5d5706240cb3f5bb9",
+      "role": "Common upstream reference and future synchronization"
+    },
+    {
+      "id": "letsgo",
+      "url": "https://github.com/raulzrrs/letsgo-recomp.git",
+      "path": "sources/letsgo",
+      "commit": "96894fd8e9ea20c1b38cdea53105ec2a335df620",
+      "role": "Second-title candidate; Android execution unverified"
+    }
+  ]
+}

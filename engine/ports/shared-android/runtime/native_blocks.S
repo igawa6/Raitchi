@@ -1,0 +1,143 @@
+/* Target layout assertions live in native_blocks.c. Physical X18 is never
+ * changed. Entry/exit normally use physical X19 for the host frame. For a
+ * body using guest X19, generated prefix/tail words temporarily keep that
+ * context in another whole-body-unused GPR; the tail restores X19 context
+ * before entering the unchanged capture below. */
+.text
+.p2align 2
+.hidden native_blocks_enter
+.global native_blocks_enter
+.type native_blocks_enter,%function
+native_blocks_enter:
+    sub sp,sp,#256
+    stp x19,x20,[sp,#0]
+    stp x21,x22,[sp,#16]
+    stp x23,x24,[sp,#32]
+    stp x25,x26,[sp,#48]
+    stp x27,x28,[sp,#64]
+    stp x29,x30,[sp,#80]
+    stp q8,q9,[sp,#96]
+    stp q10,q11,[sp,#128]
+    stp q12,q13,[sp,#160]
+    stp q14,q15,[sp,#192]
+    mrs x9,fpcr
+    str x9,[sp,#224]
+    mrs x9,fpsr
+    str x9,[sp,#232]
+    mov x19,x0
+    mov x9,sp
+    str x9,[x19,#16]
+    ldr x17,[x19,#0]
+    ldr x9,[x17,#256]
+    mov sp,x9
+    ldr x9,[x17,#320]
+    msr fpcr,x9
+    ldr x9,[x17,#328]
+    msr fpsr,x9
+    ldr x9,[x17,#272]
+    msr nzcv,x9
+    ldp q0,q1,[x17,#512]
+    ldp q2,q3,[x17,#544]
+    ldp q4,q5,[x17,#576]
+    ldp q6,q7,[x17,#608]
+    ldp q8,q9,[x17,#640]
+    ldp q10,q11,[x17,#672]
+    ldp q12,q13,[x17,#704]
+    ldp q14,q15,[x17,#736]
+    ldp q16,q17,[x17,#768]
+    ldp q18,q19,[x17,#800]
+    ldp q20,q21,[x17,#832]
+    ldp q22,q23,[x17,#864]
+    ldp q24,q25,[x17,#896]
+    ldp q26,q27,[x17,#928]
+    ldp q28,q29,[x17,#960]
+    ldp q30,q31,[x17,#992]
+    ldp x0,x1,[x17,#0]
+    ldp x2,x3,[x17,#16]
+    ldp x4,x5,[x17,#32]
+    ldp x6,x7,[x17,#48]
+    ldp x8,x9,[x17,#64]
+    ldp x10,x11,[x17,#80]
+    ldp x12,x13,[x17,#96]
+    ldp x14,x15,[x17,#112]
+    ldr x16,[x19,#8]
+    ldp x20,x21,[x17,#160]
+    ldp x22,x23,[x17,#176]
+    ldp x24,x25,[x17,#192]
+    ldp x26,x27,[x17,#208]
+    ldp x28,x29,[x17,#224]
+    ldr x30,[x17,#240]
+    br x16
+.size native_blocks_enter,.-native_blocks_enter
+
+.p2align 2
+.hidden native_blocks_exit_begin
+.global native_blocks_exit_begin
+native_blocks_exit_begin:
+    str x16,[x19,#24]
+    str x17,[x19,#32]
+    ldr x17,[x19,#0]
+    stp x0,x1,[x17,#0]
+    stp x2,x3,[x17,#16]
+    stp x4,x5,[x17,#32]
+    stp x6,x7,[x17,#48]
+    stp x8,x9,[x17,#64]
+    stp x10,x11,[x17,#80]
+    stp x12,x13,[x17,#96]
+    stp x14,x15,[x17,#112]
+    stp x20,x21,[x17,#160]
+    stp x22,x23,[x17,#176]
+    stp x24,x25,[x17,#192]
+    stp x26,x27,[x17,#208]
+    stp x28,x29,[x17,#224]
+    str x30,[x17,#240]
+    ldr x16,[x19,#24]
+    str x16,[x17,#128]
+    ldr x16,[x19,#32]
+    str x16,[x17,#136]
+    mov x16,sp
+    str x16,[x17,#256]
+    mrs x16,nzcv
+    str x16,[x17,#272]
+    mrs x16,fpcr
+    str x16,[x17,#320]
+    mrs x16,fpsr
+    str x16,[x17,#328]
+    stp q0,q1,[x17,#512]
+    stp q2,q3,[x17,#544]
+    stp q4,q5,[x17,#576]
+    stp q6,q7,[x17,#608]
+    stp q8,q9,[x17,#640]
+    stp q10,q11,[x17,#672]
+    stp q12,q13,[x17,#704]
+    stp q14,q15,[x17,#736]
+    stp q16,q17,[x17,#768]
+    stp q18,q19,[x17,#800]
+    stp q20,q21,[x17,#832]
+    stp q22,q23,[x17,#864]
+    stp q24,q25,[x17,#896]
+    stp q26,q27,[x17,#928]
+    stp q28,q29,[x17,#960]
+    stp q30,q31,[x17,#992]
+    ldr x16,[x19,#16]
+    mov sp,x16
+    ldr x9,[sp,#224]
+    msr fpcr,x9
+    ldr x9,[sp,#232]
+    msr fpsr,x9
+    ldp q8,q9,[sp,#96]
+    ldp q10,q11,[sp,#128]
+    ldp q12,q13,[sp,#160]
+    ldp q14,q15,[sp,#192]
+    ldp x19,x20,[sp,#0]
+    ldp x21,x22,[sp,#16]
+    ldp x23,x24,[sp,#32]
+    ldp x25,x26,[sp,#48]
+    ldp x27,x28,[sp,#64]
+    ldp x29,x30,[sp,#80]
+    add sp,sp,#256
+    ret
+.hidden native_blocks_exit_end
+.global native_blocks_exit_end
+native_blocks_exit_end:
+.section .note.GNU-stack,"",%progbits

@@ -1,0 +1,7 @@
+/sources/
+/evidence/
+/build/
+/private/
+/work/
+/ports/letsgo-android/apk/.gradle/
+__pycache__/

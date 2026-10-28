@@ -1,0 +1,21 @@
+{
+  "description": "Skip the known opening movie with one early A hold, then hold L+R; never confirm a save slot.",
+  "seconds": 25,
+  "checkpoints": [5, 10, 20],
+  "settings": {
+    "aspect": "original",
+    "resolution": "1",
+    "upscaler": "bilinear",
+    "frame_rate": "0",
+    "frame_gen": "0",
+    "show_fps": "1",
+    "touch_controls": "always",
+    "touch_all": "1"
+  },
+  "environment": {
+    "LARECOMP_INPUT": "180:A:30,360:L:60,360:R:60,600:L:90,600:R:90,1200:L:90,1200:R:90",
+    "LARECOMP_NO_USER_INPUT": "0",
+    "LARECOMP_LOG_EVENTS": "1",
+    "LARECOMP_LOG_LINK": "60"
+  }
+}

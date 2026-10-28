@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="raitchi_keys_imported" translatable="false">Keys imported. The library will scan your game folders.</string>
+    <string name="raitchi_preparing_game" translatable="false">Preparing game</string>
+    <string name="raitchi_keep_open" translatable="false">Keep Raitchi open while the package is checked.</string>
+    <string name="raitchi_cannot_start" translatable="false">Cannot start game</string>
+    <string name="app_name_suffixed" translatable="false">Raitchi</string>
+    <string name="raitchi_game_folders_description" translatable="false">Choose folders to scan for NSP and XCI game files.</string>
+    <string name="raitchi_driver_packages" translatable="false">Available driver packages</string>
+    <string name="raitchi_setup_games_title" translatable="false">Set up your games</string>
+    <string name="raitchi_setup_games_description" translatable="false">Import your keys, then add folders containing NSP or XCI files.</string>
+</resources>

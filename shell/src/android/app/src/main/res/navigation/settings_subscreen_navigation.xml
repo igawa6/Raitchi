@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:id="@+id/settings_subscreen_navigation" app:startDestination="@id/driverManagerFragment">
+    <fragment android:id="@+id/driverManagerFragment" android:name="org.yuzu.yuzu_emu.fragments.DriverManagerFragment" android:label="DriverManagerFragment">
+        <argument android:name="game" app:argType="org.yuzu.yuzu_emu.model.Game" app:nullable="true" android:defaultValue="@null" />
+    </fragment>
+    <fragment android:id="@+id/driverFetcherFragment" android:name="org.yuzu.yuzu_emu.fragments.DriverFetcherFragment" android:label="fragment_driver_fetcher" tools:layout="@layout/fragment_driver_fetcher" />
+    <fragment android:id="@+id/aboutFragment" android:name="org.yuzu.yuzu_emu.fragments.AboutFragment" android:label="AboutFragment" />
+    <fragment android:id="@+id/licensesFragment" android:name="org.yuzu.yuzu_emu.fragments.LicensesFragment" android:label="LicensesFragment" />
+    <fragment android:id="@+id/gameInfoFragment" android:name="org.yuzu.yuzu_emu.fragments.GameInfoFragment" android:label="GameInfoFragment">
+        <argument android:name="game" app:argType="org.yuzu.yuzu_emu.model.Game" />
+    </fragment>
+    <fragment android:id="@+id/gameFoldersFragment" android:name="org.yuzu.yuzu_emu.fragments.GameFoldersFragment" android:label="GameFoldersFragment" />
+    <activity android:id="@+id/settingsSubscreenActivity" android:name="org.yuzu.yuzu_emu.features.settings.ui.SettingsSubscreenActivity" android:label="SettingsSubscreenActivity">
+        <argument android:name="destination" app:argType="org.yuzu.yuzu_emu.features.settings.ui.SettingsSubscreen" />
+        <argument android:name="game" app:argType="org.yuzu.yuzu_emu.model.Game" app:nullable="true" android:defaultValue="@null" />
+    </activity>
+    <action android:id="@+id/action_global_settingsSubscreenActivity" app:destination="@id/settingsSubscreenActivity" />
+</navigation>
