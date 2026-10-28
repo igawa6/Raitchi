@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/mman.h>
 #include SWKBD_SOURCE
 
 static const char *answer, *expected_initial;
@@ -55,6 +56,31 @@ static void run(const char *name, const char *input, size_t cap,
 // UTF-16LE expected bytes, NUL included.
 #define U16(...) { __VA_ARGS__, 0, 0 }
 #define B(s) (const uint8_t *)(s), sizeof(s) - 1
+// A game passing a huge String::bufSize must not make the untouched range resident: the old
+// blind memset over cap faulted guest pages until the device OOM killer fired (Fold7, 2026-10-28).
+static void run_bigcap(const char *name, size_t cap, int max_len) {
+    static const uint8_t alex[] = U16('A', 0, 'l', 0, 'e', 0, 'x', 0, 'a', 0, 'n', 0, 'd', 0, 'r', 0, 'e', 0);
+    size_t pages = cap / 4096 + 1;
+    unsigned char vec[pages];
+    uint8_t *buf = mmap(NULL, cap, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_NORESERVE, -1, 0);
+    if (buf == MAP_FAILED) { fprintf(stderr, "FAIL %s mmap\n", name); failures++; return; }
+    uint8_t arg[0x4e0] = {0};
+    put32(arg + 0x3ac, max_len);
+    uint64_t output[2] = {(uintptr_t)buf, cap};
+    Cpu cpu = {0}; cpu.x[0] = (uintptr_t)output; cpu.x[1] = (uintptr_t)arg;
+    answer = "Alexandre"; expected_initial = ""; confirmed = 1;
+    int before = failures;
+    swkbd_show(&cpu);
+    cases++;
+    int ok = cpu.x[0] == 0 && !memcmp(buf, alex, sizeof alex);
+    if (mincore(buf, cap, vec) == 0)
+        for (size_t i = 1; i < pages; i++) ok &= !vec[i];
+    else
+        ok = 0;
+    if (!ok) { fprintf(stderr, "FAIL %s: resident beyond ABI span\n", name); failures++; }
+    printf("%s %s\n", failures == before ? "PASS" : "FAIL", name);
+    munmap(buf, cap);
+}
 int main(void) {
     static const uint8_t alex[] = U16('A', 0, 'l', 0, 'e', 0, 'x', 0, 'a', 0, 'n', 0, 'd', 0, 'r', 0, 'e', 0);
     static const uint8_t acc[] = U16(0xc9, 0, 'l', 0, 0xe9, 0, 'o', 0, 'n', 0, 'o', 0, 'r', 0, 'e', 0);
@@ -83,6 +109,7 @@ int main(void) {
     confirmed = 1;
     run("second shorter entry", "Bob", 32, B(bob), NULL, 0, "", 12);
     run("exact max", "ABCDEFGHIJKLmore", 32, B(abc12), NULL, 0, "", 12);
+    run_bigcap("huge capacity no residency", 1u << 20, 12);
     printf("%d cases, %d failures\n", cases, failures);
     return failures ? 1 : 0;
 }

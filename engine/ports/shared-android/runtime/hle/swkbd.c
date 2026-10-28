@@ -30,8 +30,20 @@ static char *keyboard_to_utf16(const char *text, size_t *units) {
 
 // Writes text (UTF-8) into out as UTF-16LE, at most max_len code units and at most cap bytes
 // (NUL included). Returns the number of code units written.
+//
+// A game-provided String::bufSize is trusted up to 16 KiB: the whole buffer is zeroed, exactly
+// as before. A larger capacity cannot be a real name buffer (the SDK caps text at 40 units, the
+// applet may define at most (max_len + 1) UTF-16 units); it is a game bug or garbage. Blind
+// memset over it makes the whole guest range resident, and on a memory-constrained device the
+// page-fault storm runs until the OOM killer fires (Fold7 OOM_KILL rss 5.1GB, 2026-10-28).
+// For anomalous capacity, zero only the ABI span so no untouched guest page becomes resident.
 static size_t keyboard_write_utf16(char *out, size_t cap, const char *text, int max_len) {
     if (!cap) return 0;
+    if (cap > 16384) {
+        int sane_max = max_len > 0 && max_len <= 40 ? max_len : 40;
+        size_t abi_span = (size_t)(sane_max + 1) * 2;
+        cap = cap > abi_span ? abi_span : cap;
+    }
     memset(out, 0, cap);
     size_t units = 0;
     char *wide = keyboard_to_utf16(text, &units);
@@ -78,6 +90,11 @@ HLE_FUNC("_ZN2nn5swkbd12ShowKeyboardEPNS0_6StringERKNS0_15ShowKeyboardArgE", swk
     int max_len = (int)*(const int32_t *)(uintptr_t)(arg + 0x3ac);
     uint32_t off = *(const uint32_t *)(uintptr_t)(arg + 0x3c0), n = *(const uint32_t *)(uintptr_t)(arg + 0x3c4);
     uint64_t wb = LD64(arg + 0x4d0);
+    // One bounded line per call, off by default: captures the real String ABI operands.
+    if (ENV("LARECOMP_SWKBD_TRACE"))
+        LOG("[swkbd] abi out %llx ptr %llx size %llx max %d off %u n %u arg %llx wb %llx\n",
+            (unsigned long long)out, (unsigned long long)ptr, (unsigned long long)size, max_len,
+            off, n, (unsigned long long)arg, (unsigned long long)wb);
     char initial[96] = "";
     keyboard_read_utf16(initial, sizeof initial, wb, off, n);
     char text[96];
