@@ -14,6 +14,7 @@ import uuid
 import zipfile
 import gpu_cache_fingerprint
 import check_button_font
+import check_elf16k
 
 ROOT = Path(__file__).resolve().parents[1]
 PORT = ROOT / "ports/shared-android/apk"
@@ -150,9 +151,16 @@ def verify_native(sdk):
                               check=True, capture_output=True, text=True).stdout
         needed = re.findall(r"NEEDED.*\[([^\]]+)\]", text)
         if "AArch64" not in text or any(x not in platform_libraries | set(libraries) for x in needed):
-            raise RuntimeError(f"Unexpected JNI architecture/dependencies: {name}")
+            raise RuntimeError("Unexpected JNI architecture/dependencies: " + name)
+        # 16 KiB page devices (Android 15+): every packaged library must be loadable
+        # on a 16 KiB page device, not only the ones we link ourselves.
+        alignment = check_elf16k.audit_library(str(path))
+        if not alignment["aligned16k"]:
+            raise RuntimeError("Library is not 16 KiB page compatible: " + name +
+                               " (" + "; ".join(alignment["problems"]) + ")")
         reports[name] = {"source": str(path.relative_to(ROOT)), "sha256": sha(path),
-                         "bytes": path.stat().st_size, "needed": needed}
+                         "bytes": path.stat().st_size, "needed": needed,
+                         "load_alignments": alignment["alignments"], "aligned16k": True}
     return record, sha(manifest_path), libraries, reports
 
 
