@@ -1729,7 +1729,7 @@
     },
     {
       "file": "engine/shell.lock.json",
-      "sha256": "b896d211c94f1b8b1fc53c46c5e500e60795d711439a33467547696fa765c9a1",
+      "sha256": "e4bff443917e173e34ade14e749e6b0fbe111133df52301e902c815f9a622c0c",
       "bytes": 758
     },
     {
@@ -7094,7 +7094,7 @@
     },
     {
       "file": "shell/src/android/app/build.gradle.kts",
-      "sha256": "cf2f9f5ecf40107ccf2e132be216ecab7ab8c42e4f73ddc0a337de8fe17ca05e",
+      "sha256": "604a0e961e5378c920939f4173d1c8a08ae4de88f0ca07bf765a786fb546ff4c",
       "bytes": 3881
     },
     {
@@ -25813,5 +25813,5 @@
       "bytes": 12464
     }
   ],
-  "overlay_manifest_sha256": "0ec73c1b461edb0f9086d9f68088adfd0f3434d94829845fd5c302bbadc58216"
+  "overlay_manifest_sha256": "1c00b545d61b6ab9d8bbeffa77476e2d6f8488ca5b558792b711a9a75f43c4c5"
 }

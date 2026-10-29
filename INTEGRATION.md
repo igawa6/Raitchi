@@ -1,4 +1,4 @@
-# Source integration after 0.0.1
+# Integration included in 0.0.2
 
 This update incorporates reviewed contributions from PRs #2, #3, #4, #5, #7 and
 #8, with additional fixes found during integration. Thanks to ptichalouf for the
@@ -30,8 +30,9 @@ reached title/movie screens but did not reach the keyboard through injected
 controls; that repeat remains unqualified. A real driver download and install
 also succeeded. These device builds are distinct from the public validation APK.
 
-The public validation APK uses a separate test signing key and is not distributed
-as an update. The tagged 0.0.1 release remains unchanged. No new general gameplay,
+Earlier public validation APKs used a separate test signing key and were not
+distributed as updates. The 0.0.2 release is rebuilt with the same signing
+certificate as 0.0.1 and a higher version code. No new general gameplay,
 30 fps BOTW, or 16 KiB physical-device compatibility claim is made.
 
 Issue #1's roadmap remains a backlog, not a declaration that its proposed features

@@ -1,7 +1,8 @@
-# Raitchi 0.0.1
+# Raitchi 0.0.2
 
-Source fixes after 0.0.1 are described in [integration notes](INTEGRATION.md).
-The tagged 0.0.1 APK is unchanged; these source updates are not a new APK release.
+Version 0.0.2 fixes package preparation, keyboard input, driver downloads and
+Android packaging. See the [release notes](RELEASE-NOTES-0.0.2.md) and
+[integration notes](INTEGRATION.md).
 
 Raitchi is an experimental Android launcher and shared runtime for original
 Nintendo Switch ARM64 games. Continuous native execution (NCE) runs the original

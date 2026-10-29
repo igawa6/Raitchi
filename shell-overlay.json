@@ -2825,7 +2825,8 @@
     },
     {
       "file": "src/android/app/build.gradle.kts",
-      "sha256": "cf2f9f5ecf40107ccf2e132be216ecab7ab8c42e4f73ddc0a337de8fe17ca05e"
+      "sha256": "604a0e961e5378c920939f4173d1c8a08ae4de88f0ca07bf765a786fb546ff4c",
+      "bytes": 3881
     },
     {
       "file": "src/android/app/proguard-rules.pro",
