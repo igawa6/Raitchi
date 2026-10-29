@@ -3,6 +3,29 @@
 No game files, keys, firmware or device are needed to build or to run the
 checks. Everything below runs on Linux x86-64.
 
+## Repository layout and contribution checks
+
+The public repository has sibling `engine/` and `shell/` directories. Run the
+commands here from `engine/`; in a standalone engine checkout, run them from
+its root. Android shell sources live under `shell/src/android/`, while native
+engine overlays live under `engine/ports/shared-android/` and `engine/native/`.
+Do not edit regenerated `work/` outputs. Shell restoration and staging follow
+[SOURCE-OVERLAY](SOURCE-OVERLAY.md), not an assumed independent shell URL.
+
+For a first game-free contribution, run a bounded subset:
+
+```sh
+python3 tools/run_host_checks.py -k shared_hash
+```
+
+Check the runner's actual JSON results, including skips. A subset validates its
+named scope; it does not establish a full host pass or device compatibility.
+Documentation-only PRs can verify links and described examples without building
+Android or rerunning unrelated runtime checks. ARM host results must record the
+host architecture and source revision; the x86-64 instructions below are not an
+unqualified ARM certification. See the [contributor backlog](CONTRIBUTOR-ROADMAP.md)
+for reported ARM follow-ups.
+
 ## Prerequisites
 
 | Tool | Version | Needed for |
@@ -10,6 +33,7 @@ checks. Everything below runs on Linux x86-64.
 | Python | 3.11+ | everything |
 | git | any recent | fetching pinned references |
 | clang / clang++ | any recent (host) | host checks |
+| pkg-config and SDL3 development files | SDL3 | keyboard host checks |
 | glslangValidator, spirv-val | any recent | shader host checks |
 | JDK | 17 (`JAVA_HOME`) | Java host checks, Android build |
 | Android SDK | platform `android-36`, build-tools `36.0.0`, CMake `3.31.6` | Android build |
@@ -37,7 +61,10 @@ python3 tools/run_host_checks.py -k kernel # a subset
 ```
 
 These compile synthetic tests with the host compiler (optimized and with
-AddressSanitizer/UBSan) and write only under `build/`. Missing tools are
+AddressSanitizer/UBSan) and write only under `build/`. The pipeline-library check
+also uses a CPU Vulkan ICD (Mesa lavapipe), Vulkan loader development files, and
+the shader tools listed above. Its Android translation-unit checks run only with
+`python3 tools/check_graphics_pipeline_library.py --android` after a native build. Missing tools are
 reported as **skipped**, not passed. Results: `build/host-checks.json`.
 
 Before publishing anything, run `python3 tools/check_source_privacy.py .` and supply

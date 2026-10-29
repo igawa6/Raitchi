@@ -25,7 +25,6 @@ import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -200,7 +199,7 @@ class ReleaseAdapter(
 
                         progressDialog.show()
 
-                        (context as LifecycleOwner).lifecycleScope.launch {
+                        activity.lifecycleScope.launch {
                             try {
                                 dialogBinding.status.text = context.getString(R.string.installing)
                                 val driverArchive = File(

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Actual production GPL state/cache/assembly regression, no device access."""
+"""Production GPL host/software-Vulkan checks; --android adds actual TU compilation."""
+import argparse
 import hashlib
 import json
 import os
@@ -33,7 +34,16 @@ def function(text, name):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--android', action='store_true',
+                        help='also compile actual exec/device TUs using a configured Android build')
+    args = parser.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
+    (OUT / 'verification.json').unlink(missing_ok=True)
+    compile_db = ROOT / 'build/shared-android/native/compile_commands.json'
+    if args.android and not compile_db.is_file():
+        parser.error('--android requires build/shared-android/native/compile_commands.json; '
+                     'configure/build this checkout with tools/build_shared_android.py first')
     text = SOURCE.read_text()
     key = text[text.index('typedef struct {\n    Prog *prog;'):text.index('static uint64_t pipe_key_hash(')]
     dynamic = text[text.index('static const VkDynamicState DYN[]'):text.index('// Fixed-function state', text.index('static const VkDynamicState DYN[]'))]
@@ -68,25 +78,27 @@ def main():
     gpu = json.loads(run([runner, str(vertex) + '.spv', str(fragment) + '.spv'], env=env))
     gpu['driver'] = driver
     print('software Vulkan: ' + json.dumps(gpu), flush=True)
-    # Compile actual canonical exec/device units through the existing Android compile commands.
-    entries = json.loads((ROOT / 'build/shared-android/native/compile_commands.json').read_text())
     compiled = []
-    for unit in ('exec.c', 'device.c'):
-        entry = next(e for e in entries if e['file'].endswith('/runtime/nvn/vulkan/' + unit))
-        overlay = OUT / (unit + '.overlay.json')
-        staged_runtime = Path(entry['file']).parents[2]
-        canonical_runtime = SOURCE.parents[2]
-        roots = [{'type': 'file', 'name': entry['file'], 'external-contents': str(SOURCE.with_name(unit))}]
-        roots += [{'type': 'file', 'name': str(staged_runtime / p.relative_to(canonical_runtime)),
-                   'external-contents': str(p)} for p in canonical_runtime.rglob('*.h')]
-        overlay.write_text(json.dumps({'version': 0, 'roots': roots}))
-        command = shlex.split(entry['command'])
-        command[command.index('-o') + 1] = str(OUT / (unit + '.android.o'))
-        run(command + ['-ivfsoverlay', overlay], cwd=entry['directory'])
-        compiled.append(unit)
+    if args.android:
+        # Compile actual canonical exec/device units through the existing Android compile commands.
+        entries = json.loads(compile_db.read_text())
+        for unit in ('exec.c', 'device.c'):
+            entry = next(e for e in entries if e['file'].endswith('/runtime/nvn/vulkan/' + unit))
+            overlay = OUT / (unit + '.overlay.json')
+            staged_runtime = Path(entry['file']).parents[2]
+            canonical_runtime = SOURCE.parents[2]
+            roots = [{'type': 'file', 'name': entry['file'], 'external-contents': str(SOURCE.with_name(unit))}]
+            roots += [{'type': 'file', 'name': str(staged_runtime / p.relative_to(canonical_runtime)),
+                       'external-contents': str(p)} for p in canonical_runtime.rglob('*.h')]
+            overlay.write_text(json.dumps({'version': 0, 'roots': roots}))
+            command = shlex.split(entry['command'])
+            command[command.index('-o') + 1] = str(OUT / (unit + '.android.o'))
+            run(command + ['-ivfsoverlay', overlay], cwd=entry['directory'])
+            compiled.append(unit)
     paths = [SOURCE, SOURCE.with_name('device.c'), SOURCE.with_name('vk.h'), TEST, gpu_test, Path(__file__)]
     report = {'schema': 1, 'scope': 'Actual production PipeCI/GPL keys, subset assembly, concurrent ownership/fallback assertions and CPU Vulkan creation/link smoke. Does not prove rendered images, game accuracy or hardware speedup.',
-              'results': results, 'software_vulkan': gpu, 'android_actual_units_compiled': compiled,
+              'results': results, 'software_vulkan': gpu, 'android_requested': args.android,
+              'android_actual_units_compiled': compiled,
               'production_helpers_sha256': hashlib.sha256(header.encode()).hexdigest(),
               'source_sha256': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}}
     (OUT / 'verification.json').write_text(json.dumps(report, indent=2) + '\n')

@@ -14,6 +14,7 @@ import uuid
 import zipfile
 import gpu_cache_fingerprint
 import check_button_font
+import check_elf16k
 
 ROOT = Path(__file__).resolve().parents[1]
 PORT = ROOT / "ports/shared-android/apk"
@@ -154,6 +155,24 @@ def verify_native(sdk):
         reports[name] = {"source": str(path.relative_to(ROOT)), "sha256": sha(path),
                          "bytes": path.stat().st_size, "needed": needed}
     return record, sha(manifest_path), libraries, reports
+
+
+def verify_library_alignment(libraries, reports):
+    """Audit the complete map, including optional toolkit and validation libraries."""
+    for name, path in sorted(libraries.items()):
+        alignment = check_elf16k.audit_library(path)
+        if not alignment["aligned16k"]:
+            raise RuntimeError("Library is not 16 KiB page compatible: " + name +
+                               " (" + "; ".join(alignment["problems"]) + ")")
+        reports[name].update(load_alignments=alignment["alignments"], aligned16k=True)
+
+
+def verify_apk_alignment(apk, sdk):
+    alignment = check_elf16k.audit_apk(apk)
+    alignment["zipalign"] = check_elf16k.zipalign_report(apk, sdk / "build-tools/36.0.0/zipalign")
+    if not alignment["aligned16k"] or alignment["zipalign"]["returncode"]:
+        raise RuntimeError("Final APK is not 16 KiB page compatible: " + str(apk))
+    return alignment
 
 
 def verify_toolkit(sdk, enabled):
@@ -380,6 +399,7 @@ def main():
     libraries.update(tools_libraries); native_reports.update(tools_reports)
     layer_libraries, layer_reports = verify_validation_layer(sdk, args.validation_layer)
     libraries.update(layer_libraries); native_reports.update(layer_reports)
+    verify_library_alignment(libraries, native_reports)
     prepared = stage(sdk, libraries, native_reports, digest, toolkit)
     atomic_json(BUILD / "apk-stage.json", prepared)
     if not args.build:
@@ -420,6 +440,7 @@ def main():
     for method in ("start", "stop"):
         if not re.search(r"static synchronized void " + method + r"[^;]*;\s+Code:\s+0: return", boost_code):
             raise RuntimeError("Compiled RootBoost start/stop must be empty")
+    alignment = verify_apk_alignment(apk, sdk)
     zipped = {}
     with zipfile.ZipFile(apk) as archive:
         natives = [n for n in archive.namelist() if n.startswith("lib/")]
@@ -460,7 +481,7 @@ def main():
               "built_utc": datetime.now(timezone.utc).isoformat(), "apk": str(apk.relative_to(ROOT)),
               "apk_sha256": sha(apk), "apk_bytes": apk.stat().st_size,
               "native_manifest_sha256": digest, "runtime_sha256": latest["library_sha256"],
-              "packaged_native_sha256": zipped, "signature_verification": signature,
+              "packaged_native_sha256": zipped, "native_alignment": alignment, "signature_verification": signature,
               "game_code_included": False, "installed": False, "device_executed": False,
               "compiled_root_boost_verification": boost_code,
               "gradle_command": command, "packager_sha256": sha(Path(__file__).resolve()),

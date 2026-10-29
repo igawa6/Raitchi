@@ -1,3 +1,4 @@
+#include "keyboard_text.h"
 /* Derived from LAS Recomp Android at cca791a3e7218e1dac95e7d4a11b8f97dba3ea51.
  * Copyright (c) 2026 Peiikai. MIT: native/runtime/LICENSE-LASRecomp.
  * Shared runtime: LAS-specific features run only for the selected LAS adapter. */
@@ -1154,8 +1155,8 @@ static void keyboard_draw(ImGuiIO &io, float scale) {
                          ImGuiInputTextFlags_CallbackCharFilter,
                          [](ImGuiInputTextCallbackData *d) -> int { return d->EventChar < 0x20 ? 1 : 0; });
         ImGui::PopFont();
-        if ((int)strlen(g_kbd_text) > g_kbd_max) g_kbd_text[g_kbd_max] = 0;
-        ImGui::TextDisabled(T("Enter  confirm      Esc  cancel      (%d / %d)"), (int)strlen(g_kbd_text), g_kbd_max);
+        keyboard_text_trim(g_kbd_text, sizeof g_kbd_text, (size_t)g_kbd_max);
+        ImGui::TextDisabled(T("Enter  confirm      Esc  cancel      (%d / %d)"), (int)keyboard_text_units(g_kbd_text, sizeof g_kbd_text), g_kbd_max);
     } else {  // controller: on-screen keyboard (osk.mm, shared with our menus' text fields)
         int r = osk_keys(g_kbd_text, sizeof g_kbd_text, g_kbd_max, appearing, scale, g_font_big);
         if (r) g_kbd = r > 0 ? 2 : 3;  // (Start / + confirms in menu_handle_event too)
@@ -1169,7 +1170,8 @@ static void keyboard_draw(ImGuiIO &io, float scale) {
 extern "C" int menu_keyboard_run(const char *initial, int max_len, char *out, int cap) {
     extern void backend_represent(void);
     snprintf(g_kbd_text, sizeof g_kbd_text, "%s", initial ? initial : "");
-    g_kbd_max = max_len > 0 && max_len < (int)sizeof g_kbd_text / 4 ? max_len : 8;
+    g_kbd_max = max_len > 0 ? (max_len < (int)sizeof g_kbd_text ? max_len : (int)sizeof g_kbd_text - 1) : (int)sizeof g_kbd_text - 1;
+    keyboard_text_trim(g_kbd_text, sizeof g_kbd_text, (size_t)g_kbd_max);
     input_reset();
     g_kbd = 1;
     // (test) LARECOMP_KBD_AUTO=<text>: answer at once
@@ -1181,7 +1183,7 @@ extern "C" int menu_keyboard_run(const char *initial, int max_len, char *out, in
         if (dt < 16) SDL_Delay((uint32_t)(16 - dt));
     }
     bool ok = g_kbd.load() == 2 && g_kbd_text[0];
-    if (ok) snprintf(out, cap, "%s", g_kbd_text);
+    if (ok && cap > 0) { snprintf(out, cap, "%s", g_kbd_text); keyboard_text_trim(out, (size_t)cap, (size_t)g_kbd_max); }
     g_kbd = 0;
     input_reset();
     return ok;

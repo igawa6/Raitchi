@@ -338,6 +338,28 @@ bool kernel_copy_readable(void *destination, uint64_t guest_address, uint64_t si
     return readable;
 }
 
+bool kernel_copy_writable(uint64_t guest_address, const void *source, uint64_t size) {
+    uintptr_t src=(uintptr_t)source;
+    if(!source || !guest_address || !size || size>KERNEL_READABLE_COPY_MAX ||
+       guest_address>UINTPTR_MAX || size>UINTPTR_MAX-guest_address || size>UINTPTR_MAX-src)
+        return false;
+    uint64_t end=guest_address+size;
+    if(src<end && guest_address<src+size) return false;
+    pthread_mutex_lock(&memory_lock);
+    uint64_t cursor=guest_address;bool valid=true;
+    while(cursor<end) {
+        uint64_t info[5];query_memory_unlocked(cursor,(uint64_t)(uintptr_t)info);
+        uint32_t state=(uint32_t)info[2],permissions=(uint32_t)info[3];
+        if(!state || state==0x10 || !(permissions&2) || !info[1] ||
+           info[0]>cursor || info[1]>UINT64_MAX-info[0] || cursor-info[0]>=info[1]) {
+            valid=false;break;
+        }
+        uint64_t next=info[0]+info[1];cursor=next<end?next:end;
+    }
+    if(valid) memcpy((void*)(uintptr_t)guest_address,source,(size_t)size);
+    pthread_mutex_unlock(&memory_lock);return valid;
+}
+
 
 // ------------------------------------------------------------------ threads
 static uint64_t next_thread_id = 0x50;

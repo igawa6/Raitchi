@@ -1,5 +1,8 @@
 # Raitchi 0.0.1
 
+Source fixes after 0.0.1 are described in [integration notes](INTEGRATION.md).
+The tagged 0.0.1 APK is unchanged; these source updates are not a new APK release.
+
 Raitchi is an experimental Android launcher and shared runtime for original
 Nintendo Switch ARM64 games. Continuous native execution (NCE) runs the original
 CPU code; Horizon services and NVN-to-Vulkan graphics are implemented by a shared

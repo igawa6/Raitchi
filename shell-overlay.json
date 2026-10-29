@@ -2905,7 +2905,7 @@
     },
     {
       "file": "src/android/app/src/main/java/org/yuzu/yuzu_emu/features/fetcher/ReleaseAdapter.kt",
-      "sha256": "deb5c0b2ef933b3211a11943f31c5b0ffd7c28e06b5939eda06c3e0557e82d8b"
+      "sha256": "56fda262c8e1101396bb8533b9050ad6855df91c4782a171fddd8d6499ccc5e2"
     },
     {
       "file": "src/android/app/src/main/java/org/yuzu/yuzu_emu/features/fetcher/SpacingItemDecoration.kt",

@@ -102,3 +102,6 @@ int kernel_configure_thread_core(uint32_t default_core);
  * Caller guarantees destination capacity and immutable source contents during
  * copy; this lock protects mapping lifetime, not concurrent guest CPU stores. */
 bool kernel_copy_readable(void *destination, uint64_t guest_address, uint64_t size);
+
+/* Validate the complete destination under the mapping lock before writing. */
+bool kernel_copy_writable(uint64_t guest_address, const void *source, uint64_t size);

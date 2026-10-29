@@ -18,6 +18,19 @@ Original copyright and SPDX headers remain in the adapted source files.
 | AdrenoTools and LinkerNSBypass | Dependency inventory produced by the Android build | BSD 2-Clause, Billy Laws. [AdrenoTools notice](ports/letsgo-android/LICENSE-AdrenoTools), [LinkerNSBypass notice](ports/letsgo-android/LICENSE-LinkerNSBypass). |
 | Fredoka / attributed button glyphs | Bundled font assets | [Fredoka SIL OFL 1.1](ports/shared-android/assets/fonts/OFL-Fredoka.txt); [button-glyph MIT notice](ports/shared-android/assets/fonts/LICENSE-ButtonGlyphs.txt) and [font provenance](ports/shared-android/assets/fonts/README.txt). |
 
+## Community fixes and compatibility references
+
+[ptichalouf](https://github.com/ptichalouf) contributed the native-manifest
+publication, 16 KiB SDL linkage, ARM host-probe guard and keyboard fixes in
+[PRs #2–#8](https://github.com/igawa6/Raitchi/pulls), plus the contributor-guide
+proposal. Integrated changes include additional bounds, packaging and Unicode
+editing checks.
+
+[nx2android](https://github.com/shirai91/nx2android), reviewed at
+`9d67edec2175ae5f4beadbd65f37eaa88105d132`, informed the SDK keyboard encoding-mode
+compatibility review. This is an implementation reference, not a claim that its
+runtime or game profiles are incorporated wholesale.
+
 ## Packaged dependencies and notices
 
 The Android engine build uses SDL3, FFmpeg, shaderc and its dependencies, Vulkan

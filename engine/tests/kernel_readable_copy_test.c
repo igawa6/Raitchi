@@ -44,6 +44,19 @@ int main(void){
  CHECK(!kernel_copy_readable(out,(uintptr_t)arena,KERNEL_READABLE_COPY_MAX+1));CHECK(!kernel_copy_readable(out,UINT64_MAX-4,8));CHECK(!kernel_copy_readable((void*)(UINTPTR_MAX-4),(uintptr_t)arena,8));
  CHECK(!kernel_copy_readable(arena+1,(uintptr_t)arena,8));CHECK(!kernel_copy_readable(out,(uintptr_t)arena+6*page,1));CHECK(!writes);unchanged(out,page*4);
  CHECK(kernel_copy_readable(out,(uintptr_t)arena+4*page-20,20));for(unsigned i=0;i<20;i++)CHECK(out[i]==0x33);
+ // DLC output follows the same full-span rule, requiring write permission.
+ memset(out,0xa5,page*2);watched=arena+5*page;writes=0;
+ CHECK(kernel_copy_writable((uintptr_t)arena+5*page,out,32));CHECK(writes==1);
+ for(unsigned i=0;i<32;i++)CHECK(arena[5*page+i]==0xa5);
+ CHECK(!kernel_copy_writable((uintptr_t)arena+4*page,out,32)); // real read-only page
+ memset(arena+page-32,0x5a,32);watched=arena+page-32;writes=0;
+ CHECK(!kernel_copy_writable((uintptr_t)arena+page-32,out,64));CHECK(!writes);
+ for(unsigned i=0;i<32;i++)CHECK(arena[page-32+i]==0x5a); // valid prefix + unmapped hole
+ CHECK(!kernel_copy_writable((uintptr_t)arena,NULL,1));
+ CHECK(!kernel_copy_writable(0,out,1));CHECK(!kernel_copy_writable((uintptr_t)arena,out,0));
+ CHECK(!kernel_copy_writable((uintptr_t)arena,out,KERNEL_READABLE_COPY_MAX+1));
+ CHECK(!kernel_copy_writable(UINT64_MAX-4,out,8));
+ CHECK(!kernel_copy_writable((uintptr_t)arena,arena+1,8));
  // Existing mapping lock prevents physical unmap between validation and copy.
  watched=NULL;pthread_t writer;CHECK(!pthread_create(&writer,NULL,racer,NULL));for(int i=0;i<1000;i++){CHECK(kernel_copy_readable(out,(uintptr_t)arena,page));for(size_t j=0;j<page;j++)CHECK(out[j]==0x5a);}CHECK(!pthread_join(writer,NULL));
  physical_memory_reset();nregions=0;free(out);CHECK(!munmap(arena,page*8));

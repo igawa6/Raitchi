@@ -19,8 +19,8 @@
     },
     {
       "file": "engine/CONTRIBUTING.md",
-      "sha256": "46ae04529b108b292751b0ee34049dfc6a95e9e533ffbd929490fcb07e3ed290",
-      "bytes": 3102
+      "sha256": "a278c61efa403f526afddb4eca8856c0d2b0896aa69ed6da2b978f04f381d98f",
+      "bytes": 4220
     },
     {
       "file": "engine/COPYING",
@@ -34,8 +34,8 @@
     },
     {
       "file": "engine/NOTICE.md",
-      "sha256": "3bfe07e52c0441c4d0eeab60eed21e4a6b65bf9f71b799a1f188ac5d9ba039bb",
-      "bytes": 4755
+      "sha256": "d3c9baf8df304fe012243dddb732312e9675b78375006bee8d0a4ce8875e535d",
+      "bytes": 5418
     },
     {
       "file": "engine/README.md",
@@ -88,19 +88,29 @@
       "bytes": 2541
     },
     {
+      "file": "engine/docs/AI-CONTRIBUTING.md",
+      "sha256": "4bba7b1f034adb847d9e2b0f08df2413a464ad1e417a39cdf01bc82b8f71bdd3",
+      "bytes": 3852
+    },
+    {
       "file": "engine/docs/ARCHITECTURE.md",
       "sha256": "70e23f4e0fc3c77b4ac453c86587ecc1ba1be9a42cd0e37f015a9bffdc57f7eb",
       "bytes": 5779
     },
     {
       "file": "engine/docs/BUILDING.md",
-      "sha256": "b8751eed1735e288b0981961d93b4ea45ed1a980f3249f3471a057c8829725db",
-      "bytes": 5698
+      "sha256": "d9a5cd633f221d4c08a4bc051a34ac6585eb89ef67a46a4ecfb8aa066ab490b1",
+      "bytes": 7185
     },
     {
       "file": "engine/docs/COMPATIBILITY.md",
       "sha256": "0a3f37988050d18db43e413354e98a8b686599358694900ccb4c64b159f17921",
       "bytes": 1893
+    },
+    {
+      "file": "engine/docs/CONTRIBUTOR-ROADMAP.md",
+      "sha256": "0bec6730e4afed1eed03d107171274124684d23143b3b33227e540f2d03871e9",
+      "bytes": 7404
     },
     {
       "file": "engine/docs/DIAGNOSTICS.md",
@@ -714,8 +724,8 @@
     },
     {
       "file": "engine/native/runtime/native_prepare.c",
-      "sha256": "9fb113cd7ca5417cc76b3fa3b785939a533ed0ab096d871269a468655568b9ac",
-      "bytes": 7861
+      "sha256": "fb65c20ac8fc8ae4f3b05ca3a217fd905c2277e7246430dfd0b13941ce041788",
+      "bytes": 8666
     },
     {
       "file": "engine/native/runtime/native_prepare.h",
@@ -938,6 +948,11 @@
       "bytes": 261
     },
     {
+      "file": "engine/ports/shared-android/apk/app/src/main/res/values-night/raitchi_theme.xml",
+      "sha256": "ec7fc93c864d3d5141ce14e2fb0aad96fa6f40892e029dceb1e46071b90f2fa0",
+      "bytes": 353
+    },
+    {
       "file": "engine/ports/shared-android/apk/app/src/main/res/values/raitchi_icon.xml",
       "sha256": "4d05fdb1087083d0f138c0952e8f4901d5e0690d172420de361f8dfd83a02c62",
       "bytes": 116
@@ -946,11 +961,6 @@
       "file": "engine/ports/shared-android/apk/app/src/main/res/values/raitchi_theme.xml",
       "sha256": "059440295b73b2b465458b8ed7406849fa144b865e33e769c0ef5e24b11b132a",
       "bytes": 359
-    },
-    {
-      "file": "engine/ports/shared-android/apk/app/src/main/res/values-night/raitchi_theme.xml",
-      "sha256": "ec7fc93c864d3d5141ce14e2fb0aad96fa6f40892e029dceb1e46071b90f2fa0",
-      "bytes": 353
     },
     {
       "file": "engine/ports/shared-android/apk/build.gradle",
@@ -1008,6 +1018,11 @@
       "bytes": 670
     },
     {
+      "file": "engine/ports/shared-android/branding-substitutions.json",
+      "sha256": "b4a7708c0194f885e928a2439830d6a72289bd0025af9b6dfde4fdc70d3ca74f",
+      "bytes": 2318
+    },
+    {
       "file": "engine/ports/shared-android/branding/README.md",
       "sha256": "6f7e8a2ea499f2b6d3ad15b7d154b60377ef16f555fa5417be2468cd16e3adef",
       "bytes": 2341
@@ -1021,11 +1036,6 @@
       "file": "engine/ports/shared-android/branding/raitchi-logo.png",
       "sha256": "b92e20985e01bb67c110522739fe6bf600f9f0e03cab19534ac8c3f1030ac31a",
       "bytes": 775846
-    },
-    {
-      "file": "engine/ports/shared-android/branding-substitutions.json",
-      "sha256": "b4a7708c0194f885e928a2439830d6a72289bd0025af9b6dfde4fdc70d3ca74f",
-      "bytes": 2318
     },
     {
       "file": "engine/ports/shared-android/exports.map",
@@ -1049,8 +1059,8 @@
     },
     {
       "file": "engine/ports/shared-android/runtime/continuous_context.c",
-      "sha256": "b03b5ecce43cf8b592e17cd100cc7ac3c7cd06980382ae35e4587b542236e67c",
-      "bytes": 1341
+      "sha256": "9e7121467e0e643534461c250b3d7b089042e34c2d29880fb973ce037412d998",
+      "bytes": 1656
     },
     {
       "file": "engine/ports/shared-android/runtime/continuous_context.h",
@@ -1178,6 +1188,11 @@
       "bytes": 19549
     },
     {
+      "file": "engine/ports/shared-android/runtime/hle/swkbd.c",
+      "sha256": "8bd5bbb73a89ffe62c928d80d5f84546ada9b28d0620f1b4b8c403e7baabf036",
+      "bytes": 6756
+    },
+    {
       "file": "engine/ports/shared-android/runtime/hle/vi.c",
       "sha256": "dec4bcd697ac716e0b0ba91b0f9382ead1f6c80de931eac191b6abf3f08be011",
       "bytes": 6102
@@ -1204,13 +1219,13 @@
     },
     {
       "file": "engine/ports/shared-android/runtime/kernel.c",
-      "sha256": "0fc950de86489221956d51657603dc9f1a9329c0823d06316c2708c1a8c559ef",
-      "bytes": 67868
+      "sha256": "035021d363438f5d89cad3e23a45eb74964ced6ce4eb85dedd7dc0698db27d9c",
+      "bytes": 68940
     },
     {
       "file": "engine/ports/shared-android/runtime/kernel.h",
-      "sha256": "559d34aa5c2628d30228554198dd40859308421f18c47bc0a4ee19d6a15eff0d",
-      "bytes": 4460
+      "sha256": "cb287c863bf6cac910d1c5a24b001a98a7f9d9c9d391db8cf21bddef5ec541b6",
+      "bytes": 4626
     },
     {
       "file": "engine/ports/shared-android/runtime/kernel_thread_affinity.c",
@@ -1693,9 +1708,19 @@
       "bytes": 1167
     },
     {
+      "file": "engine/ports/shared-android/runtime/ui/keyboard_text.h",
+      "sha256": "731542c29dc5e09917fffe5d31155e29ac81fe715b383bdd79a5f6636bfada38",
+      "bytes": 1533
+    },
+    {
       "file": "engine/ports/shared-android/runtime/ui/menu.mm",
-      "sha256": "b8fce83509cef7097b9c929f6b99d6193979f4407ff4793c5be485bfad31c640",
-      "bytes": 84002
+      "sha256": "c4fe0b0ea5be5aa7b8109a577a3a0857fdd64a094eaff2696e40762c420acf59",
+      "bytes": 84260
+    },
+    {
+      "file": "engine/ports/shared-android/runtime/ui/osk.mm",
+      "sha256": "92f4d5aab6f5e3c10ef1a9c2264c7b3def4c9cd27bf9eaf55d64aa8f9c292c35",
+      "bytes": 10818
     },
     {
       "file": "engine/ports/shared-android/runtime/ui/touch_controls.mm",
@@ -1704,7 +1729,7 @@
     },
     {
       "file": "engine/shell.lock.json",
-      "sha256": "ba42b9a5233ae90070d233ace6bff5702f0a7b8ed62ab8a9a50bd7fb0b48185a",
+      "sha256": "b896d211c94f1b8b1fc53c46c5e500e60795d711439a33467547696fa765c9a1",
       "bytes": 758
     },
     {
@@ -1933,6 +1958,11 @@
       "bytes": 4806
     },
     {
+      "file": "engine/tests/elf16k_test.py",
+      "sha256": "99e90760129d25a9317f65dab178b4eb3ca78aaa25fd0726e623c89a469b0b48",
+      "bytes": 12936
+    },
+    {
       "file": "engine/tests/feedback_array_view_test.c",
       "sha256": "a59856789229fd9e0b02523fc93c514a2804c481edb425e4a3b8026d49df29ca",
       "bytes": 4051
@@ -2019,8 +2049,8 @@
     },
     {
       "file": "engine/tests/kernel_readable_copy_test.c",
-      "sha256": "1667bca43167c5f9e546ee5c6f6f722cc7aeed9be1dc2cc13c31cfef874fdfa5",
-      "bytes": 4362
+      "sha256": "5fbea48f931838f7ce512508d3837b05ffb4a5164b1f53ff3eae2c98247c7357",
+      "bytes": 5287
     },
     {
       "file": "engine/tests/kernel_thread_affinity_test.c",
@@ -2036,6 +2066,11 @@
       "file": "engine/tests/kernel_thread_start_test.c",
       "sha256": "baebbd2ba4992a76761a27928ce43d424994c11fddf071c0b3403be0a9c76a40",
       "bytes": 5196
+    },
+    {
+      "file": "engine/tests/keyboard_text_test.cpp",
+      "sha256": "08d89d11e4a9faf7b7413dc0c7c42c751f1fbea06cffd506e9d4b307138db96a",
+      "bytes": 2257
     },
     {
       "file": "engine/tests/ldc_signed_offset_test.c",
@@ -2483,6 +2518,11 @@
       "bytes": 12675
     },
     {
+      "file": "engine/tests/swkbd_test.c",
+      "sha256": "5ea071239acc8fe9e42954ed060a3d834e8c66220aa112d9fbc97fd0ed010636",
+      "bytes": 10585
+    },
+    {
       "file": "engine/tests/test_button_font.py",
       "sha256": "2b9f952c7e5ef6290b3c423599b39384f40dcb3267dc59009b59460fe1d74f11",
       "bytes": 1361
@@ -2579,13 +2619,13 @@
     },
     {
       "file": "engine/tools/build_eden_shell.py",
-      "sha256": "4eaac777571f9f8da0e09773b4ffe450b7750c6424141e10fc997afcca99a4a9",
-      "bytes": 14328
+      "sha256": "112671375e53e5a3042cd35eaaef8ba404f2a3e65034944ef0a5ef20a99f6aa2",
+      "bytes": 14492
     },
     {
       "file": "engine/tools/build_las_baseline.py",
-      "sha256": "ee96767587c564b6cad84795b79fcb799b7b329fd209ff6393bc11e5360134ae",
-      "bytes": 4562
+      "sha256": "1e398fdf77042e7686126ccb6772ec281c623df31291251b2875b899e0e5d4e1",
+      "bytes": 4986
     },
     {
       "file": "engine/tools/build_letsgo_android.py",
@@ -2798,6 +2838,11 @@
       "bytes": 4692
     },
     {
+      "file": "engine/tools/check_elf16k.py",
+      "sha256": "4ff4f1b29922d1ac9f9a32404a911eb3971dcb2650391a417094d6a5aaa567df",
+      "bytes": 6540
+    },
+    {
       "file": "engine/tools/check_feedback_array_view.py",
       "sha256": "e5ec34af16cf98ad5b242acfbce1cee5cd08b70f2bfff57d480c98e32513ce5c",
       "bytes": 2801
@@ -2834,8 +2879,8 @@
     },
     {
       "file": "engine/tools/check_graphics_pipeline_library.py",
-      "sha256": "2ca715171e0793bb9e739ed2b240628d56a70b842b50909657242c45ca819497",
-      "bytes": 5466
+      "sha256": "3dbdec1608c3fb6924157b443a6022a0b49fb41e56b59e76b5be7cd05e0d0ed5",
+      "bytes": 6190
     },
     {
       "file": "engine/tools/check_graphics_ready.py",
@@ -2869,8 +2914,8 @@
     },
     {
       "file": "engine/tools/check_kernel_readable_copy.py",
-      "sha256": "2042dcda2f2a2183e6bb84621ac1feb209c833fa4b93a3d78ca1993b04e927d0",
-      "bytes": 2177
+      "sha256": "b2a18ffd5dc20b910378503f81050e66565641d8e577271fe9bf717564a88c52",
+      "bytes": 2212
     },
     {
       "file": "engine/tools/check_kernel_thread_affinity.py",
@@ -3011,6 +3056,11 @@
       "file": "engine/tools/check_native_prepare.py",
       "sha256": "9210f2ac12ae92e668d1be0aecbb5a41411d38bc3ac356758c8a7b8bfb51288e",
       "bytes": 4453
+    },
+    {
+      "file": "engine/tools/check_native_publish.py",
+      "sha256": "902bd94236935bd4a65374588f4f78ec204fac48cf233f26f6c78114d7f69b1d",
+      "bytes": 7953
     },
     {
       "file": "engine/tools/check_native_runtime_bridge.py",
@@ -3328,6 +3378,11 @@
       "bytes": 4995
     },
     {
+      "file": "engine/tools/check_swkbd.py",
+      "sha256": "699280995af04aab65a232126e53feb6e8ee05c4ad6364369ceae72e116b44e6",
+      "bytes": 5242
+    },
+    {
       "file": "engine/tools/check_texture_3d_attachments.py",
       "sha256": "d09f5d462f30769ba4e461f4508a85ea6ac63253b41c7b2226432e333602e438",
       "bytes": 4101
@@ -3419,8 +3474,8 @@
     },
     {
       "file": "engine/tools/package_shared_android.py",
-      "sha256": "554fa69b259315d1ed7bbf500ff3085d59ecdc7430e4faad035a23b07dce15a3",
-      "bytes": 29486
+      "sha256": "5949f449353010dd47de3fdccb5d718c2257d08f5858ffbc9b9f80c8a6d5edc6",
+      "bytes": 30528
     },
     {
       "file": "engine/tools/prepare_native_game.py",
@@ -3449,8 +3504,8 @@
     },
     {
       "file": "engine/tools/run_host_checks.py",
-      "sha256": "7169a1092c7ed59273b5a4f36c24cb2949028b8bda3844db44b370ef3b2285e9",
-      "bytes": 8817
+      "sha256": "17151eb7186b894db3acd162681b21923b060f67d4b1aa4879438ac56f73e834",
+      "bytes": 9069
     },
     {
       "file": "engine/tools/run_las_reference.py",
@@ -3628,11 +3683,6 @@
       "bytes": 684
     },
     {
-      "file": "shell/.patch/openssl/0001-add-bundled-cert.patch",
-      "sha256": "6e00b83af340836bf985e973f362b28f0db2007133769b3112efd5dbfae86068",
-      "bytes": 254439
-    },
-    {
       "file": "shell/.patch/openssl-cmake/0001-cpmutil-compat.patch",
       "sha256": "44f2ad755739dce82e7bf25894b8ff6c91754864f70e92be3ec03db8fda6500c",
       "bytes": 8636
@@ -3651,6 +3701,11 @@
       "file": "shell/.patch/openssl-cmake/0004-use-shell-wrapper.patch",
       "sha256": "d79a5610c87ebf7d685f0f68c28b0f0ca2e012e27f4a1098b765dc568d749e64",
       "bytes": 1334
+    },
+    {
+      "file": "shell/.patch/openssl/0001-add-bundled-cert.patch",
+      "sha256": "6e00b83af340836bf985e973f362b28f0db2007133769b3112efd5dbfae86068",
+      "bytes": 254439
     },
     {
       "file": "shell/.patch/opus/0001-disable-clang-runtime-neon.patch",
@@ -7139,8 +7194,8 @@
     },
     {
       "file": "shell/src/android/app/src/main/java/org/yuzu/yuzu_emu/features/fetcher/ReleaseAdapter.kt",
-      "sha256": "deb5c0b2ef933b3211a11943f31c5b0ffd7c28e06b5939eda06c3e0557e82d8b",
-      "bytes": 15466
+      "sha256": "56fda262c8e1101396bb8533b9050ad6855df91c4782a171fddd8d6499ccc5e2",
+      "bytes": 15406
     },
     {
       "file": "shell/src/android/app/src/main/java/org/yuzu/yuzu_emu/features/fetcher/SpacingItemDecoration.kt",
@@ -7606,6 +7661,26 @@
       "file": "shell/src/android/app/src/main/res/color/game_card_ripple.xml",
       "sha256": "202d0c708751e6885ce556875246d750addfe3ddc5c6cf30b1e5e763f7896bdd",
       "bytes": 519
+    },
+    {
+      "file": "shell/src/android/app/src/main/res/drawable-hdpi/ic_stat_notification_logo.png",
+      "sha256": "d4d63a3a9808ddd44bf2345573b99cc72316a6d21209dda5407ca04456ee816d",
+      "bytes": 2210
+    },
+    {
+      "file": "shell/src/android/app/src/main/res/drawable-xhdpi/ic_stat_notification_logo.png",
+      "sha256": "c10acfdf8c79192ed655d6380ec13866588745159fb24cca940da724599e00dd",
+      "bytes": 2972
+    },
+    {
+      "file": "shell/src/android/app/src/main/res/drawable-xhdpi/tv_banner.png",
+      "sha256": "21fda008e16dd22b5f5ed032998f82bc53ad7effefddbae42a4e024dbf2ec787",
+      "bytes": 40324
+    },
+    {
+      "file": "shell/src/android/app/src/main/res/drawable-xxhdpi/ic_stat_notification_logo.png",
+      "sha256": "088d7d80aeed80dd23eb4c7a4bfcf3f5807ef2e84b0e3e668d40266140939071",
+      "bytes": 4532
     },
     {
       "file": "shell/src/android/app/src/main/res/drawable/button_anim.xml",
@@ -8313,24 +8388,64 @@
       "bytes": 1203
     },
     {
-      "file": "shell/src/android/app/src/main/res/drawable-hdpi/ic_stat_notification_logo.png",
-      "sha256": "d4d63a3a9808ddd44bf2345573b99cc72316a6d21209dda5407ca04456ee816d",
-      "bytes": 2210
+      "file": "shell/src/android/app/src/main/res/layout-land/card_game_carousel.xml",
+      "sha256": "8b29bdcb27275fdcef24a76f09a2945cd71c72735eb44e03e8c43f756c3fa76e",
+      "bytes": 2986
     },
     {
-      "file": "shell/src/android/app/src/main/res/drawable-xhdpi/ic_stat_notification_logo.png",
-      "sha256": "c10acfdf8c79192ed655d6380ec13866588745159fb24cca940da724599e00dd",
-      "bytes": 2972
+      "file": "shell/src/android/app/src/main/res/layout-land/dialog_lobby_browser.xml",
+      "sha256": "008ffa6bd6f90ee3ab515b98f185a62825f7b7d9f930a6a7186712c84a9798ff",
+      "bytes": 10927
     },
     {
-      "file": "shell/src/android/app/src/main/res/drawable-xhdpi/tv_banner.png",
-      "sha256": "21fda008e16dd22b5f5ed032998f82bc53ad7effefddbae42a4e024dbf2ec787",
-      "bytes": 40324
+      "file": "shell/src/android/app/src/main/res/layout-land/dialog_multiplayer_connect.xml",
+      "sha256": "6cc96f8fb309afc6e105abe4bc3d32ebe48589059c9ed9f35395b2b7c3f92021",
+      "bytes": 4654
     },
     {
-      "file": "shell/src/android/app/src/main/res/drawable-xxhdpi/ic_stat_notification_logo.png",
-      "sha256": "088d7d80aeed80dd23eb4c7a4bfcf3f5807ef2e84b0e3e668d40266140939071",
-      "bytes": 4532
+      "file": "shell/src/android/app/src/main/res/layout-land/fragment_games.xml",
+      "sha256": "41902f9fa8a9ab3ac2e24fa6feb93cfb0e2f50f115ca196e321b678f84a53a6e",
+      "bytes": 10152
+    },
+    {
+      "file": "shell/src/android/app/src/main/res/layout-ldrtl/list_item_setting_input.xml",
+      "sha256": "e31a06e03301e1b2faeec2ef0001c89203b191ead11b2bc78746eace08ce12da",
+      "bytes": 2467
+    },
+    {
+      "file": "shell/src/android/app/src/main/res/layout-w1000dp/card_installable_icon.xml",
+      "sha256": "2c9305fd420f6bdc84781945ca86eef51ec7f313529749eaec3451856408b719",
+      "bytes": 3892
+    },
+    {
+      "file": "shell/src/android/app/src/main/res/layout-w600dp/activity_main.xml",
+      "sha256": "5647375cacf30b7afbc36bd886240c6cf61addb5f6c3f02b6765d1ea02e367b2",
+      "bytes": 1900
+    },
+    {
+      "file": "shell/src/android/app/src/main/res/layout-w600dp/fragment_about.xml",
+      "sha256": "68fdbc47e1ae9c8aad586024513910f582af81f887a8aacae331d0c597cd7acc",
+      "bytes": 12689
+    },
+    {
+      "file": "shell/src/android/app/src/main/res/layout-w600dp/fragment_game_info.xml",
+      "sha256": "ace50c8b18fe6a4b0edc11ddf424318101107d71aba77842a36c27de7169560e",
+      "bytes": 6458
+    },
+    {
+      "file": "shell/src/android/app/src/main/res/layout-w600dp/fragment_game_properties.xml",
+      "sha256": "02e7685509735b618924cb1e982f41df6d6abb0d4123785308d2c6f5caedb0ed",
+      "bytes": 5287
+    },
+    {
+      "file": "shell/src/android/app/src/main/res/layout-w600dp/fragment_setup.xml",
+      "sha256": "dbf230b9c0e60114bf840df7269720e9f589af7a48d56b0fc39ae755b33b3aa4",
+      "bytes": 1839
+    },
+    {
+      "file": "shell/src/android/app/src/main/res/layout-w600dp/page_setup.xml",
+      "sha256": "fbea531a5c79a9d64d535bba93072824f5bb10c0c13bf99d4e2161cab13ec5fa",
+      "bytes": 4394
     },
     {
       "file": "shell/src/android/app/src/main/res/layout/activity_main.xml",
@@ -8823,66 +8938,6 @@
       "bytes": 3640
     },
     {
-      "file": "shell/src/android/app/src/main/res/layout-land/card_game_carousel.xml",
-      "sha256": "8b29bdcb27275fdcef24a76f09a2945cd71c72735eb44e03e8c43f756c3fa76e",
-      "bytes": 2986
-    },
-    {
-      "file": "shell/src/android/app/src/main/res/layout-land/dialog_lobby_browser.xml",
-      "sha256": "008ffa6bd6f90ee3ab515b98f185a62825f7b7d9f930a6a7186712c84a9798ff",
-      "bytes": 10927
-    },
-    {
-      "file": "shell/src/android/app/src/main/res/layout-land/dialog_multiplayer_connect.xml",
-      "sha256": "6cc96f8fb309afc6e105abe4bc3d32ebe48589059c9ed9f35395b2b7c3f92021",
-      "bytes": 4654
-    },
-    {
-      "file": "shell/src/android/app/src/main/res/layout-land/fragment_games.xml",
-      "sha256": "41902f9fa8a9ab3ac2e24fa6feb93cfb0e2f50f115ca196e321b678f84a53a6e",
-      "bytes": 10152
-    },
-    {
-      "file": "shell/src/android/app/src/main/res/layout-ldrtl/list_item_setting_input.xml",
-      "sha256": "e31a06e03301e1b2faeec2ef0001c89203b191ead11b2bc78746eace08ce12da",
-      "bytes": 2467
-    },
-    {
-      "file": "shell/src/android/app/src/main/res/layout-w1000dp/card_installable_icon.xml",
-      "sha256": "2c9305fd420f6bdc84781945ca86eef51ec7f313529749eaec3451856408b719",
-      "bytes": 3892
-    },
-    {
-      "file": "shell/src/android/app/src/main/res/layout-w600dp/activity_main.xml",
-      "sha256": "5647375cacf30b7afbc36bd886240c6cf61addb5f6c3f02b6765d1ea02e367b2",
-      "bytes": 1900
-    },
-    {
-      "file": "shell/src/android/app/src/main/res/layout-w600dp/fragment_about.xml",
-      "sha256": "68fdbc47e1ae9c8aad586024513910f582af81f887a8aacae331d0c597cd7acc",
-      "bytes": 12689
-    },
-    {
-      "file": "shell/src/android/app/src/main/res/layout-w600dp/fragment_game_info.xml",
-      "sha256": "ace50c8b18fe6a4b0edc11ddf424318101107d71aba77842a36c27de7169560e",
-      "bytes": 6458
-    },
-    {
-      "file": "shell/src/android/app/src/main/res/layout-w600dp/fragment_game_properties.xml",
-      "sha256": "02e7685509735b618924cb1e982f41df6d6abb0d4123785308d2c6f5caedb0ed",
-      "bytes": 5287
-    },
-    {
-      "file": "shell/src/android/app/src/main/res/layout-w600dp/fragment_setup.xml",
-      "sha256": "dbf230b9c0e60114bf840df7269720e9f589af7a48d56b0fc39ae755b33b3aa4",
-      "bytes": 1839
-    },
-    {
-      "file": "shell/src/android/app/src/main/res/layout-w600dp/page_setup.xml",
-      "sha256": "fbea531a5c79a9d64d535bba93072824f5bb10c0c13bf99d4e2161cab13ec5fa",
-      "bytes": 4394
-    },
-    {
       "file": "shell/src/android/app/src/main/res/menu/menu_driver_manager.xml",
       "sha256": "75c63d05f1d4254bf30ba63468b6efe1a4d5334ffcd6f5513d85b8aa2a8f0156",
       "bytes": 228
@@ -8978,61 +9033,6 @@
       "bytes": 27
     },
     {
-      "file": "shell/src/android/app/src/main/res/values/arrays.xml",
-      "sha256": "98c0bacbcbefec61ac16dd8b5561f07993f38c8ccc4bbcfceef13fdc8f5abed3",
-      "bytes": 21870
-    },
-    {
-      "file": "shell/src/android/app/src/main/res/values/bools.xml",
-      "sha256": "9906e9f97752395ffc9d9263497d798e7920da73c208920926419c500b45f2c4",
-      "bytes": 106
-    },
-    {
-      "file": "shell/src/android/app/src/main/res/values/colors.xml",
-      "sha256": "472cdd00f02abd3649c92f3adaa57cb55b333c4bb7e1f87782c3d7e9b20416c8",
-      "bytes": 114
-    },
-    {
-      "file": "shell/src/android/app/src/main/res/values/dimens.xml",
-      "sha256": "dfe1b6458f694f572a74d828c6b3b22f9b6f624932a609ffcb6a4851f2f1b66e",
-      "bytes": 911
-    },
-    {
-      "file": "shell/src/android/app/src/main/res/values/fractions.xml",
-      "sha256": "684a6808b4a34e5fa4ed2b6b68d2c86662bdb4a1d61630578fbb9ea21de985c0",
-      "bytes": 411
-    },
-    {
-      "file": "shell/src/android/app/src/main/res/values/integers.xml",
-      "sha256": "82dbf57b0adb007ec557b374342745daaba61d55a4a7f5f6562c5c42f809b958",
-      "bytes": 5873
-    },
-    {
-      "file": "shell/src/android/app/src/main/res/values/raitchi.xml",
-      "sha256": "b5fc2194da794c98abfffa034cdce60cda320ef3f1306c5548d39ea2ce9d7741",
-      "bytes": 1026
-    },
-    {
-      "file": "shell/src/android/app/src/main/res/values/strings.xml",
-      "sha256": "323a62ad957aeac6a8ef2a661af0c7848ea4afbf96162f7225ba0600dbed420d",
-      "bytes": 124713
-    },
-    {
-      "file": "shell/src/android/app/src/main/res/values/styles.xml",
-      "sha256": "f6b5d59b8590d98ad5a231465acf70a78258788986fef8a34c168a2fedcbf444",
-      "bytes": 16431
-    },
-    {
-      "file": "shell/src/android/app/src/main/res/values/themes.xml",
-      "sha256": "b605fde4a0f704a1991ef5d4950d880040ab1deb2bda6194aa60e2cc17054c34",
-      "bytes": 21793
-    },
-    {
-      "file": "shell/src/android/app/src/main/res/values/yuzu_colors.xml",
-      "sha256": "69c95d6f2fafe7385823d47de130c07ed079730350f534beab9942dba4d7a843",
-      "bytes": 17289
-    },
-    {
       "file": "shell/src/android/app/src/main/res/values-ar/strings.xml",
       "sha256": "ec875493d65088ca74f440ca4ad504e61b9ab068cbcdb1322b0baddd60e81217",
       "bytes": 113091
@@ -9103,6 +9103,11 @@
       "bytes": 41564
     },
     {
+      "file": "shell/src/android/app/src/main/res/values-night-v31/themes.xml",
+      "sha256": "9870a49fcee1c5f42a7ac47305a1ac8894e5c87f77a01d749875ff81ea8fc148",
+      "bytes": 2342
+    },
+    {
       "file": "shell/src/android/app/src/main/res/values-night/themes.xml",
       "sha256": "60cff0b6718f20b798db251484d491bfaf0c5d93cac1243d84f978203a8f5a17",
       "bytes": 266
@@ -9111,11 +9116,6 @@
       "file": "shell/src/android/app/src/main/res/values-night/yuzu_colors.xml",
       "sha256": "e4802b8cef100b9b9e14f8210cd2b21063e76ea59d833470095657b25b7e29ff",
       "bytes": 15857
-    },
-    {
-      "file": "shell/src/android/app/src/main/res/values-night-v31/themes.xml",
-      "sha256": "9870a49fcee1c5f42a7ac47305a1ac8894e5c87f77a01d749875ff81ea8fc148",
-      "bytes": 2342
     },
     {
       "file": "shell/src/android/app/src/main/res/values-pl/strings.xml",
@@ -9183,6 +9183,61 @@
       "bytes": 82128
     },
     {
+      "file": "shell/src/android/app/src/main/res/values/arrays.xml",
+      "sha256": "98c0bacbcbefec61ac16dd8b5561f07993f38c8ccc4bbcfceef13fdc8f5abed3",
+      "bytes": 21870
+    },
+    {
+      "file": "shell/src/android/app/src/main/res/values/bools.xml",
+      "sha256": "9906e9f97752395ffc9d9263497d798e7920da73c208920926419c500b45f2c4",
+      "bytes": 106
+    },
+    {
+      "file": "shell/src/android/app/src/main/res/values/colors.xml",
+      "sha256": "472cdd00f02abd3649c92f3adaa57cb55b333c4bb7e1f87782c3d7e9b20416c8",
+      "bytes": 114
+    },
+    {
+      "file": "shell/src/android/app/src/main/res/values/dimens.xml",
+      "sha256": "dfe1b6458f694f572a74d828c6b3b22f9b6f624932a609ffcb6a4851f2f1b66e",
+      "bytes": 911
+    },
+    {
+      "file": "shell/src/android/app/src/main/res/values/fractions.xml",
+      "sha256": "684a6808b4a34e5fa4ed2b6b68d2c86662bdb4a1d61630578fbb9ea21de985c0",
+      "bytes": 411
+    },
+    {
+      "file": "shell/src/android/app/src/main/res/values/integers.xml",
+      "sha256": "82dbf57b0adb007ec557b374342745daaba61d55a4a7f5f6562c5c42f809b958",
+      "bytes": 5873
+    },
+    {
+      "file": "shell/src/android/app/src/main/res/values/raitchi.xml",
+      "sha256": "b5fc2194da794c98abfffa034cdce60cda320ef3f1306c5548d39ea2ce9d7741",
+      "bytes": 1026
+    },
+    {
+      "file": "shell/src/android/app/src/main/res/values/strings.xml",
+      "sha256": "323a62ad957aeac6a8ef2a661af0c7848ea4afbf96162f7225ba0600dbed420d",
+      "bytes": 124713
+    },
+    {
+      "file": "shell/src/android/app/src/main/res/values/styles.xml",
+      "sha256": "f6b5d59b8590d98ad5a231465acf70a78258788986fef8a34c168a2fedcbf444",
+      "bytes": 16431
+    },
+    {
+      "file": "shell/src/android/app/src/main/res/values/themes.xml",
+      "sha256": "b605fde4a0f704a1991ef5d4950d880040ab1deb2bda6194aa60e2cc17054c34",
+      "bytes": 21793
+    },
+    {
+      "file": "shell/src/android/app/src/main/res/values/yuzu_colors.xml",
+      "sha256": "69c95d6f2fafe7385823d47de130c07ed079730350f534beab9942dba4d7a843",
+      "bytes": 17289
+    },
+    {
       "file": "shell/src/android/app/src/main/res/xml/data_extraction_rules.xml",
       "sha256": "4b5c38c9aca7acbbdda1315737fae92e129640ef7e83697147ec197f6cb88216",
       "bytes": 338
@@ -9218,6 +9273,11 @@
       "bytes": 676
     },
     {
+      "file": "shell/src/android/gradle.properties",
+      "sha256": "e451217a1838c8deccce4990b65a0c3e95b3862d389e449075b05ef83af87149",
+      "bytes": 955
+    },
+    {
       "file": "shell/src/android/gradle/wrapper/gradle-wrapper.jar",
       "sha256": "f4d953f31fbf6c38a8c330d19171c8ba6e0d1ff59d4d5c5c2d3ed821c9f3d5a3",
       "bytes": 54708
@@ -9226,11 +9286,6 @@
       "file": "shell/src/android/gradle/wrapper/gradle-wrapper.properties",
       "sha256": "00d4dd5d1cfd7006e3f0f672ac64450c97fa16a53b774198d9495e27b6448eae",
       "bytes": 231
-    },
-    {
-      "file": "shell/src/android/gradle.properties",
-      "sha256": "e451217a1838c8deccce4990b65a0c3e95b3862d389e449075b05ef83af87149",
-      "bytes": 955
     },
     {
       "file": "shell/src/android/gradlew",
@@ -12938,6 +12993,16 @@
       "bytes": 6377
     },
     {
+      "file": "shell/src/core/hle/kernel/svc.cpp",
+      "sha256": "c716a312346edbd25085173fba4908ec0c75e86042345fa5908bcccf16cd34f8",
+      "bytes": 135804
+    },
+    {
+      "file": "shell/src/core/hle/kernel/svc.h",
+      "sha256": "aff988aac2b7d084acc294edae1eadd8b11f4f157477ed8aed9869adf0962ce6",
+      "bytes": 45484
+    },
+    {
       "file": "shell/src/core/hle/kernel/svc/svc_activity.cpp",
       "sha256": "06a59a45e8c86d832e239ef5506025b54542ed998b7766c45c1d1b2bf893ffc9",
       "bytes": 2710
@@ -13121,16 +13186,6 @@
       "file": "shell/src/core/hle/kernel/svc/svc_transfer_memory.cpp",
       "sha256": "a621e16b721d8e0290e61caebb9eaf6e1ff73ff8fd9cc7d7733c95688f9b6b36",
       "bytes": 6392
-    },
-    {
-      "file": "shell/src/core/hle/kernel/svc.cpp",
-      "sha256": "c716a312346edbd25085173fba4908ec0c75e86042345fa5908bcccf16cd34f8",
-      "bytes": 135804
-    },
-    {
-      "file": "shell/src/core/hle/kernel/svc.h",
-      "sha256": "aff988aac2b7d084acc294edae1eadd8b11f4f157477ed8aed9869adf0962ce6",
-      "bytes": 45484
     },
     {
       "file": "shell/src/core/hle/kernel/svc_common.h",
@@ -17018,6 +17073,16 @@
       "bytes": 2286
     },
     {
+      "file": "shell/src/core/memory.cpp",
+      "sha256": "f14cd177d9b5e6e51604bb38edde8c8d402fe87fef9f6332b82f552a7465c364",
+      "bytes": 42270
+    },
+    {
+      "file": "shell/src/core/memory.h",
+      "sha256": "2f9323b4d44ff3aa199440b08ba22b9e9afd345ba0e6c32294ac48b3b6242d82",
+      "bytes": 19987
+    },
+    {
       "file": "shell/src/core/memory/cheat_engine.cpp",
       "sha256": "ea0882a8ad362e63a2b3857446f1ab3e32ad21045ac05920c39a6fd6167ea525",
       "bytes": 10631
@@ -17041,16 +17106,6 @@
       "file": "shell/src/core/memory/dmnt_cheat_vm.h",
       "sha256": "8f65354c97a47cd4da60f79b4eece5775c8fab80590e9d623807770ed3433767",
       "bytes": 8122
-    },
-    {
-      "file": "shell/src/core/memory.cpp",
-      "sha256": "f14cd177d9b5e6e51604bb38edde8c8d402fe87fef9f6332b82f552a7465c364",
-      "bytes": 42270
-    },
-    {
-      "file": "shell/src/core/memory.h",
-      "sha256": "2f9323b4d44ff3aa199440b08ba22b9e9afd345ba0e6c32294ac48b3b6242d82",
-      "bytes": 19987
     },
     {
       "file": "shell/src/core/perf_stats.cpp",
@@ -17983,6 +18038,11 @@
       "bytes": 1331
     },
     {
+      "file": "shell/src/dynarmic/src/dynarmic/common/fp/op.h",
+      "sha256": "6909ab6a2e28ed7792c27f2b13d74f4bfc30f670555edc4a782245914fea2762",
+      "bytes": 612
+    },
+    {
       "file": "shell/src/dynarmic/src/dynarmic/common/fp/op/FPCompare.cpp",
       "sha256": "392511fb0edcb7635b6fe5f3918187187777360a957cb3efdb2b75acacf35966",
       "bytes": 1423
@@ -18086,11 +18146,6 @@
       "file": "shell/src/dynarmic/src/dynarmic/common/fp/op/FPToFixed.h",
       "sha256": "66b374aba519d3f12ede35e8c6ef5fe853affd8891b26c9d6a94a03436982248",
       "bytes": 526
-    },
-    {
-      "file": "shell/src/dynarmic/src/dynarmic/common/fp/op.h",
-      "sha256": "6909ab6a2e28ed7792c27f2b13d74f4bfc30f670555edc4a782245914fea2762",
-      "bytes": 612
     },
     {
       "file": "shell/src/dynarmic/src/dynarmic/common/fp/process_exception.cpp",
@@ -22918,6 +22973,11 @@
       "bytes": 7199
     },
     {
+      "file": "shell/src/video_core/query_cache.h",
+      "sha256": "023c9d66a2af4fc1825544cc23fe4c6b76262aeec52bf5040d9ae05b6f05a05f",
+      "bytes": 17565
+    },
+    {
       "file": "shell/src/video_core/query_cache/bank_base.h",
       "sha256": "a1fe3bc6d34273d4a3ca333ee16e5200854237315a4faf9ab1a7e82497480617",
       "bytes": 2539
@@ -22946,11 +23006,6 @@
       "file": "shell/src/video_core/query_cache/types.h",
       "sha256": "89c950f40557abfba9152c141bee72c96b22274f92e823f8ee4a0fde70cb961f",
       "bytes": 1889
-    },
-    {
-      "file": "shell/src/video_core/query_cache.h",
-      "sha256": "023c9d66a2af4fc1825544cc23fe4c6b76262aeec52bf5040d9ae05b6f05a05f",
-      "bytes": 17565
     },
     {
       "file": "shell/src/video_core/rasterizer_download_area.h",
@@ -25478,6 +25533,11 @@
       "bytes": 269
     },
     {
+      "file": "shell/tools/cpm-fetch-all.sh",
+      "sha256": "318b0b98ce7f6ae3159e9697de6839be01925172099ab14c77fcc1a689315da2",
+      "bytes": 355
+    },
+    {
       "file": "shell/tools/cpm/README.md",
       "sha256": "577ea21202b927f63f9e85bdf0059ab8022c9c197529bd4a172345d8acc4d0f1",
       "bytes": 344
@@ -25568,6 +25628,11 @@
       "bytes": 977
     },
     {
+      "file": "shell/tools/cpm/package.sh",
+      "sha256": "973af2ca87ebdc9860aff5a5a11bd43f197f2d7bcb1d7f9c401f18c03c840bb6",
+      "bytes": 1891
+    },
+    {
       "file": "shell/tools/cpm/package/add.sh",
       "sha256": "211acce3d49626d5cfe5f612110be26a9e25da768d4fd305286f9540a97c1dca",
       "bytes": 5059
@@ -25578,19 +25643,9 @@
       "bytes": 347
     },
     {
-      "file": "shell/tools/cpm/package.sh",
-      "sha256": "973af2ca87ebdc9860aff5a5a11bd43f197f2d7bcb1d7f9c401f18c03c840bb6",
-      "bytes": 1891
-    },
-    {
       "file": "shell/tools/cpm/update.sh",
       "sha256": "fa1c68d2dfbc92fd0e958d66eb2c0f9362b440d188a6ea1028ded57c4c39e7ff",
       "bytes": 406
-    },
-    {
-      "file": "shell/tools/cpm-fetch-all.sh",
-      "sha256": "318b0b98ce7f6ae3159e9697de6839be01925172099ab14c77fcc1a689315da2",
-      "bytes": 355
     },
     {
       "file": "shell/tools/cpmutil.sh",
@@ -25758,5 +25813,5 @@
       "bytes": 12464
     }
   ],
-  "overlay_manifest_sha256": "e1e11e2b757f39cd5eac8f9e3734c98e5576eafa31cf55cda60597bbd557c11b"
+  "overlay_manifest_sha256": "0ec73c1b461edb0f9086d9f68088adfd0f3434d94829845fd5c302bbadc58216"
 }

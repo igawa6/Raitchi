@@ -11,7 +11,7 @@ should improve that shared runtime. Please do not fork the runtime per game.
 | Shared runtime fix | A focused PR to services, kernel, NVN, shader translation or packages, with a synthetic test | PR |
 | Title adapter | Adapter table plus adapter test; only identifiers you measured from your own copy | PR |
 | Device QA | A **Compatibility report** issue or a `compatibility/reports/*.json` PR for a specific build | Issue or PR |
-| Android app | Shell UI changes go to the shell repository (pinned in `shell.lock.json`) | Shell PR |
+| Android app | Eden-derived shell UI lives in public `shell/src/android/`; shared engine code lives in `engine/` | Focused shell PR |
 
 Keep investigation, implementation and device QA separate. A game
 investigation does not need to come with a fix, and a QA report does not need
@@ -19,11 +19,18 @@ to explain the cause.
 
 ## Before you start
 
-1. Search the issues. One open issue per game version; claim it by commenting.
+1. Search issues and PRs for the same defect/version before starting. Coordinate
+   scope, expected files, dependencies and next update in an issue comment.
 2. Shared renderer areas (`nvn/maxwell/translate.c`, `nvn/vulkan/exec.c`,
    `nvn/cmdbuf.c`, texture cache) change often. Comment on the tracking issue
    before a larger change there, so two people do not rewrite the same code.
 3. One bounded problem per PR. Split refactors from behavior changes.
+4. Independent tasks may proceed in parallel on separate branches/worktrees.
+   State dependent PRs and coordinate shared files; there is no blanket limit of
+   one open contribution per person. Keep work within review capacity.
+
+See the [contributor backlog](docs/CONTRIBUTOR-ROADMAP.md) for proposed work and
+existing foundations. Its milestone labels do not claim implemented features.
 
 ## Pull request requirements
 
@@ -37,7 +44,12 @@ to explain the cause.
   practical. Tests and CI never use game files, keys or firmware.
 - **Results**: before/after observations, regressions checked, and an explicit
   list of what you could not test (for example: no device, one game only).
-- Run the host checks: see [building](docs/BUILDING.md#host-checks).
+- Run appropriate checks: see [building](docs/BUILDING.md#host-checks).
+  Documentation-only changes need link/example verification; report that runtime
+  checks were not run when they were not needed. Runtime fixes still need the
+  relevant synthetic checks and required regression suite.
+- When using a coding assistant, read the
+  [assistant contribution guide](docs/AI-CONTRIBUTING.md).
 
 Maintainers can only review evidence they can see. Describe private results
 (logs, captures) in words or with redacted excerpts. Never attach game data,
@@ -51,6 +63,13 @@ fallbacks. An unimplemented call should fail with a diagnostic instead of
 returning fake success. Diagnostics stay off by default and print metadata,
 never game content. User-visible text says "Raitchi"; upstream project names
 belong only on the licenses screen (`tools/check_frontend_branding.py`).
+
+## AI assistance
+
+Coding assistants are optional. Follow the [assistant contribution guide](docs/AI-CONTRIBUTING.md),
+review and test the work yourself, describe the assistance plainly in the PR,
+and be able to explain the submitted change. Do not add assistant authorship
+or signature trailers.
 
 ## Licensing
 

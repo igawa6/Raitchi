@@ -19,6 +19,9 @@ FONT = "ports/shared-android/assets/fonts/shared_5.ttf"
 # (command, required executables). Default invocations only: no --android,
 # --capture or --original* flags, which need private inputs or an NDK build.
 CHECKS = [
+    (["tools/check_native_publish.py"], ["clang"]),
+    (["tools/check_swkbd.py"], ["clang", "clang++", "pkg-config"]),
+    (["tests/elf16k_test.py"], []),
     (["tools/check_button_font.py", FONT], []),
     (["tools/check_compatibility.py"], []),
     (["tools/check_compiler_constants_staging.py"], ["clang"]),
@@ -93,6 +96,7 @@ CHECKS = [
 # the dependency build or build/shared-android/native/compile_commands.json, so
 # they run with --android after `build_shared_android.py --build`.
 ANDROID_CHECKS = [
+    "tools/check_graphics_pipeline_library.py",
     "tools/check_gpu_cache_compat.py", "tools/check_graphics_mirror.py",
     "tools/check_nvn_texture_view.py", "tools/check_pool_mapping.py",
     "tools/check_stencil_sampler.py", "tools/check_material_attributes.py",
@@ -107,6 +111,7 @@ ANDROID_CHECKS = [
 ]
 
 ANDROID_COMPILE_FLAGS = {
+    "tools/check_graphics_pipeline_library.py",
     "tools/check_graphics_mirror.py", "tools/check_stencil_sampler.py",
     "tools/check_material_probe.py", "tools/check_nvn_command_shadow.py",
 }

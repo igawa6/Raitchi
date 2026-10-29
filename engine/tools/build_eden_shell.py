@@ -96,6 +96,7 @@ def strip_libraries(sdk, libraries, reports):
 
 
 def inspect_apk(apk, sdk, reports, assets):
+    alignment = engine.verify_apk_alignment(apk, sdk)
     build_tools = sdk / "build-tools/36.0.0"
     signature = run([build_tools / "apksigner", "verify", "--verbose", "--print-certs", apk],
                     capture_output=True).stdout
@@ -151,7 +152,8 @@ def inspect_apk(apk, sdk, reports, assets):
             entry["raw_bytes"] += item.file_size
             entry["compressed_bytes"] += item.compress_size
     return {"apk": str(apk.relative_to(ROOT)), "apk_sha256": sha(apk), "apk_bytes": apk.stat().st_size,
-            "size_components": table, "signature": signature.strip(), "host_build_and_lint_passed": True,
+            "size_components": table, "native_alignment": alignment,
+            "signature": signature.strip(), "host_build_and_lint_passed": True,
             "device_installed": False}
 
 
@@ -179,6 +181,7 @@ def main():
     native, digest, libraries, unstripped_reports = engine.verify_native(sdk)
     toolkit, kit_libraries, kit_reports = engine.verify_toolkit(sdk, args.with_ondevice)
     libraries.update(kit_libraries); unstripped_reports.update(kit_reports)
+    engine.verify_library_alignment(libraries, unstripped_reports)
     packaged_libraries, reports = strip_libraries(sdk, libraries, unstripped_reports)
     stage = engine.stage(sdk, packaged_libraries, reports, digest, toolkit)
     service = engine.WORK / "app/src/main/java/com/lasrecomp/android/SharedBuildService.java"

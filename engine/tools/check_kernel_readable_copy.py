@@ -9,7 +9,7 @@ def main():
   while depth:depth+=(s[at]=='{')-(s[at]=='}');at+=1
   return s[start:at]+'\n'
  limit=re.search(r'^#define KERNEL_READABLE_COPY_MAX .+$',header.read_text(),re.M).group(0)
- (out/'kernel_readable_copy_production.h').write_text(limit+'\n'+body('static void query_memory_unlocked(')+body('bool kernel_copy_readable('))
+ (out/'kernel_readable_copy_production.h').write_text(limit+'\n'+body('static void query_memory_unlocked(')+body('bool kernel_copy_readable(')+body('bool kernel_copy_writable('))
  paths=[source,header,mapper,test,pathlib.Path(__file__).resolve()];pins={str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in paths};reports={}
  for mode,flags in [('optimized',['-O2']),('sanitized',['-O1','-g','-fsanitize=address,undefined','-fno-omit-frame-pointer'])]:
   binary=out/mode

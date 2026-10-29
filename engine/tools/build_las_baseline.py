@@ -52,11 +52,18 @@ def main():
         'JOBS=${RECOMP_BUILD_JOBS:-4} # Bounded baseline build; avoid oversubscribing the host.',
     )
     replace_once(WORK / "tools/android/build_game.sh", "JOBS=$(nproc)", "JOBS=${RECOMP_BUILD_JOBS:-4}")
+    # ptichalouf's Raitchi PR #4: imported SDL must itself support 16 KiB pages.
+    replace_once(
+        WORK / "android/app/CMakeLists.txt",
+        "add_subdirectory(${ROOT}/build/android/SDL3 ${CMAKE_BINARY_DIR}/SDL3)",
+        "add_subdirectory(${ROOT}/build/android/SDL3 ${CMAKE_BINARY_DIR}/SDL3)\n"
+        'target_link_options(SDL3-shared PRIVATE "-Wl,-z,max-page-size=16384")',
+    )
     sdk = args.sdk.resolve()
     (WORK / "android/local.properties").write_text(f"sdk.dir={sdk}\ncmake.dir={sdk}/cmake/3.31.6\n")
     evidence = ROOT / "evidence"
     evidence.mkdir(exist_ok=True)
-    patch = run(["git", "-C", WORK, "diff", "--", "android/app/src/main/java/com/lasrecomp/android/RootBoost.java", "tools/android/build_deps.sh", "tools/android/build_game.sh"], capture_output=True, text=True).stdout
+    patch = run(["git", "-C", WORK, "diff", "--", "android/app/src/main/java/com/lasrecomp/android/RootBoost.java", "android/app/CMakeLists.txt", "tools/android/build_deps.sh", "tools/android/build_game.sh"], capture_output=True, text=True).stdout
     (evidence / "las-baseline.patch").write_text(patch)
     env = dict(os.environ)
     env.update(ANDROID_HOME=str(sdk), ANDROID_SDK_ROOT=str(sdk),
