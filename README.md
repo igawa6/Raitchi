@@ -4,7 +4,7 @@ AC-NativeNX is an experimental Android ARM64 launcher and shared runtime for
 original Nintendo Switch games that you own. It is **based on Raitchi by igawa6**
 ([igawa6/Raitchi](https://github.com/igawa6/Raitchi), v0.0.2), maintained by
 AC-Création with help from disclosed AI agents. Repository:
-[ptichalouf/AC-NativeNX](https://github.com/ptichalouf/AC-NativeNX). Its Android frontend is derived
+[AC-CREATION-AI/AC-NativeNX](https://github.com/AC-CREATION-AI/AC-NativeNX). Its Android frontend is derived
 from [Eden](https://git.eden-emu.dev/eden-emu/eden) and the yuzu lineage. All
 upstream copyright lines, SPDX headers and license texts are kept; the project is
 GPL-3.0-or-later (see [NOTICE.md](NOTICE.md), [LICENSE](LICENSE), [COPYING](COPYING)).

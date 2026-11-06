@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "id": "raitchi-shell",
-  "url": "https://github.com/ptichalouf/AC-NativeNX",
+  "url": "https://github.com/AC-CREATION-AI/AC-NativeNX",
   "path": "../shell-with-history",
   "commit": "989768aa46720e3fcab9e2111e3ddd70819c382b",
   "upstream": {

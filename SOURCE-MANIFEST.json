@@ -1729,8 +1729,8 @@
     },
     {
       "file": "engine/shell.lock.json",
-      "sha256": "21c064ad7823c0681ec8ef8d07ed20c5fd0ecc1b69492b95c6a7ea8b62165bf9",
-      "bytes": 766
+      "sha256": "eb0d906f72eec5b527a0ac7cc100f606f473f82e2760c517e4d7e2ff2c698133",
+      "bytes": 770
     },
     {
       "file": "engine/sources.lock.json",

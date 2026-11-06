@@ -2,7 +2,7 @@
 
 AC-NativeNX is a fork of [Raitchi](https://github.com/igawa6/Raitchi) by igawa6
 (v0.0.2, commit `535890ff982c871a16e4d2c5fe4e971309896f4a`), maintained by
-AC-Création at [ptichalouf/AC-NativeNX](https://github.com/ptichalouf/AC-NativeNX). It is distributed under GPL-3.0-or-later, like Raitchi. Every
+AC-Création at [AC-CREATION-AI/AC-NativeNX](https://github.com/AC-CREATION-AI/AC-NativeNX). It is distributed under GPL-3.0-or-later, like Raitchi. Every
 copyright line, SPDX header and license text inherited from Raitchi, Eden, yuzu
 and the other projects below is kept unchanged. AC-Création changes (branding,
 application ID `com.accreation.nativenx`, build and release workflows) are also
