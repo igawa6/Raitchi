@@ -2,7 +2,8 @@ Raitchi Android app
 
 This branch starts from upstream Eden 989768aa46 and turns its Android app
 module (src/android/app, namespace org.yuzu.yuzu_emu) into the Raitchi
-frontend, application ID dev.igawa6.raitchi.
+frontend. In AC-NativeNX (a fork based on Raitchi by igawa6) the
+application ID is com.accreation.nativenx.
 
 Retained Eden screens: setup (permissions and prod.keys; no firmware needed),
 game folders and scanning, the game grid/list/carousel with search and sort,

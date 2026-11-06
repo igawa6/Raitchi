@@ -1,0 +1,180 @@
+# AC-NativeNX CI build: reproduces engine/docs/BUILDING.md on Ubuntu x86-64.
+# Produces AC-NativeNX-<ver>-arm64-v8a.apk (signed with a throw-away per-run test
+# key) and AC-NativeNX-<ver>-source.tar.gz (corresponding GPL source).
+# No game, key, firmware or device is used or needed.
+name: build
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  workflow_call:
+    outputs:
+      version:
+        description: RELEASE.json version
+        value: ${{ jobs.apk.outputs.version }}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # Pinned toolchain (engine/docs/BUILDING.md "Prerequisites").
+  JDK_VERSION: "17"
+  ANDROID_PLATFORM: "android-36"
+  ANDROID_BUILD_TOOLS: "36.0.0"
+  ANDROID_CMAKE: "3.31.6"
+  ANDROID_NDK: "27.2.12479018"
+  JOBS: "4"
+
+jobs:
+  checks:
+    name: branding + manifests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Source manifests are current
+        run: python3 tools/refresh_source_manifests.py --check
+      - name: Branding tests
+        run: python3 -m unittest discover -s tests -p 'test_branding.py' -v
+
+  apk:
+    name: arm64-v8a APK + source archive
+    needs: checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+    defaults:
+      run:
+        working-directory: engine
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Version metadata
+        id: meta
+        working-directory: .
+        run: |
+          version=$(python3 -c "import json;print(json.load(open('RELEASE.json'))['version'])")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "AC_VERSION=$version" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: ${{ env.JDK_VERSION }}
+
+      - name: Host packages
+        working-directory: .
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends ninja-build pkg-config xxd zip unzip curl make
+
+      - name: Android SDK/NDK (pinned) in ~/android-sdk
+        working-directory: .
+        run: |
+          set -euo pipefail
+          sdkmanager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          mkdir -p "$HOME/android-sdk"
+          yes | "$sdkmanager" --sdk_root="$HOME/android-sdk" --licenses > /dev/null || true
+          "$sdkmanager" --sdk_root="$HOME/android-sdk" --install \
+            "platforms;$ANDROID_PLATFORM" "build-tools;$ANDROID_BUILD_TOOLS" \
+            "cmake;$ANDROID_CMAKE" "ndk;$ANDROID_NDK" "platform-tools" > /dev/null
+          cat "$HOME/android-sdk/ndk/$ANDROID_NDK/source.properties"
+          # Free disk: the preinstalled SDK and unrelated toolchains are no longer needed.
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
+          df -h /
+
+      - uses: actions/cache@v6
+        with:
+          path: ~/.gradle/caches
+          key: gradle-${{ hashFiles('shell/src/android/**/*.kts', 'shell/src/android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: gradle-
+
+      - name: 1. Fetch pinned references
+        run: |
+          python3 tools/fetch_sources.py
+          python3 tools/verify_sources.py
+          python3 tools/verify_sources.py --lock echoes-source.lock.json
+
+      - name: 2a. LAS baseline native dependencies
+        run: python3 tools/build_las_baseline.py --deps --jobs "$JOBS"
+
+      - name: 2b. LAS baseline APK (SDL3 + AdrenoTools cache)
+        run: python3 tools/build_las_baseline.py --apk --jobs "$JOBS"
+
+      - name: 2c. FFmpeg (LGPL, Opus/swresample)
+        run: python3 tools/build_letsgo_ffmpeg.py --build --jobs "$JOBS"
+
+      - name: 2d. Capstone via shared on-device toolkit preparation
+        run: |
+          set +e
+          python3 tools/prepare_shared_ondevice.py --fetch --build --jobs 2
+          rc=$?
+          set -e
+          capstone=build/shared-ondevice/stage/jniLibs/arm64-v8a/libcapstone.so
+          if [ ! -f "$capstone" ]; then
+            echo "::error::toolkit preparation failed (rc=$rc) before producing $capstone"
+            tail -n 80 build/shared-ondevice/logs/*.log || true
+            exit 1
+          fi
+          # On a clean checkout the toolkit's final metadata step needs the shared
+          # runtime built in 2e; Capstone (all the default APK needs) is ready.
+          echo "toolkit rc=$rc; capstone ready"
+
+      - name: 2e. Shared Android runtime (libmain.so, libraitchiprepare.so)
+        run: python3 tools/build_shared_android.py --build --jobs "$JOBS"
+
+      - name: 3a. Restore Eden shell over its upstream history
+        run: |
+          python3 tools/restore_shell_overlay.py \
+            --snapshot ../shell --manifest ../shell-overlay.json \
+            --destination ../shell-with-history
+
+      - name: 3b. Build the Android app
+        run: |
+          python3 tools/build_eden_shell.py --shell ../shell-with-history \
+            --sdk "$HOME/android-sdk" --build --allow-downloads --variant release --jobs "$JOBS"
+
+      - name: Build log on failure
+        if: failure()
+        run: |
+          tail -n 200 build/eden-shell/build.log 2>/dev/null || true
+          df -h / || true
+
+      - name: Name artifacts
+        id: out
+        working-directory: .
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          apk="dist/AC-NativeNX-${AC_VERSION}-arm64-v8a.apk"
+          cp engine/build/eden-shell/raitchi-eden-app-release.apk "$apk"
+          cp engine/build/eden-shell/apk.json "dist/AC-NativeNX-${AC_VERSION}-build-receipt.json"
+          git archive --format=tar --prefix="AC-NativeNX-${AC_VERSION}/" HEAD \
+            | gzip -n -9 > "dist/AC-NativeNX-${AC_VERSION}-source.tar.gz"
+          (cd dist && sha256sum * > SHA256SUMS && cat SHA256SUMS)
+          ls -l dist
+          {
+            echo "### AC-NativeNX ${AC_VERSION} (commit ${GITHUB_SHA::12})"
+            echo '```'; cat dist/SHA256SUMS; echo '```'
+            echo "CI test-signed APK (throw-away key). Not device-tested."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: AC-NativeNX-${{ steps.meta.outputs.version }}-${{ github.sha }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30

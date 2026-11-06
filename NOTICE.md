@@ -1,6 +1,15 @@
 # Licenses and attribution
 
-Raitchi combines a shared native runtime with an Eden-derived Android shell.
+AC-NativeNX is a fork of [Raitchi](https://github.com/igawa6/Raitchi) by igawa6
+(v0.0.2, commit `535890ff982c871a16e4d2c5fe4e971309896f4a`), maintained by
+AC-Création at [ptichalouf/AC-NativeNX](https://github.com/ptichalouf/AC-NativeNX). It is distributed under GPL-3.0-or-later, like Raitchi. Every
+copyright line, SPDX header and license text inherited from Raitchi, Eden, yuzu
+and the other projects below is kept unchanged. AC-Création changes (branding,
+application ID `com.accreation.nativenx`, build and release workflows) are also
+GPL-3.0-or-later. Each published APK is accompanied by its corresponding source
+archive (`AC-NativeNX-<version>-source.tar.gz`).
+
+Raitchi (and therefore AC-NativeNX) combines a shared native runtime with an Eden-derived Android shell.
 The default engine includes GPL-3.0-or-later components; it also retains MIT and
 other third-party components under their existing notices. [LICENSE](LICENSE)
 maps these notices and [COPYING](COPYING) contains the unmodified GPLv3 text.
@@ -14,6 +23,7 @@ Original copyright and SPDX headers remain in the adapted source files.
 | Let's Go Recomp | `96894fd8e9ea20c1b38cdea53105ec2a335df620` | Runtime adaptations; MIT, raulzito12345rrs and Peiikai portions. [Notice](engine/native/runtime/LICENSE-LetsGo), [source lock](engine/sources.lock.json). |
 | EoWRecomp | `dd9c79d6c01d9eaddafc1fc5a07b6658bfc56505` | Echoes startup/services/graphics references and adapters; MIT, Peiikai and EoWRecomp contributors. [Echoes notice](engine/native/runtime/LICENSE-Echoes), [EoW notice](engine/native/runtime/LICENSE-EoWRecomp), [adapter notice](engine/native/adapters/echoes/LICENSE), [source lock](engine/echoes-source.lock.json). |
 | Eden/yuzu runtime helpers | Eden `c6541721fa6307e99b3fdd9517dd4ed1b73927ed` | Logical guest affinity and audio-renderer work-size accounting; GPL-3.0-or-later adaptations. Source headers retain Eden/yuzu copyrights and source paths. [Affinity license](engine/ports/shared-android/runtime/LICENSE-kernel-thread-affinity.txt), [audio license](engine/ports/shared-android/runtime/services/LICENSE-audren-work-size.txt). |
+| Raitchi | igawa6/Raitchi `535890ff982c871a16e4d2c5fe4e971309896f4a` (v0.0.2) | Engine, shared runtime, shell integration and tooling by igawa6 and contributors; GPL-3.0-or-later. Base of this fork. |
 | Eden Android shell | Upstream `989768aa46720e3fcab9e2111e3ddd70819c382b` | Separate GPL-3.0-or-later frontend; retains its own `LICENSE.txt`, per-file notices and upstream history. [Shell lock](engine/shell.lock.json) records the actual upstream base and hashed uncommitted source overlay. The distribution URL is igawa6/Raitchi; no published integration commit is asserted. |
 | AdrenoTools and LinkerNSBypass | Dependency inventory produced by the Android build | BSD 2-Clause, Billy Laws. [AdrenoTools notice](engine/ports/letsgo-android/LICENSE-AdrenoTools), [LinkerNSBypass notice](engine/ports/letsgo-android/LICENSE-LinkerNSBypass). |
 | Fredoka / attributed button glyphs | Bundled font assets | [Fredoka SIL OFL 1.1](engine/ports/shared-android/assets/fonts/OFL-Fredoka.txt); [button-glyph MIT notice](engine/ports/shared-android/assets/fonts/LICENSE-ButtonGlyphs.txt) and [font provenance](engine/ports/shared-android/assets/fonts/README.txt). |
@@ -48,5 +58,5 @@ for all optional combinations is implied by the default configuration.
 
 Game files, game assets, keys and generated game code are not licensed by this
 repository. Nintendo and game trademarks belong to their respective owners.
-Raitchi is not affiliated with or endorsed by Nintendo, Eden or the upstream
-recomp projects.
+AC-NativeNX is not affiliated with or endorsed by Nintendo, igawa6/Raitchi, Eden,
+yuzu or the upstream recomp projects.

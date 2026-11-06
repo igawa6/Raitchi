@@ -4,8 +4,8 @@
     <string name="notice_notification_channel_name">Pemberitahuan dan error</string>
     <string name="notice_notification_channel_description">Menampilkan pemberitahuan ketika terjadi kesalahan.</string>
     <string name="notification_permission_not_granted">Izin notifikasi tidak diberikan!</string>
-    <string name="app_notification_channel_description">Notifikasi emulator Raitchi</string>
-    <string name="app_notification_running">Raitchi sedang berjalan</string>
+    <string name="app_notification_channel_description">Notifikasi emulator AC-NativeNX</string>
+    <string name="app_notification_running">AC-NativeNX sedang berjalan</string>
     <string name="seconds">Detik</string>
 
     <!-- Spinbox strings -->
@@ -173,7 +173,7 @@
 
     <!-- Setup strings -->
     <string name="welcome">Selamat datang!</string>
-    <string name="welcome_description">Pelajari cara menyiapkan &lt;b>Raitchi&lt;/b> dan masuk ke dalam emulasi.</string>
+    <string name="welcome_description">Pelajari cara menyiapkan &lt;b>AC-NativeNX&lt;/b> dan masuk ke dalam emulasi.</string>
     <string name="get_started">Memulai</string>
     <string name="keys">Kunci</string>
     <string name="keys_description">Pilih file &lt;b>prod.keys&lt;/b> Anda dengan tombol di bawah ini.</string>
@@ -231,8 +231,8 @@
     <string name="settings_description">Konfigurasikan pengaturan emulator</string>
     <string name="search_recently_played">Baru dimainkan</string>
     <string name="search_recently_added">baru ditambahkan</string>
-    <string name="open_user_folder">Buka folder Raitchi</string>
-    <string name="open_user_folder_description">Kelola file internal Raitchi\'s</string>
+    <string name="open_user_folder">Buka folder AC-NativeNX</string>
+    <string name="open_user_folder_description">Kelola file internal AC-NativeNX\'s</string>
     <string name="no_file_manager">Tidak menemukan file manager</string>
     <string name="notification_no_directory_link_description">Silakan cari folder pengguna dengan panel samping manajer file secara manual.</string>
     <string name="manage_save_data">Kelola save data</string>
@@ -251,7 +251,7 @@
     <string name="firmware_installed_failure_description">Pastikan file nca firmware terdapat pada folder utama dari file .zip dan coba lagi.</string>
     <string name="firmware_uninstalled_failure">Instalasi Firmware gagal</string>
     <string name="share_log">Bagikan log debug</string>
-    <string name="share_log_description">Bagikan file log Raitchi untuk mendebug isu</string>
+    <string name="share_log_description">Bagikan file log AC-NativeNX untuk mendebug isu</string>
     <string name="share_log_missing">Tidak ada log file yang ditemukan</string>
     <string name="install_game_content">Instal konten game.</string>
     <string name="install_game_content_description">Instal pembaruan game atau DLC</string>
@@ -265,7 +265,7 @@
     <string name="install_game_content_success_overwrite">%1$d telah berhasil ditimpa.</string>
     <string name="custom_driver_not_supported">Driver kustom tidak didukung</string>
     <string name="custom_driver_not_supported_description">Pemuatan driver kustom tidak didukung oleh perangkat ini.\nPeriksa lagi opsi ini di masa mendatang untuk melihat apakah dukungan telah ditambahkan!</string>
-    <string name="manage_yuzu_data">Kelola data Raitchi.</string>
+    <string name="manage_yuzu_data">Kelola data AC-NativeNX.</string>
     <string name="manage_yuzu_data_description">Impor/expor firmware, key, data pengguna, dan sebagainya!</string>
     <string name="game_folders">Folder Game</string>
     <string name="deep_scan">Pemindaian mendalam</string>
@@ -320,7 +320,7 @@
     <string name="copied_to_clipboard">Salin ke papan klip</string>
     <string name="about_app_description">Emulator Switch Open-Source</string>
     <string name="contributors">Kontributor</string>
-    <string name="licenses_description">Proyek yang memungkinkan Raitchi untuk Android</string>
+    <string name="licenses_description">Proyek yang memungkinkan AC-NativeNX untuk Android</string>
     <string name="build">Versi</string>
     <string name="user_data">Data pengguna</string>
     <string name="user_data_description">Impor/Ekspor semua data aplikasi\n\nketika mengimpor data user, semua data user yang tersedia akan dihapus!\n\nMengimpor data dari Citron dapat menyebabkan masalah. Direkomendasikan untuk melakukan impor manual semua data yang dibutuhkan.</string>

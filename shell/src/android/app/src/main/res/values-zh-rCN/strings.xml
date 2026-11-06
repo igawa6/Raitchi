@@ -5,8 +5,8 @@
     <string name="notice_notification_channel_name">错误与注意事项</string>
     <string name="notice_notification_channel_description">当发生错误时显示通知。</string>
     <string name="notification_permission_not_granted">未授予通知权限！</string>
-    <string name="app_notification_channel_description">Raitchi模拟器通知</string>
-    <string name="app_notification_running">Raitchi正在运行</string>
+    <string name="app_notification_channel_description">AC-NativeNX模拟器通知</string>
+    <string name="app_notification_running">AC-NativeNX正在运行</string>
     <string name="seconds">秒</string>
 
     <!-- Spinbox strings -->
@@ -200,7 +200,7 @@
 
     <!-- Setup strings -->
     <string name="welcome">欢迎！</string>
-    <string name="welcome_description">了解如何设置 &lt;b>Raitchi&lt;/b> 并进行模拟。</string>
+    <string name="welcome_description">了解如何设置 &lt;b>AC-NativeNX&lt;/b> 并进行模拟。</string>
     <string name="get_started">开始</string>
     <string name="keys">密钥文件</string>
     <string name="keys_description">使用下方的按钮来选择你的 &lt;b>prod.keys&lt;/b> 文件。</string>
@@ -370,8 +370,8 @@
     <string name="settings_description">更改模拟器设置</string>
     <string name="search_recently_played">最近游玩</string>
     <string name="search_recently_added">最近添加</string>
-    <string name="open_user_folder">打开 Raitchi 文件夹</string>
-    <string name="open_user_folder_description">管理 Raitchi 内部文件</string>
+    <string name="open_user_folder">打开 AC-NativeNX 文件夹</string>
+    <string name="open_user_folder_description">管理 AC-NativeNX 内部文件</string>
     <string name="app_settings_description">更改 app 的外观</string>
     <string name="no_file_manager">找不到可用的文件管理器</string>
     <string name="notification_no_directory_link_description">请使用文件管理器侧边栏中的内部存储手动定位用户文件夹。</string>
@@ -391,10 +391,10 @@
     <string name="firmware_installed_failure_description">请确保固件 nca 文件位于 zip 压缩包的根目录，然后重试。</string>
     <string name="firmware_uninstalled_failure">固件安装失败</string>
     <string name="share_log">分享调试日志</string>
-    <string name="share_log_description">分享 Raitchi 日志文件以便调试</string>
+    <string name="share_log_description">分享 AC-NativeNX 日志文件以便调试</string>
     <string name="share_log_missing">未找到日志文件</string>
     <string name="share_gpu_log">分享 GPU 日志</string>
-    <string name="share_gpu_log_description">分享 Raitchi 的 GPU 日志来调试图形问题</string>
+    <string name="share_gpu_log_description">分享 AC-NativeNX 的 GPU 日志来调试图形问题</string>
     <string name="share_gpu_log_missing">找不到 GPU 日志文件</string>
     <string name="install_game_content">安装游戏附加内容</string>
     <string name="install_game_content_description">安装游戏更新及 DLC</string>
@@ -408,7 +408,7 @@
     <string name="install_game_content_success_overwrite">%1$d 个包覆盖安装成功</string>
     <string name="custom_driver_not_supported">不支持自定义驱动</string>
     <string name="custom_driver_not_supported_description">此设备不支持自定义驱动。\n请之后再访问此项，查看是否已为此设备添加支持。</string>
-    <string name="manage_yuzu_data">管理 Raitchi 数据</string>
+    <string name="manage_yuzu_data">管理 AC-NativeNX 数据</string>
     <string name="manage_yuzu_data_description">导入/导出固件、密钥、用户数据以及其他</string>
     <string name="game_folders">游戏文件夹</string>
     <string name="deep_scan">深度扫描</string>
@@ -464,8 +464,8 @@
     <string name="copied_to_clipboard">已复制到剪贴板</string>
     <string name="about_app_description">一款开源的 Switch 模拟器</string>
     <string name="contributors">贡献者</string>
-    <string name="contributors_description">Raitchi Android 版的诞生离不开这些人的支持</string>
-    <string name="licenses_description">Android 版 Raitchi 离不开这些项目的支持</string>
+    <string name="contributors_description">AC-NativeNX Android 版的诞生离不开这些人的支持</string>
+    <string name="licenses_description">Android 版 AC-NativeNX 离不开这些项目的支持</string>
     <string name="build">构建版本</string>
     <string name="user_data">用户数据</string>
     <string name="user_data_description">导入导出所有应用数据。\n\n导入数据时，现有的数据均会被删除！\n\n从Citron导入数据可能会导致问题，建议手动导入所有需要的数据。</string>
@@ -628,7 +628,7 @@
     <string name="extended_logging">开启扩展日志</string>
     <string name="extended_logging_description">将最大日志文件大小从 100 MiB 提升至 1GiB。</string>
     <string name="log_filter">日志筛选器</string>
-    <string name="log_filter_description">控制 Raitchi 的日志类别。例如: *:Info Service.LM:Debug</string>
+    <string name="log_filter_description">控制 AC-NativeNX 的日志类别。例如: *:Info Service.LM:Debug</string>
 
     <!-- GPU Logging strings -->
     <string name="gpu_logging_header">GPU 日志</string>
@@ -1159,7 +1159,7 @@
     <string name="app_language_system">跟随系统</string>
     <!-- Static Themes -->
     <string name="static_theme_color">主题颜色</string>
-    <string name="eden_theme">Raitchi</string>
+    <string name="eden_theme">AC-NativeNX</string>
     <string name="violet">紫色</string>
     <string name="blue">蓝色</string>
     <string name="cyan">青色</string>

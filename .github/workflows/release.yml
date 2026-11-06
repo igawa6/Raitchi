@@ -1,0 +1,104 @@
+# AC-NativeNX signed release (tag v*). Refuses to run unless the repository
+# variable NATIVENX_RELEASE_APPROVED is exactly "true" (set by the maintainer
+# only after a real-device test report). Creates a DRAFT release: a human
+# reviews and publishes it.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      verify_signing_only:
+        description: "Only check that the signing secrets unlock (no build, no release)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Release approval gate
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.verify_signing_only) }}
+        env:
+          APPROVED: ${{ vars.NATIVENX_RELEASE_APPROVED }}
+        run: |
+          if [ "$APPROVED" != "true" ]; then
+            echo "::error::NATIVENX_RELEASE_APPROVED is not 'true'. A release needs a real-device report and maintainer approval first."
+            exit 1
+          fi
+          case "$GITHUB_REF" in refs/tags/v*) ;; *) echo "::error::releases are built from v* tags only"; exit 1;; esac
+
+  verify-signing:
+    needs: gate
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Keystore unlocks with the configured alias
+        env:
+          KS_B64: ${{ secrets.NATIVENX_RELEASE_KEYSTORE_B64 }}
+          KS_PASS: ${{ secrets.NATIVENX_RELEASE_KS_PASS }}
+          KEY_ALIAS: ${{ secrets.NATIVENX_RELEASE_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          umask 077
+          ks="$RUNNER_TEMP/release.p12"
+          printf '%s' "$KS_B64" | base64 -d > "$ks"
+          keytool -list -storetype PKCS12 -keystore "$ks" -storepass:env KS_PASS -alias "$KEY_ALIAS" \
+            | grep -E "PrivateKeyEntry|SHA-256|SHA256" || { echo "::error::keystore/alias check failed"; exit 1; }
+          rm -f "$ks"
+
+  build:
+    needs: verify-signing
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.verify_signing_only) }}
+    uses: ./.github/workflows/build.yml
+
+  sign-and-draft:
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.build.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Tag matches RELEASE.json version
+        run: |
+          test "${GITHUB_REF_NAME#v}" = "$VERSION" || { echo "::error::tag $GITHUB_REF_NAME != RELEASE.json $VERSION"; exit 1; }
+      - uses: actions/download-artifact@v8
+        with:
+          name: AC-NativeNX-${{ needs.build.outputs.version }}-${{ github.sha }}
+          path: dist
+      - name: Sign APK with the AC-NativeNX release key
+        env:
+          KS_B64: ${{ secrets.NATIVENX_RELEASE_KEYSTORE_B64 }}
+          KS_PASS: ${{ secrets.NATIVENX_RELEASE_KS_PASS }}
+          KEY_PASS: ${{ secrets.NATIVENX_RELEASE_KEY_PASS }}
+          KEY_ALIAS: ${{ secrets.NATIVENX_RELEASE_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          umask 077
+          apksigner="$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -n1)apksigner"
+          ks="$RUNNER_TEMP/release.p12"
+          printf '%s' "$KS_B64" | base64 -d > "$ks"
+          apk="dist/AC-NativeNX-${VERSION}-arm64-v8a.apk"
+          "$apksigner" sign --ks "$ks" --ks-type PKCS12 --ks-key-alias "$KEY_ALIAS" \
+            --ks-pass env:KS_PASS --key-pass env:KEY_PASS \
+            --v1-signing-enabled false --v2-signing-enabled true --v3-signing-enabled true "$apk"
+          rm -f "$ks"
+          "$apksigner" verify --verbose --print-certs "$apk" | grep -E "Verified|SHA-256"
+          rm -f dist/*.idsig dist/SHA256SUMS
+          (cd dist && sha256sum * > SHA256SUMS && cat SHA256SUMS)
+      - name: Draft release (human publishes)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* --draft --prerelease \
+            --title "AC-NativeNX ${VERSION}" \
+            --notes "AC-NativeNX ${VERSION} (based on Raitchi by igawa6). Corresponding GPL source: AC-NativeNX-${VERSION}-source.tar.gz. Bring your own game and keys; Adreno only, Mali unsupported."

@@ -4,8 +4,8 @@
     <string name="notice_notification_channel_name">Hinweise und Fehler</string>
     <string name="notice_notification_channel_description">Zeigt Benachrichtigungen an, wenn etwas schief läuft.</string>
     <string name="notification_permission_not_granted">Berechtigung für Benachrichtigungen nicht zugelassen!</string>
-    <string name="app_notification_channel_description">Raitchi Switch Emulator Benachrichtigungen</string>
-    <string name="app_notification_running">Raitchi wird ausgeführt</string>
+    <string name="app_notification_channel_description">AC-NativeNX Switch Emulator Benachrichtigungen</string>
+    <string name="app_notification_running">AC-NativeNX wird ausgeführt</string>
     <string name="seconds">Sekunden</string>
 
     <!-- Spinbox strings -->
@@ -198,7 +198,7 @@
 
     <!-- Setup strings -->
     <string name="welcome">Willkommen!</string>
-    <string name="welcome_description">Erfahre, wie du Raitchi einrichtest, und tauche in die Welt der Emulation ein.</string>
+    <string name="welcome_description">Erfahre, wie du AC-NativeNX einrichtest, und tauche in die Welt der Emulation ein.</string>
     <string name="get_started">Erste Schritte</string>
     <string name="keys">Schlüssel</string>
     <string name="keys_description">Wähle deine <b>prod.keys</b> -Datei über die untenstehende Schaltfläche aus.</string>
@@ -315,8 +315,8 @@
     <string name="settings_description">Emulatoreinstellungen konfigurieren</string>
     <string name="search_recently_played">Kürzlich gespielt</string>
     <string name="search_recently_added">Kürzlich hinzugefügt</string>
-    <string name="open_user_folder">Raitchi-Ordner öffnen</string>
-    <string name="open_user_folder_description">Raitchi\'s interne Dateien verwalten</string>
+    <string name="open_user_folder">AC-NativeNX-Ordner öffnen</string>
+    <string name="open_user_folder_description">AC-NativeNX\'s interne Dateien verwalten</string>
     <string name="app_settings_description">Verhalten und Aussehen der App verändern</string>
     <string name="no_file_manager">Kein Datei-Manager gefunden</string>
     <string name="notification_no_directory_link_description">Bitte suche den Benutzerordner manuell über die Seitenleiste des Datei-Managers.</string>
@@ -337,7 +337,7 @@ Wirklich fortfahren?</string>
     <string name="firmware_installed_failure_description">Stelle sicher, dass sich die Firmware-NCA-Dateien im Stammverzeichnis der ZIP-Datei befinden, und versuche es erneut.</string>
     <string name="firmware_uninstalled_failure">Deinstallation der Firmware fehlgeschlagen</string>
     <string name="share_log">Fehlerbehebungs-Protokolle teilen</string>
-    <string name="share_log_description">Fehlerbehebungs-Protokolle an Raitchi zur Fehlerbehebung absenden</string>
+    <string name="share_log_description">Fehlerbehebungs-Protokolle an AC-NativeNX zur Fehlerbehebung absenden</string>
     <string name="share_log_missing">Keine Protokolldatei gefunden</string>
     <string name="share_gpu_log">GPU-Protokolle teilen</string>
     <string name="share_gpu_log_description">Teile Edens GPU-Protokolldatei, um Grafikprobleme zu beheben</string>
@@ -354,7 +354,7 @@ Wirklich fortfahren?</string>
     <string name="install_game_content_success_overwrite">%1$d erfolgreich überschrieben</string>
     <string name="custom_driver_not_supported">Benutzerdefinierte Treiber werden nicht unterstützt</string>
     <string name="custom_driver_not_supported_description">Das Laden von benutzerdefinierten Treibern wird für dieses Gerät momentan nicht unterstützt.\nSchau später einfach nochmal nach, ob die Unterstützung hinzugefügt wurde!</string>
-    <string name="manage_yuzu_data">Raitchi-Daten verwalten</string>
+    <string name="manage_yuzu_data">AC-NativeNX-Daten verwalten</string>
     <string name="manage_yuzu_data_description">Importieren/Exportieren Sie Firmware, Schlüssel, Benutzerdaten und mehr!</string>
     <string name="game_folders">Spielordner</string>
     <string name="deep_scan">Tiefer Scan</string>
@@ -412,8 +412,8 @@ Wirklich fortfahren?</string>
     <string name="copied_to_clipboard">In die Zwischenablage kopiert</string>
     <string name="about_app_description">Ein quelloffener Switch-Emulator</string>
     <string name="contributors">Beitragende</string>
-    <string name="contributors_description">Personen, die Raitchi für Android möglich gemacht haben</string>
-    <string name="licenses_description">Projekte, die Raitchi für Android möglich machen </string>
+    <string name="contributors_description">Personen, die AC-NativeNX für Android möglich gemacht haben</string>
+    <string name="licenses_description">Projekte, die AC-NativeNX für Android möglich machen </string>
     <string name="build">Build</string>
     <string name="user_data">Nutzerdaten</string>
     <string name="user_data_description">Alle App-Daten importieren/exportieren\n\nBeim Importieren von Nutzerdaten werden alle existierenden Nutzerdaten gelöscht!\n\nDaten aus Citron zu importieren kann Probleme verursachen. Es wird empfohlen, alle benötigten Daten manuell zu importieren.</string>
@@ -1041,7 +1041,7 @@ Wirklich fortfahren?</string>
     <string name="app_language_system">System folgen</string>
     <!-- Static Themes -->
     <string name="static_theme_color">Designfarbe</string>
-    <string name="eden_theme">Raitchi</string>
+    <string name="eden_theme">AC-NativeNX</string>
     <string name="violet">Violett </string>
     <string name="blue">Blau</string>
     <string name="cyan">Cyan</string>

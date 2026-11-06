@@ -16,7 +16,7 @@ import package_shared_android as engine
 
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = ROOT / "build/eden-shell"
-PACKAGE = "dev.igawa6.raitchi"
+PACKAGE = "com.accreation.nativenx"
 LAUNCHER = "org.yuzu.yuzu_emu.ui.main.MainActivity"
 EDEN_BASE = "989768aa46"
 SHELL_LOCK = ROOT / "shell.lock.json"

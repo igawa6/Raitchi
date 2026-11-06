@@ -155,7 +155,7 @@
 
     <!-- Setup strings -->
     <string name="welcome">ようこそ!</string>
-    <string name="welcome_description">&lt;b>Raitchi&lt;/b> のセットアップ方法を学び、エミュレーションに飛び込みましょう。</string>
+    <string name="welcome_description">&lt;b>AC-NativeNX&lt;/b> のセットアップ方法を学び、エミュレーションに飛び込みましょう。</string>
     <string name="get_started">はじめる</string>
     <string name="keys">キー</string>
     <string name="keys_description">下のボタンから &lt;b>prod.keys&lt;/b> ファイルを選択してください。</string>
@@ -211,8 +211,8 @@
     <string name="settings_description">エミュレーターの設定を構成します</string>
     <string name="search_recently_played">最近プレイした</string>
     <string name="search_recently_added">最近追加された</string>
-    <string name="open_user_folder">Raitchi フォルダを開く</string>
-    <string name="open_user_folder_description">Raitchi内部のファイルを管理します</string>
+    <string name="open_user_folder">AC-NativeNX フォルダを開く</string>
+    <string name="open_user_folder_description">AC-NativeNX内部のファイルを管理します</string>
     <string name="no_file_manager">ファイルマネージャーが見つかりませんでした</string>
     <string name="notification_no_directory_link_description">ファイルマネージャのサイドパネルでユーザーフォルダを手動で探してください。</string>
     <string name="manage_save_data">セーブデータ</string>
@@ -244,7 +244,7 @@
     <string name="install_game_content_success_install">%1$d のインストールに成功しました</string>
     <string name="install_game_content_success_overwrite">%1$d の上書きに成功しました</string>
     <string name="custom_driver_not_supported">カスタムドライバはサポートされていません</string>
-    <string name="manage_yuzu_data">Raitchi データを管理</string>
+    <string name="manage_yuzu_data">AC-NativeNX データを管理</string>
     <string name="manage_yuzu_data_description">ファームウェア、キー、ユーザデータなどのインポート・エクスポート</string>
     <string name="game_folders">ゲームフォルダ</string>
     <string name="deep_scan">詳細スキャン</string>
@@ -298,7 +298,7 @@
     <string name="copied_to_clipboard">クリップボードにコピーしました</string>
     <string name="about_app_description">オープンソースのSwitchエミュレータ</string>
     <string name="contributors">貢献者</string>
-    <string name="licenses_description">Raitchi for Androidの作成を可能にしたプロジェクト</string>
+    <string name="licenses_description">AC-NativeNX for Androidの作成を可能にしたプロジェクト</string>
     <string name="build">ビルド</string>
     <string name="user_data">ユーザデータ</string>
     <string name="exporting_user_data">ユーザデータをエクスポート中...</string>

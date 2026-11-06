@@ -227,7 +227,7 @@
 
     <!-- Setup strings -->
     <string name="welcome">خوش آمدید!</string>
-    <string name="welcome_description">نحوه راه اندازی &lt;b>Raitchi&lt;/b> و شبیه سازی را بیاموزید.</string>
+    <string name="welcome_description">نحوه راه اندازی &lt;b>AC-NativeNX&lt;/b> و شبیه سازی را بیاموزید.</string>
     <string name="get_started">شروع کنید</string>
     <string name="keys">کلیدها</string>
     <string name="keys_description">فایل &lt;b>prod.keys&lt;/b> خود را با دکمه زیر انتخاب کنید.</string>
@@ -282,8 +282,8 @@
     <string name="settings_description">پیکربندی تنظیمات شبیه‌ساز</string>
     <string name="search_recently_played">آخرین بازی شده‌ها</string>
     <string name="search_recently_added">به تازگی اضافه شده‌ها</string>
-    <string name="open_user_folder">باز کردن پوشه Raitchi</string>
-    <string name="open_user_folder_description">مدیریت فایل‌های داخلی Raitchi</string>
+    <string name="open_user_folder">باز کردن پوشه AC-NativeNX</string>
+    <string name="open_user_folder_description">مدیریت فایل‌های داخلی AC-NativeNX</string>
     <string name="no_file_manager">هیچ برنامه مدیریت فایلی پیدا نشد</string>
     <string name="notification_no_directory_link_description">لطفاً پوشه کاربری را با استفاده از پنل کناری برنامه مدیریت فایل به صورت دستی پیدا کنید.</string>
     <string name="manage_save_data">مدیریت ذخیره داده‌ها</string>
@@ -301,7 +301,7 @@
     <string name="firmware_installed_failure">نصب ثابت‌افزار ناموفق بود</string>
     <string name="firmware_installed_failure_description">مطمئن شوید که فایل‌های nca ثابت‌افزار در ریشه فایل فشرده هستند و دوباره امتحان کنید.</string>
     <string name="share_log">اشتراک گزارش اشکال زدایی</string>
-    <string name="share_log_description">فایل گزارش Raitchi را برای رفع اشکال به اشتراک بگذارید</string>
+    <string name="share_log_description">فایل گزارش AC-NativeNX را برای رفع اشکال به اشتراک بگذارید</string>
     <string name="share_log_missing">هیچ فایل گزارشی یافت نشد</string>
     <string name="install_game_content">نصب محتوای بازی</string>
     <string name="install_game_content_description">آپدیت های بازی یا DLC را نصب کنید</string>
@@ -315,7 +315,7 @@
     <string name="install_game_content_success_overwrite">%1$dبا موفقیت بازنویسی شد</string>
     <string name="custom_driver_not_supported">درایورهای سفارشی پشتیبانی نمی‌شوند</string>
     <string name="custom_driver_not_supported_description">بارگیری درایور سفارشی در حال حاضر برای این دستگاه پشتیبانی نمی‌شود.\nاین گزینه را دوباره در آینده بررسی کنید تا ببینید آیا پشتیبانی اضافه شده است یا خیر!</string>
-    <string name="manage_yuzu_data">مدیریت داده‌های Raitchi</string>
+    <string name="manage_yuzu_data">مدیریت داده‌های AC-NativeNX</string>
     <string name="manage_yuzu_data_description">وارد کردن/صادر کردن ثابت‌افزار، کلیدها، داده‌های کاربر، و موارد دیگر!</string>
     <string name="game_folders">پوشه‌های بازی</string>
     <string name="deep_scan">بررسی عمیق</string>
@@ -365,8 +365,8 @@
     <string name="copied_to_clipboard">در کلیپ‌بورد کپی شد</string>
     <string name="about_app_description">یک شبیه‌ساز سوئیچ منبع باز</string>
     <string name="contributors">مشارکت کنندگان</string>
-    <string name="contributors_description">Made with \u2764 from the Raitchi team</string>
-    <string name="licenses_description">پروژه‌هایی که Raitchi را برای اندروید ممکن می‌سازند</string>
+    <string name="contributors_description">Made with \u2764 from the AC-NativeNX team</string>
+    <string name="licenses_description">پروژه‌هایی که AC-NativeNX را برای اندروید ممکن می‌سازند</string>
     <string name="build">ساخت</string>
     <string name="user_data">داده کاربر</string>
     <string name="user_data_description">همه داده‌های برنامه را وارد/صادر کنید.\n\nهنگام وارد کردن داده‌های کاربر، همه داده‌های کاربر موجود حذف خواهند شد!</string>

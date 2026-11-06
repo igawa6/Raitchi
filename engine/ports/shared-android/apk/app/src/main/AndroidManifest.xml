@@ -16,7 +16,7 @@
     <application android:allowBackup="false" android:appCategory="game"
         android:hasFragileUserData="true" android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher" android:isGame="true"
-        android:label="Raitchi" android:allowNativeHeapPointerTagging="false"
+        android:label="AC-NativeNX" android:allowNativeHeapPointerTagging="false"
         android:extractNativeLibs="true" android:theme="@style/AppTheme">
         <meta-data android:name="android.game_mode_config" android:resource="@xml/game_mode_config" />
         <profileable android:shell="true" />

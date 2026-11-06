@@ -155,7 +155,7 @@
 
     <!-- Setup strings -->
     <string name="welcome">Chào mừng!</string>
-    <string name="welcome_description">Tìm hiểu cách cài đặt &lt;b>Raitchi&lt;/b> và bắt đầu giả lập.</string>
+    <string name="welcome_description">Tìm hiểu cách cài đặt &lt;b>AC-NativeNX&lt;/b> và bắt đầu giả lập.</string>
     <string name="get_started">Bắt đầu</string>
     <string name="keys">Chìa khóa</string>
     <string name="keys_description">Chọn file &lt;b>prod.keys&lt;/b> của bạn bằng nút bên dưới.</string>
@@ -204,8 +204,8 @@
     <string name="settings_description">Tinh chỉnh cài đặt giả lập</string>
     <string name="search_recently_played">Đã chơi gần đây</string>
     <string name="search_recently_added">Đã thêm gần đây</string>
-    <string name="open_user_folder">Mở thư mục Raitchi</string>
-    <string name="open_user_folder_description">Quản lý file nội bộ của Raitchi</string>
+    <string name="open_user_folder">Mở thư mục AC-NativeNX</string>
+    <string name="open_user_folder_description">Quản lý file nội bộ của AC-NativeNX</string>
     <string name="no_file_manager">Không tìm thấy trình quản lý tệp</string>
     <string name="notification_no_directory_link_description">Vui lòng xác định thư mục người dùng với bảng điều khiển bên của trình quản lý tệp thủ công.</string>
     <string name="manage_save_data">Quản lý dữ liệu save</string>
@@ -218,7 +218,7 @@
     <string name="firmware_installing">Đang cài đặt firmware</string>
     <string name="firmware_installed_failure">Cài đặt firmware thất bại</string>
     <string name="share_log">Chia sẽ log gỡ lỗi</string>
-    <string name="share_log_description">Chia sẻ tệp log của Raitchi để gỡ lỗi vấn đề</string>
+    <string name="share_log_description">Chia sẻ tệp log của AC-NativeNX để gỡ lỗi vấn đề</string>
     <string name="share_log_missing">Không tìm thấy tệp log</string>
     <string name="install_game_content">Cài đặt nội dung game</string>
     <string name="install_game_content_description">Cài đặt cập nhật game hoặc DLC</string>
@@ -285,7 +285,7 @@
     <string name="copied_to_clipboard">Đã sao chép vào bộ nhớ tạm</string>
     <string name="about_app_description">Một giả lập Switch mã nguồn mở</string>
     <string name="contributors">Người đóng góp</string>
-    <string name="licenses_description">Các dự án làm cho Raitchi trên Android trở thành điều có thể</string>
+    <string name="licenses_description">Các dự án làm cho AC-NativeNX trên Android trở thành điều có thể</string>
     <string name="build">Dựng</string>
     <!-- General settings strings -->
     <string name="frame_limit_enable">Giới hạn tốc độ</string>

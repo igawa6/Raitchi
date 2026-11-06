@@ -5,8 +5,8 @@
     <string name="notice_notification_channel_name">Уведомления и ошибки</string>
     <string name="notice_notification_channel_description">Показывает уведомления, когда что-то пошло не так</string>
     <string name="notification_permission_not_granted">Вы не предоставили разрешение на уведомления!</string>
-    <string name="app_notification_channel_description">Уведомления эмулятора switch Raitchi</string>
-    <string name="app_notification_running">Raitchi работает</string>
+    <string name="app_notification_channel_description">Уведомления эмулятора switch AC-NativeNX</string>
+    <string name="app_notification_running">AC-NativeNX работает</string>
     <string name="seconds">Секунды</string>
 
     <!-- Spinbox strings -->
@@ -200,7 +200,7 @@
 
     <!-- Setup strings -->
     <string name="welcome">Добро пожаловать!</string>
-    <string name="welcome_description">Узнайте, как настроить &lt;b>Raitchi&lt;/b> и перейти прямиком к эмуляции.</string>
+    <string name="welcome_description">Узнайте, как настроить &lt;b>AC-NativeNX&lt;/b> и перейти прямиком к эмуляции.</string>
     <string name="get_started">Начать</string>
     <string name="keys">Ключи</string>
     <string name="keys_description">Выберите ваш файл &lt;b>prod.keys&lt;/b> с помощью кнопки ниже.</string>
@@ -363,8 +363,8 @@
     <string name="settings_description">Настройка параметров эмулятора</string>
     <string name="search_recently_played">Недавно сыгранные</string>
     <string name="search_recently_added">Недавно добавлено</string>
-    <string name="open_user_folder">Открыть папку Raitchi</string>
-    <string name="open_user_folder_description">Управление внутренними файлами Raitchi</string>
+    <string name="open_user_folder">Открыть папку AC-NativeNX</string>
+    <string name="open_user_folder_description">Управление внутренними файлами AC-NativeNX</string>
     <string name="app_settings_description">Изменяет поведение и внешний вид приложения</string>
     <string name="no_file_manager">Не найден файловый менеджер</string>
     <string name="notification_no_directory_link_description">Пожалуйста, найдите папку пользователя с помощью боковой панели файлового менеджера вручную.</string>
@@ -384,10 +384,10 @@
     <string name="firmware_installed_failure_description">Убедитесь что файлы прошивки nca находятся в корне zip-архива и повторите попытку.</string>
     <string name="firmware_uninstalled_failure">Не удалось удалить прошивку</string>
     <string name="share_log">Поделиться журналом отладки</string>
-    <string name="share_log_description">Поделиться журналом отладки Raitchi для устранения проблем</string>
+    <string name="share_log_description">Поделиться журналом отладки AC-NativeNX для устранения проблем</string>
     <string name="share_log_missing">Файл журнала не найден</string>
     <string name="share_gpu_log">Поделиться журналом ГПУ</string>
-    <string name="share_gpu_log_description">Поделиться журналом ГПУ Raitchi для отладки графики</string>
+    <string name="share_gpu_log_description">Поделиться журналом ГПУ AC-NativeNX для отладки графики</string>
     <string name="share_gpu_log_missing">Журнал ГПУ не найден</string>
     <string name="install_game_content">Установить игровой контент</string>
     <string name="install_game_content_description">Установить обновления игры или дополнений</string>
@@ -401,7 +401,7 @@
     <string name="install_game_content_success_overwrite">%1$d Успешно перезаписано</string>
     <string name="custom_driver_not_supported">Пользовательские драйверы не поддерживаются</string>
     <string name="custom_driver_not_supported_description">Загрузка пользовательского драйвера в настоящее время не поддерживается для этого устройства.\nПроверьте этот параметр в будущем чтобы узнать была ли добавлена ​​поддержка!</string>
-    <string name="manage_yuzu_data">Управление данными Raitchi</string>
+    <string name="manage_yuzu_data">Управление данными AC-NativeNX</string>
     <string name="manage_yuzu_data_description">Импортируйте/экспортируйте прошивку, ключи, пользовательские данные и многое другое!</string>
     <string name="game_folders">Папки с играми</string>
     <string name="deep_scan">Глубокий анализ</string>
@@ -463,8 +463,8 @@
     <string name="copied_to_clipboard">Скопировано в буфер обмена</string>
     <string name="about_app_description">Эмулятор Switch с открытым исходным кодом</string>
     <string name="contributors">Контрибьюторы</string>
-    <string name="contributors_description">Люди, благодаря которым появился Raitchi для Android</string>
-    <string name="licenses_description">Проекты, которые сделали Raitchi для Android возможным</string>
+    <string name="contributors_description">Люди, благодаря которым появился AC-NativeNX для Android</string>
+    <string name="licenses_description">Проекты, которые сделали AC-NativeNX для Android возможным</string>
     <string name="build">Сборка</string>
     <string name="user_data">Данные пользователя</string>
     <string name="user_data_description">Импорт/экспорт всех данных\n\nПри импорте все текущие данные будут удалены!\n\nИмпорт из Citron может вызвать ошибки. Рекомендуется ручной перенос.</string>
@@ -627,7 +627,7 @@
     <string name="extended_logging">Включить расширенное логирование</string>
     <string name="extended_logging_description">Увеличивает максимальный размер файла журнала со 100 МБ до 1 ГБ.</string>
     <string name="log_filter">Фильтр журнала</string>
-    <string name="log_filter_description">Управляет категориями журнала Raitchi. Пример: :Info Service.LM:Debug</string>
+    <string name="log_filter_description">Управляет категориями журнала AC-NativeNX. Пример: :Info Service.LM:Debug</string>
 
     <!-- GPU Logging strings -->
     <string name="gpu_logging_header">Ведение журнала ГПУ</string>
@@ -1158,7 +1158,7 @@
     <string name="app_language_system">Следовать системе</string>
     <!-- Static Themes -->
     <string name="static_theme_color">Цвет темы</string>
-    <string name="eden_theme">Raitchi</string>
+    <string name="eden_theme">AC-NativeNX</string>
     <string name="violet">Фиолетовый </string>
     <string name="blue">Синий</string>
     <string name="cyan">Циановый</string>

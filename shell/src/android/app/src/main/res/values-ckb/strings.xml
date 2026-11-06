@@ -155,7 +155,7 @@
 
     <!-- Setup strings -->
     <string name="welcome">بەخێربێیت!</string>
-    <string name="welcome_description">فێربە چۆن &lt;b>Raitchi&lt;/b> ڕێکبخەیت و بچییە ناو ئیمولەیشن.</string>
+    <string name="welcome_description">فێربە چۆن &lt;b>AC-NativeNX&lt;/b> ڕێکبخەیت و بچییە ناو ئیمولەیشن.</string>
     <string name="get_started">دەست پێبکە</string>
     <string name="keys">کلیلەکان</string>
     <string name="keys_description">فایلی &lt;b>prod.keys&lt;/b> هەڵبژێرە بە دوگمەی خوارەوە.</string>

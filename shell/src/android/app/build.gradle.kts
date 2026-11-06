@@ -18,13 +18,13 @@ android {
     compileSdk = 36
     ndkVersion = "27.2.12479018"
     defaultConfig {
-        applicationId = "dev.igawa6.raitchi"
+        applicationId = "com.accreation.nativenx"
         minSdk = 30
         targetSdk = 36
-        versionCode = 2
-        versionName = "0.0.2"
+        versionCode = 100
+        versionName = "0.1.0"
         ndk { abiFilters += "arm64-v8a" }
-        manifestPlaceholders += mapOf("appNameBase" to "Raitchi", "appNameSuffix" to "")
+        manifestPlaceholders += mapOf("appNameBase" to "AC-NativeNX", "appNameSuffix" to "")
     }
     buildFeatures { viewBinding = true; buildConfig = true }
     testOptions { unitTests.isIncludeAndroidResources = true }

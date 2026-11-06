@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "id": "raitchi-shell",
-  "url": "https://github.com/igawa6/Raitchi",
+  "url": "https://github.com/ptichalouf/AC-NativeNX",
   "path": "../shell-with-history",
   "commit": "989768aa46720e3fcab9e2111e3ddd70819c382b",
   "upstream": {
@@ -11,7 +11,7 @@
   "role": "Exact upstream base plus hashed uncommitted Android source overlay; not a published Raitchi integration commit. Restore through the supplied overlay manifest.",
   "source_overlay": {
     "manifest": "../shell-overlay.json",
-    "sha256": "1c00b545d61b6ab9d8bbeffa77476e2d6f8488ca5b558792b711a9a75f43c4c5",
+    "sha256": "0c9d2e2b94d55e0cf90a6149ad3d78dfdc9e46ea8fb22488a5e30b071a3a52de",
     "scope": "uncommitted source snapshot",
     "integration_commit": null,
     "maintained_fork_integration_required": true

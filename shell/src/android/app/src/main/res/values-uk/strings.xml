@@ -4,8 +4,8 @@
     <string name="notice_notification_channel_name">Сповіщення та помилки</string>
     <string name="notice_notification_channel_description">Показує сповіщення у разі виникнення проблем.</string>
     <string name="notification_permission_not_granted">Дозвіл на сповіщення не надано!</string>
-    <string name="app_notification_channel_description">Сповіщення емулятора Switch Raitchi</string>
-    <string name="app_notification_running">Raitchi працює</string>
+    <string name="app_notification_channel_description">Сповіщення емулятора Switch AC-NativeNX</string>
+    <string name="app_notification_running">AC-NativeNX працює</string>
     <string name="seconds">с</string>
 
     <!-- Spinbox strings -->
@@ -198,7 +198,7 @@
 
     <!-- Setup strings -->
     <string name="welcome">Вітаємо!</string>
-    <string name="welcome_description">Дізнайтеся, як налаштувати &lt;b>Raitchi&lt;/b> та перейти до емуляції.</string>
+    <string name="welcome_description">Дізнайтеся, як налаштувати &lt;b>AC-NativeNX&lt;/b> та перейти до емуляції.</string>
     <string name="get_started">Розпочати</string>
     <string name="keys">Ключі</string>
     <string name="keys_description">Виберіть ваш файл &lt;b>prod.keys&lt;/b> за допомогою кнопки нижче.</string>
@@ -287,8 +287,8 @@
     <string name="settings_description">Налаштування параметрів емулятора</string>
     <string name="search_recently_played">Нещодавно зіграно</string>
     <string name="search_recently_added">Нещодавно додано</string>
-    <string name="open_user_folder">Відкрити теку Raitchi</string>
-    <string name="open_user_folder_description">Керування внутрішніми файлами Raitchi</string>
+    <string name="open_user_folder">Відкрити теку AC-NativeNX</string>
+    <string name="open_user_folder_description">Керування внутрішніми файлами AC-NativeNX</string>
     <string name="app_settings_description">Змінити зовнішній вигляд і поведінку застосунку</string>
     <string name="no_file_manager">Не знайдено файлового менеджера</string>
     <string name="notification_no_directory_link_description">Будь ласка, знайдіть теку користувача за допомогою бічної панелі файлового менеджера вручну.</string>
@@ -311,7 +311,7 @@
     <string name="share_log_description">Поділіться лог-файлом для діагностики та допомоги з проблемою.</string>
     <string name="share_log_missing">Файл логу не знайдено</string>
     <string name="share_gpu_log">Поділитися журналом ГП</string>
-    <string name="share_gpu_log_description">Поділитися файлом журналу ГП Raitchi’а для зневадження графічних помилок</string>
+    <string name="share_gpu_log_description">Поділитися файлом журналу ГП AC-NativeNX’а для зневадження графічних помилок</string>
     <string name="share_gpu_log_missing">Файл журналу ГП не виявлено</string>
     <string name="install_game_content">Встановити вміст гри</string>
     <string name="install_game_content_description">Встановити оновлення або DLC</string>
@@ -387,8 +387,8 @@
     <string name="copied_to_clipboard">Скопійовано в буфер обміну</string>
     <string name="about_app_description">Емулятор Switch із відкритим вихідним кодом</string>
     <string name="contributors">Автори проєкту</string>
-    <string name="contributors_description">Люди, які зробили Raitchi на Android можливим</string>
-    <string name="licenses_description">Проєкти, які зробили запуск Raitchi на Android можливим</string>
+    <string name="contributors_description">Люди, які зробили AC-NativeNX на Android можливим</string>
+    <string name="licenses_description">Проєкти, які зробили запуск AC-NativeNX на Android можливим</string>
     <string name="build">Збірка</string>
     <string name="user_data">Дані користувача</string>
     <string name="user_data_description">Імпортувати/експортувати всі дані програми.\n\nПри імпорті даних користувача всі наявні користувацькі дані буде видалено!\n\nЗавантаження даних із Citron може викликати проблеми. Рекомендується імпортувати всі необхідні дані звідти вручну.</string>
@@ -1048,7 +1048,7 @@
     <string name="app_language_system">Як у системі</string>
     <!-- Static Themes -->
     <string name="static_theme_color">Колір теми</string>
-    <string name="eden_theme">Raitchi</string>
+    <string name="eden_theme">AC-NativeNX</string>
     <string name="violet">Фіолетовий</string>
     <string name="blue">Синій</string>
     <string name="cyan">Блакитний</string>

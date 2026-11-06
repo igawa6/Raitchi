@@ -4,8 +4,8 @@
     <string name="notice_notification_channel_name">Avvisi ed errori</string>
     <string name="notice_notification_channel_description">Mostra le notifiche quando qualcosa va storto.</string>
     <string name="notification_permission_not_granted">Autorizzazione di notifica non concessa!</string>
-    <string name="app_notification_channel_description">Notifiche dell\'emulatore Raitchi Switch</string>
-    <string name="app_notification_running">Raitchi è in esecuzione</string>
+    <string name="app_notification_channel_description">Notifiche dell\'emulatore AC-NativeNX Switch</string>
+    <string name="app_notification_running">AC-NativeNX è in esecuzione</string>
     <string name="seconds">secondi</string>
 
     <!-- Spinbox strings -->
@@ -172,7 +172,7 @@
 
     <!-- Setup strings -->
     <string name="welcome">Benvenuto!</string>
-    <string name="welcome_description">Scopri come configurare &lt;b>Raitchi&lt;/b> e passare all\'emulazione.</string>
+    <string name="welcome_description">Scopri come configurare &lt;b>AC-NativeNX&lt;/b> e passare all\'emulazione.</string>
     <string name="get_started">Iniziare</string>
     <string name="keys">Chiavi</string>
     <string name="keys_description">Seleziona il tuo file &lt;b>prod.keys&lt;/b> con il pulsante in basso.</string>
@@ -233,8 +233,8 @@
     <string name="settings_description">Configura le impostazioni dell\'emulatore</string>
     <string name="search_recently_played">Giocati recentemente</string>
     <string name="search_recently_added">Aggiunti recentemente</string>
-    <string name="open_user_folder">Apri la cartella di Raitchi</string>
-    <string name="open_user_folder_description">Gestisci i file interni di Raitchi</string>
+    <string name="open_user_folder">Apri la cartella di AC-NativeNX</string>
+    <string name="open_user_folder_description">Gestisci i file interni di AC-NativeNX</string>
     <string name="app_settings_description">Modifica il comportamento e l\'aspetto dell\'app</string>
     <string name="no_file_manager">Nessun file manager trovato</string>
     <string name="notification_no_directory_link_description">Per favore individua la cartella dell\'utente manualmente con il pannello laterale del file manager.</string>
@@ -254,7 +254,7 @@
     <string name="firmware_installed_failure_description">Accertati che i file .nca del firmware siano contenuti direttamente nella radice dello .zip e riprova.</string>
     <string name="firmware_uninstalled_failure">Disinstallazione del firmware fallita</string>
     <string name="share_log">Condividi log di debug</string>
-    <string name="share_log_description">Condividi i log di Raitchi per ricevere supporto</string>
+    <string name="share_log_description">Condividi i log di AC-NativeNX per ricevere supporto</string>
     <string name="share_log_missing">Nessun file di log trovato</string>
     <string name="install_game_content">Installa contenuti di gioco</string>
     <string name="install_game_content_description">Installa aggiornamenti o DLC</string>
@@ -268,7 +268,7 @@
     <string name="install_game_content_success_overwrite">%1$dsovrascritto con successo</string>
     <string name="custom_driver_not_supported">I driver personalizzati non sono supportati.</string>
     <string name="custom_driver_not_supported_description">I driver personalizzati non sono attualmente supportati per questo dispositivo.\nRicontrolla in futuro se il supporto è stato aggiunto.</string>
-    <string name="manage_yuzu_data">Gestisci i dati di Raitchi</string>
+    <string name="manage_yuzu_data">Gestisci i dati di AC-NativeNX</string>
     <string name="manage_yuzu_data_description">Importa/Esporta il firmware, le keys, i dati utente, e altro!</string>
     <string name="game_folders">Cartelle di gioco</string>
     <string name="deep_scan">Scansione Sotto-Cartelle</string>
@@ -327,7 +327,7 @@
     <string name="copied_to_clipboard">Copiato negli appunti</string>
     <string name="about_app_description">Un emulatore della Switch open-source.</string>
     <string name="contributors">Collaboratori</string>
-    <string name="licenses_description">Progetti che rendono Raitchi per Android possibile</string>
+    <string name="licenses_description">Progetti che rendono AC-NativeNX per Android possibile</string>
     <string name="build">Compilazione</string>
     <string name="user_data">Dati Utente</string>
     <string name="user_data_description">Importa/Esporta tutti i dati dell\'app.\n\nQuando si importano nuovi dati utente, tutti quelli esistenti verranno cancellati!\n\nImportare dati da Citron può causare problemi. È raccomandato importare manualmente tutti i dati utili.</string>

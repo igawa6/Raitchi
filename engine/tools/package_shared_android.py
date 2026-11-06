@@ -314,7 +314,7 @@ def stage(sdk, libraries, native_reports, manifest_digest, toolkit=None):
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(path, target)
         for path in (temporary / "app/src/main/res").glob("values*/strings.xml"):
-            path.write_text(path.read_text().replace("LAS Recomp", "Raitchi"))
+            path.write_text(path.read_text().replace("LAS Recomp", "AC-NativeNX"))
         (temporary / "local.properties").write_text("sdk.dir=" + str(sdk) + "\n")
         root_boost = (activity.parent / "RootBoost.java").read_text()
         if ("return false;" not in root_boost or any(word in root_boost for word in ("ProcessBuilder", "Runtime.getRuntime", "SCRIPT", '"su"'))):

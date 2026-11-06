@@ -5,8 +5,8 @@
     <string name="notice_notification_channel_name">通知和錯誤</string>
     <string name="notice_notification_channel_description">發生錯誤時顯示通知</string>
     <string name="notification_permission_not_granted">未授予通知權限！</string>
-    <string name="app_notification_channel_description">Raitchi 模擬器通知</string>
-    <string name="app_notification_running">Raitchi 正在執行</string>
+    <string name="app_notification_channel_description">AC-NativeNX 模擬器通知</string>
+    <string name="app_notification_running">AC-NativeNX 正在執行</string>
     <string name="seconds">秒</string>
 
     <!-- Spinbox strings -->
@@ -84,7 +84,7 @@
     <string name="soc_overlay_options">裝置疊加層</string>
     <string name="soc_overlay_options_description">設定裝置疊加層中顯示的資訊</string>
 
-    <string name="show_build_id">顯示 Raitchi 的組建版本</string>
+    <string name="show_build_id">顯示 AC-NativeNX 的組建版本</string>
     <string name="show_driver_version">顯示圖形驅動程式的版本</string>
     <string name="show_device_model">顯示裝置型號</string>
     <string name="show_gpu_model">顯示 GPU 型號</string>
@@ -200,7 +200,7 @@
 
     <!-- Setup strings -->
     <string name="welcome">歡迎！</string>
-    <string name="welcome_description">瞭解如何設定 <b>Raitchi</b> 並開始模擬</string>
+    <string name="welcome_description">瞭解如何設定 <b>AC-NativeNX</b> 並開始模擬</string>
     <string name="get_started">開始使用</string>
     <string name="keys">金鑰</string>
     <string name="keys_description">使用下方的按鈕安裝您的 <b>prod.keys</b> 檔案</string>
@@ -350,7 +350,7 @@
     <string name="lossless_scaling_replace">更換</string>
     <string name="lossless_scaling_remove">刪除</string>
     <string name="lossless_scaling_remove_description">刪除已安裝的 Lossless.dll 及預先編譯的著色器</string>
-    <string name="lossless_scaling_remove_confirmation">影格生成功能會停止運作直到您重新安裝Lossless.dll，您的 Lossless.dll原始檔不會被 Raitchi 修改</string>
+    <string name="lossless_scaling_remove_confirmation">影格生成功能會停止運作直到您重新安裝Lossless.dll，您的 Lossless.dll原始檔不會被 AC-NativeNX 修改</string>
     <string name="lossless_scaling_missing">Lossless.dll 未安裝</string>
     <string name="lossless_scaling_missing_description">前往 設定 -&gt; Lossless Scaling 安裝以使用影格生成功能</string>
     <string name="lossless_scaling_locked">請先關閉遊戲</string>
@@ -370,9 +370,9 @@
     <string name="settings_description">調整模擬器設定</string>
     <string name="search_recently_played">最近遊玩</string>
     <string name="search_recently_added">最近新增</string>
-    <string name="open_user_folder">開啟 Raitchi 資料夾</string>
-    <string name="open_user_folder_description">管理 Raitchi 的內部檔案</string>
-    <string name="app_settings_description">自訂 Raitchi 的主題與介面</string>
+    <string name="open_user_folder">開啟 AC-NativeNX 資料夾</string>
+    <string name="open_user_folder_description">管理 AC-NativeNX 的內部檔案</string>
+    <string name="app_settings_description">自訂 AC-NativeNX 的主題與介面</string>
     <string name="no_file_manager">找不到檔案管理員</string>
     <string name="notification_no_directory_link_description">請使用檔案管理員的側邊面板手動定位到使用者資料夾</string>
     <string name="manage_save_data">管理儲存資料</string>
@@ -391,10 +391,10 @@
     <string name="firmware_installed_failure_description">請確保韌體 nca 檔案位於 zip 壓縮檔的根目錄後再試一次</string>
     <string name="firmware_uninstalled_failure">韌體解除安裝失敗</string>
     <string name="share_log">分享偵錯記錄</string>
-    <string name="share_log_description">分享 Raitchi 的記錄檔以便對相關問題進行偵錯</string>
+    <string name="share_log_description">分享 AC-NativeNX 的記錄檔以便對相關問題進行偵錯</string>
     <string name="share_log_missing">找不到日誌檔案</string>
     <string name="share_gpu_log">分享 GPU 日誌</string>
-    <string name="share_gpu_log_description">分享 Raitchi 的 GPU 日誌以對圖形問題進行偵錯</string>
+    <string name="share_gpu_log_description">分享 AC-NativeNX 的 GPU 日誌以對圖形問題進行偵錯</string>
     <string name="share_gpu_log_missing">找不到 GPU 日誌檔案</string>
     <string name="install_game_content">安裝遊戲內容</string>
     <string name="install_game_content_description">安裝遊戲更新或 DLC</string>
@@ -408,7 +408,7 @@
     <string name="install_game_content_success_overwrite">%1$d 覆寫成功</string>
     <string name="custom_driver_not_supported">您的裝置不支援自訂驅動程式</string>
     <string name="custom_driver_not_supported_description">此裝置不支援注入自訂驅動程式\n請以後再來查看是否已新增支援！</string>
-    <string name="manage_yuzu_data">管理 Raitchi 資料</string>
+    <string name="manage_yuzu_data">管理 AC-NativeNX 資料</string>
     <string name="manage_yuzu_data_description">安裝韌體、金鑰，導入/導出使用者資料及安裝其它項目！</string>
     <string name="game_folders">遊戲資料夾</string>
     <string name="deep_scan">深度掃描</string>
@@ -464,8 +464,8 @@
     <string name="copied_to_clipboard">已複製到剪貼簿</string>
     <string name="about_app_description">一個開放原始碼的 Switch 模擬器</string>
     <string name="contributors">參與者</string>
-    <string name="contributors_description">這些人讓 Raitchi Android 版成為可能</string>
-    <string name="licenses_description">這些專案使 Raitchi Android 版成為可能</string>
+    <string name="contributors_description">這些人讓 AC-NativeNX Android 版成為可能</string>
+    <string name="licenses_description">這些專案使 AC-NativeNX Android 版成為可能</string>
     <string name="build">組建版本</string>
     <string name="user_data">使用者資料</string>
     <string name="user_data_description">匯入/匯出所有應用程式資料\n\n匯入使用者資料時，現有的使用者資料將被取代！\n\n直接從 Citron 匯入使用者資料可能會出現問題，建議手動匯入所有所需資料</string>
@@ -630,7 +630,7 @@
     <string name="extended_logging">啟用更詳細的日誌記錄</string>
     <string name="extended_logging_description">將日誌檔的最大檔案限制從 100MB 提高到 1GB</string>
     <string name="log_filter">日誌過濾器</string>
-    <string name="log_filter_description">控制 Raitchi 日誌的紀錄類別。例如： *:Info Service.LM:Debug</string>
+    <string name="log_filter_description">控制 AC-NativeNX 日誌的紀錄類別。例如： *:Info Service.LM:Debug</string>
 
     <!-- GPU Logging strings -->
     <string name="gpu_logging_header">GPU 日誌</string>
@@ -1124,7 +1124,7 @@
     <string name="change_app_theme">變更應用程式主題</string>
     <string name="theme_default">預設</string>
     <string name="theme_material_you">質感設計3</string>
-    <string name="app_settings">Raitchi介面設定</string>
+    <string name="app_settings">AC-NativeNX介面設定</string>
     <string name="theme_and_color">主題和顏色</string>
     <!-- Theme Modes -->
     <string name="change_theme_mode">變更主題模式</string>
@@ -1138,7 +1138,7 @@
 
     <!-- App Language -->
     <string name="app_language">語言</string>
-    <string name="app_language_description">選擇Raitchi顯示的語言</string>
+    <string name="app_language_description">選擇AC-NativeNX顯示的語言</string>
     <string name="app_language_system">跟隨系統</string>
     <!-- Static Themes -->
     <string name="static_theme_color">主題色彩</string>

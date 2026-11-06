@@ -4,8 +4,8 @@
     <string name="notice_notification_channel_name">Powiadomienia błędy</string>
     <string name="notice_notification_channel_description">Pokaż powiadomienie gdy coś pójdzie źle</string>
     <string name="notification_permission_not_granted">Nie zezwolono na powiadomienia!</string>
-    <string name="app_notification_channel_description">Powiadomienia emulatora switcha Raitchi</string>
-    <string name="app_notification_running">Raitchi działa</string>
+    <string name="app_notification_channel_description">Powiadomienia emulatora switcha AC-NativeNX</string>
+    <string name="app_notification_running">AC-NativeNX działa</string>
     <string name="seconds">Sekundy</string>
 
     <!-- Spinbox strings -->
@@ -190,7 +190,7 @@
 
     <!-- Setup strings -->
     <string name="welcome">Witaj!</string>
-    <string name="welcome_description">Zobacz jak skonfigurować &lt;b>Raitchi&lt;/b> i wskocz w świat emulacji.</string>
+    <string name="welcome_description">Zobacz jak skonfigurować &lt;b>AC-NativeNX&lt;/b> i wskocz w świat emulacji.</string>
     <string name="get_started">Zaczynamy</string>
     <string name="keys">Klucze</string>
     <string name="keys_description">Wybierz swoje klucze &lt;b>prod.keys&lt;/b> za pomocą przycisku poniżej.</string>
@@ -279,7 +279,7 @@
     <string name="settings_description">Skonfiguruj ustawienia emulatora</string>
     <string name="search_recently_played">Ostatnio grane</string>
     <string name="search_recently_added">Ostatnio dodane</string>
-    <string name="open_user_folder">Otwórz folder Raitchi</string>
+    <string name="open_user_folder">Otwórz folder AC-NativeNX</string>
     <string name="open_user_folder_description">Zarządzaj plikami emulatora</string>
     <string name="app_settings_description">Dostosuj działanie i wygląd aplikacji</string>
     <string name="no_file_manager">Nie znaleziono menedżera plików</string>
@@ -300,7 +300,7 @@
     <string name="firmware_installed_failure_description">Upewnij się, że pliki firmware’u NCA znajdują się w katalogu głównym archiwum ZIP i spróbuj ponownie.</string>
     <string name="firmware_uninstalled_failure">Odinstalowanie firmware’u nie powiodło się</string>
     <string name="share_log">Udostępnij logi debugowania</string>
-    <string name="share_log_description">Podziel się logami Raitchi, pomoże to twórcom w poprawie działania emulatora</string>
+    <string name="share_log_description">Podziel się logami AC-NativeNX, pomoże to twórcom w poprawie działania emulatora</string>
     <string name="share_log_missing">Nie znaleziono plików logów</string>
     <string name="install_game_content">Zainstaluj zawartość gry</string>
     <string name="install_game_content_description">Zainstaluj aktualizację gry lub dodatek DLC</string>
@@ -314,7 +314,7 @@
     <string name="install_game_content_success_overwrite">%1$d nadpisano</string>
     <string name="custom_driver_not_supported">Niestandardowe sterowniki nieobsługiwane</string>
     <string name="custom_driver_not_supported_description">Ładowanie niestandardowego sterownika nie jest obecnie obsługiwane na tym urządzeniu.\nSprawdź tę opcję ponownie w przyszłości, aby zobaczyć, czy dodano obsługę!</string>
-    <string name="manage_yuzu_data">Zarządzaj danymi Raitchi</string>
+    <string name="manage_yuzu_data">Zarządzaj danymi AC-NativeNX</string>
     <string name="manage_yuzu_data_description">Importuj/eksportuj firmware, klucze i dane.</string>
     <string name="game_folders">Foldery gier</string>
     <string name="deep_scan">Głębokie skanowanie</string>
@@ -375,7 +375,7 @@
     <string name="copied_to_clipboard">Skopiowano do schowka</string>
     <string name="about_app_description">Otwarto-źródłowy emulator konsoli Switch</string>
     <string name="contributors">Współtwórcy</string>
-    <string name="licenses_description">Projekty dzięki którym Raitchi mógł zostać stworzony</string>
+    <string name="licenses_description">Projekty dzięki którym AC-NativeNX mógł zostać stworzony</string>
     <string name="build">Wersja</string>
     <string name="user_data">Dane użytkownika</string>
     <string name="user_data_description">Importuj/eksportuj wszystkie dane aplikacji.\n\nPodczas importu danych użytkownika wszystkie istniejące dane użytkownika zostaną usunięte!\n\nImport danych z Citron może powodować problemy. Zaleca się ręczny import wszystkich potrzebnych danych.</string>

@@ -305,7 +305,7 @@
     },
     {
       "file": "RAITCHI.txt",
-      "sha256": "dbd292e897b89d5f2aacd337082242763e6c7accdeab79fc27f7f38f7ecc20d6"
+      "sha256": "a60483d96187d1426c581a2917b706a574a0e7bb478162ecae38196cbdebe36e"
     },
     {
       "file": "README.md",
@@ -2825,7 +2825,7 @@
     },
     {
       "file": "src/android/app/build.gradle.kts",
-      "sha256": "604a0e961e5378c920939f4173d1c8a08ae4de88f0ca07bf765a786fb546ff4c",
+      "sha256": "2382ccc6e0c40fb65920289e09714a18f44a6165eddcb22f1ff5d30b00aada44",
       "bytes": 3881
     },
     {
@@ -4402,11 +4402,11 @@
     },
     {
       "file": "src/android/app/src/main/res/values/raitchi.xml",
-      "sha256": "b5fc2194da794c98abfffa034cdce60cda320ef3f1306c5548d39ea2ce9d7741"
+      "sha256": "62590cd5e44137e97c7ebd4cd6070321224830cd14b362fb5c2954a96acac0c3"
     },
     {
       "file": "src/android/app/src/main/res/values/strings.xml",
-      "sha256": "323a62ad957aeac6a8ef2a661af0c7848ea4afbf96162f7225ba0600dbed420d"
+      "sha256": "a046739adc7672bc7cd759bbce884ac8955000050c9395ece1d5d0b178bb2efc"
     },
     {
       "file": "src/android/app/src/main/res/values/styles.xml",
@@ -4422,59 +4422,59 @@
     },
     {
       "file": "src/android/app/src/main/res/values-ar/strings.xml",
-      "sha256": "ec875493d65088ca74f440ca4ad504e61b9ab068cbcdb1322b0baddd60e81217"
+      "sha256": "56cf36fff781b5ac45c30902cc17bf5d2526351fdf4ec1ba8173a893ec0c5761"
     },
     {
       "file": "src/android/app/src/main/res/values-ckb/strings.xml",
-      "sha256": "08b50d226e55898f14f359f3aa8338bada346a79783dc22d68368bcf3b6645a5"
+      "sha256": "85928f8ed5b3122124af311bdb13e16bdeea31a54df998f697e77f311d200327"
     },
     {
       "file": "src/android/app/src/main/res/values-cs/strings.xml",
-      "sha256": "a1f47d84af77b5fdbb31cd427e448a7903515f1679a43262b9b702081850c2f7"
+      "sha256": "fce42a89f689132493f9dce0bc76614d63c9cd456b623bb3b24006760909f21e"
     },
     {
       "file": "src/android/app/src/main/res/values-de/strings.xml",
-      "sha256": "b0f54963da9116021ba0ad70f517080bb51dab17f877d9639c1324af97a4422e"
+      "sha256": "a0e038ae273b189baa7172717fbe5bdc9224f2243e2d24e8b733bf1342ba7c23"
     },
     {
       "file": "src/android/app/src/main/res/values-es/strings.xml",
-      "sha256": "7e370024504513679256b3a4c523d7c333c4aceedd912560f61d7284ca4bc5fc"
+      "sha256": "8be8f8937343ac1f9dd31753b9a5b1b4155ce949db9f5634e5949e829e42aaf2"
     },
     {
       "file": "src/android/app/src/main/res/values-fa/strings.xml",
-      "sha256": "190a8527c86a89898b09a8d3d769acc4a477588dc7ae7f3ac1a92bb043283b68"
+      "sha256": "d49d9503bcc4f427b92b7550b8d30cc7705869afd9a698c93e5d317cfc7a64bc"
     },
     {
       "file": "src/android/app/src/main/res/values-fr/strings.xml",
-      "sha256": "f23fea43916e59013c3387de43d5881758e550d6d379056b46a2140fbe768953"
+      "sha256": "e19bebd6013ffecdf1defd825d7537d46e020d040a41bffe26a252c3095a9adf"
     },
     {
       "file": "src/android/app/src/main/res/values-he/strings.xml",
-      "sha256": "c7eba11ddda400a41b466d233570ff7844ca3231d201b1319888b067ad9d931b"
+      "sha256": "11503d6735cbf3bcd9ec0e857ff580d10195729193ec804752825db6c815cb2a"
     },
     {
       "file": "src/android/app/src/main/res/values-hu/strings.xml",
-      "sha256": "4bc7186dec308766a619f9531dad4f9e877d57a289a8a167f47bd1e242ec58a3"
+      "sha256": "467ad367320a6c2532621395bafb45954e0c6a8b3d2fc75f0ecfc1ba8ed198ef"
     },
     {
       "file": "src/android/app/src/main/res/values-id/strings.xml",
-      "sha256": "8a1f1bc0e74e3cb5e67ff65e0cb4dc7b8d67a0ae3635d9e9afab2859f9db5e60"
+      "sha256": "103ea32dde332ab1097174ea7607b175b0a3fd0879453cc9e6654e79238f9d0c"
     },
     {
       "file": "src/android/app/src/main/res/values-it/strings.xml",
-      "sha256": "3a7db2f70cbd1367b682a9f04ec1d253a65a5816d16915af557250d902dbfebd"
+      "sha256": "9fa3f5fd5b1f1c30dc66ce689e3cc796fd9420fe4cdc3d46e7817ab08f5f4b40"
     },
     {
       "file": "src/android/app/src/main/res/values-ja/strings.xml",
-      "sha256": "a4c622c0ebaabb58c7037b81d0121864f364ebc9ce65ceec0b9e313366765ea3"
+      "sha256": "1c3b7925d2fe9370fc52f60d520fcd3f4d8ca93a06356bedcaf133b76472597c"
     },
     {
       "file": "src/android/app/src/main/res/values-ko/strings.xml",
-      "sha256": "83e150c35848b7eb7e9d34875440ae2530cc111186f305cdc6aa880df1c0dd23"
+      "sha256": "12d329096770247eb76946648f3d6c6479fb6724fbd2d921457bd13436641a68"
     },
     {
       "file": "src/android/app/src/main/res/values-nb/strings.xml",
-      "sha256": "760cb3532729e2aa957c12748fd57ef19ce8e786b774e9aeb4bac85ba3e72ba9"
+      "sha256": "7a64f668aca3bf2af90046bcf0346e8c091668717bf396e889adda8cfd67b0a5"
     },
     {
       "file": "src/android/app/src/main/res/values-night/themes.xml",
@@ -4490,19 +4490,19 @@
     },
     {
       "file": "src/android/app/src/main/res/values-pl/strings.xml",
-      "sha256": "13b08df3c535e86cfc4b790dbf48ddd13b75caf01d25b90b8595a9c343db257d"
+      "sha256": "6fc42547e60d6ab9c63411fea87c23055063d38004ba52fe027c9d7fe89f555c"
     },
     {
       "file": "src/android/app/src/main/res/values-pt-rBR/strings.xml",
-      "sha256": "73e580bd9013f19368224aa60190c782a73ecc12103b8283e0176e20696dd41d"
+      "sha256": "b79e50764ac3ffd9dd0f2b3e41948f986c95afa9eda0bb4f8cbf50b02b684d70"
     },
     {
       "file": "src/android/app/src/main/res/values-pt-rPT/strings.xml",
-      "sha256": "2062e758fc3da1da3658845532014a99bf58696edf466328128156c265e06b9d"
+      "sha256": "9596fc3a84ab915fdaa1b2478fe3f53f8a09cccafb852f906cd30ca3d8edb0ab"
     },
     {
       "file": "src/android/app/src/main/res/values-ru/strings.xml",
-      "sha256": "fd4dee93a4bde0b9940f886714420af666bed02756a6db2cc899e4638e6b2cbc"
+      "sha256": "cae1049f522254503a147dbfdcbd08f062ee25119f606cf117e5b8146b18a62c"
     },
     {
       "file": "src/android/app/src/main/res/values-sr/strings.xml",
@@ -4510,7 +4510,7 @@
     },
     {
       "file": "src/android/app/src/main/res/values-uk/strings.xml",
-      "sha256": "a2bafa7967c42db28064b50597262e6e10bf2b99cbee6113eba8cba7499924c3"
+      "sha256": "2394e42ce2cf723eae2cf0abc2bd5e2432d008b9d69914d6e8d9e25f9ad87323"
     },
     {
       "file": "src/android/app/src/main/res/values-v31/themes.xml",
@@ -4518,7 +4518,7 @@
     },
     {
       "file": "src/android/app/src/main/res/values-vi/strings.xml",
-      "sha256": "a346ec9c3c69920b4e9a83e01acdc52ed399a7c610ca661d5c6b7c02df19e844"
+      "sha256": "1c778c4e63c48dce90d96fd79ca95cca7d1eb6896ea7970d7829167ac89d2669"
     },
     {
       "file": "src/android/app/src/main/res/values-w600dp/bools.xml",
@@ -4534,11 +4534,11 @@
     },
     {
       "file": "src/android/app/src/main/res/values-zh-rCN/strings.xml",
-      "sha256": "b8a5dd467332a0b40a89458ab5ea7b0735ead1e324a9b273bd4d48a070775db0"
+      "sha256": "2296c654f65b0033691dce8185bedfc54c82ea649bf2bfad225286c9556862b9"
     },
     {
       "file": "src/android/app/src/main/res/values-zh-rTW/strings.xml",
-      "sha256": "68caed3740d861fd780fb2edf021ac433a285618b3e18776fb47915506709e9d"
+      "sha256": "bd2f93d00f93fc8adcbf5896ff973e005ac152e15338c6c233d510dfce05520b"
     },
     {
       "file": "src/android/app/src/main/res/xml/data_extraction_rules.xml",

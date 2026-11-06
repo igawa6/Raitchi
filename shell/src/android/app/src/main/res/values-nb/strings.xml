@@ -155,7 +155,7 @@
 
     <!-- Setup strings -->
     <string name="welcome">Velkommen!</string>
-    <string name="welcome_description">Lær å sette opp &lt;b>Raitchi&lt;/b> og hopp inn i emulering.</string>
+    <string name="welcome_description">Lær å sette opp &lt;b>AC-NativeNX&lt;/b> og hopp inn i emulering.</string>
     <string name="get_started">Kom i gang</string>
     <string name="keys">Nøkler</string>
     <string name="keys_description">Velg din &lt;b>prod.keys&lt;/b> fil ved å bruke knappen under.</string>
@@ -204,7 +204,7 @@
     <string name="settings_description">Konfigurere emulatorinnstillinger</string>
     <string name="search_recently_played">Nylig spilt</string>
     <string name="search_recently_added">Nylig lagt til</string>
-    <string name="open_user_folder">Åpne Raitchi-mappen</string>
+    <string name="open_user_folder">Åpne AC-NativeNX-mappen</string>
     <string name="open_user_folder_description">Administrere Edens interne filer</string>
     <string name="no_file_manager">Ingen filbehandler funnet</string>
     <string name="notification_no_directory_link_description">Finn brukermappen manuelt med filbehandlingens sidepanel.</string>
@@ -287,7 +287,7 @@
     <string name="copied_to_clipboard">Kopiert til utklippstavlen</string>
     <string name="about_app_description">En Switch-emulator med åpen kildekode</string>
     <string name="contributors">Bidragsytere</string>
-    <string name="licenses_description">Prosjekter som gjør Raitchi for Android mulig</string>
+    <string name="licenses_description">Prosjekter som gjør AC-NativeNX for Android mulig</string>
     <string name="build">Bygg</string>
     <!-- General settings strings -->
     <string name="frame_limit_enable">Begrense hastigheten</string>

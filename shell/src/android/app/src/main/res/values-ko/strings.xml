@@ -155,7 +155,7 @@
 
     <!-- Setup strings -->
     <string name="welcome">환영합니다!</string>
-    <string name="welcome_description">&lt;b>Raitchi&lt;/b>를 설정하고 에뮬레이션을 시작하세요.</string>
+    <string name="welcome_description">&lt;b>AC-NativeNX&lt;/b>를 설정하고 에뮬레이션을 시작하세요.</string>
     <string name="get_started">시작하기</string>
     <string name="keys">키 설정</string>
     <string name="keys_description">아래 버튼으로 &lt;b>prod.keys&lt;/b> 파일을 선택합니다.</string>
@@ -209,7 +209,7 @@
     <string name="settings_description">에뮬레이터 설정 구성</string>
     <string name="search_recently_played">최근 플레이</string>
     <string name="search_recently_added">최근 추가</string>
-    <string name="open_user_folder">Raitchi 폴더 열기</string>
+    <string name="open_user_folder">AC-NativeNX 폴더 열기</string>
     <string name="open_user_folder_description">Eden의 내부 파일 관리</string>
     <string name="no_file_manager">파일 관리자를 찾을 수 없음</string>
     <string name="notification_no_directory_link_description">파일 관리자의 사이드 패널에서 사용자 폴더를 수동으로 찾아주세요.</string>
@@ -228,7 +228,7 @@
     <string name="firmware_installed_failure">펌웨어 설치 실패</string>
     <string name="firmware_installed_failure_description">펌웨어 NCA 파일이 ZIP 파일의 루트 디렉토리에 위치한지 확인하고 다시 시도하세요.</string>
     <string name="share_log">디버그 로그 공유</string>
-    <string name="share_log_description">문제 해결을 위한 Raitchi 로그 파일 공유</string>
+    <string name="share_log_description">문제 해결을 위한 AC-NativeNX 로그 파일 공유</string>
     <string name="share_log_missing">로그 파일을 찾을 수 없습니다.</string>
     <string name="install_game_content">게임 콘텐츠 설치</string>
     <string name="install_game_content_description">게임 업데이트 또는 DLC 설치</string>
@@ -241,7 +241,7 @@
     <string name="install_game_content_success_install">%1$d개를 설치했습니다.</string>
     <string name="install_game_content_success_overwrite">%1$d개를 덮어씌웠습니다.</string>
     <string name="custom_driver_not_supported">사용자 지정 드라이버는 지원하지 않습니다.</string>
-    <string name="manage_yuzu_data">Raitchi 데이터 관리</string>
+    <string name="manage_yuzu_data">AC-NativeNX 데이터 관리</string>
     <string name="manage_yuzu_data_description">펌웨어, 키 값, 유저 데이터 등을 가져오기 또는 내보내기</string>
     <string name="game_folders">게임 폴더</string>
     <string name="deep_scan">딥 스캔(하위 폴더 탐색)</string>
