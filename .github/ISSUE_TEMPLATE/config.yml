@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/ptichalouf/AC-NativeNX/security/advisories/new
+    about: Report security problems privately. Do not open a public issue.
+  - name: Raitchi (upstream, separate project)
+    url: https://github.com/igawa6/Raitchi
+    about: AC-NativeNX is an autonomous fork. Do not report AC-NativeNX problems upstream.

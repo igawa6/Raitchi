@@ -1,0 +1,33 @@
+name: guard
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  no-game-content:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Refuse game content, keys and oversized files
+        run: python3 tools/check_no_game_content.py .
+  kit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Guard unit tests
+        run: python3 -m unittest tests.test_check_no_game_content -v
+      - name: Setup-check tests
+        run: bash tests/test_setup_check.sh
+      - name: Syntax of the kit scripts
+        run: |
+          for f in tools/setup.sh docs/ai-kit/sync-to.sh tests/test_setup_check.sh; do bash -n "$f"; done
+          python3 - <<'PY'
+          import re, pathlib
+          for p in pathlib.Path("skills").glob("*/SKILL.md"):
+              t = p.read_text()
+              m = re.match(r"---\nname: (.+)\ndescription: (.+)\n---\n", t)
+              assert m and m.group(1) == p.parent.name, f"bad frontmatter: {p}"
+          print("skills frontmatter OK")
+          PY

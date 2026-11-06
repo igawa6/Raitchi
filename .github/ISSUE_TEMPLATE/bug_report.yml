@@ -1,0 +1,101 @@
+name: Bug report
+description: Something does not build, crash, render or behave as documented.
+title: "[bug] "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Do not attach game files, keys, firmware, saves or extracted game content.**
+        This includes `.xci`, `.nsp`, `.nca`, `exefs`/`romfs`, `prod.keys`, `title.keys`, `.bfttf` fonts and generated game code.
+        Issues containing them are deleted. Remove paths that reveal where you keep your dump.
+
+  - type: checkboxes
+    id: legal
+    attributes:
+      label: Confirmation
+      options:
+        - label: I use my own legally obtained copy of the game and my own keys, and I am not attaching any of them, or anything extracted from them, to this issue.
+          required: true
+        - label: I searched existing issues and the project's known-issues file (TESTING.md).
+          required: true
+  - type: dropdown
+    id: project
+    attributes:
+      label: Project
+      options:
+        - AC-NativeNX app / runtime
+        - Build, tools or documentation
+    validations:
+      required: true
+  - type: input
+    id: build
+    attributes:
+      label: Build version
+      description: Release tag, or the full commit SHA you built from, and the build variant (for example release APK, CI artifact, or built from source).
+      placeholder: "v0.1.0, or full commit SHA + built from source"
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and Android version
+      placeholder: "Samsung Galaxy Z Fold5, Android 15, One UI 7"
+    validations:
+      required: true
+  - type: input
+    id: gpu
+    attributes:
+      label: SoC and GPU
+      placeholder: "Snapdragon 8 Gen 2, Adreno 740 (Mali and other GPUs are unsupported; crashes there are still worth reporting)"
+    validations:
+      required: true
+  - type: input
+    id: driver
+    attributes:
+      label: GPU driver
+      description: Stock vendor driver (give the version from the driver info screen or `vulkaninfo`), or the custom driver package and version (for example a Turnip build).
+      placeholder: "Stock Qualcomm 0800.xx / custom Turnip build x.y"
+    validations:
+      required: true
+  - type: input
+    id: game_version
+    attributes:
+      label: Game version
+      description: Version number only (for example 1.0.2). No title keys, no file hashes of your dump.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you expected, what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Fresh install of the APK
+        2. Import …
+        3. …
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Relevant `adb logcat` excerpt or crash log. Check that it contains no game text, key material or private paths.
+      render: text
+  - type: dropdown
+    id: regression
+    attributes:
+      label: Did it work before?
+      options:
+        - Unknown
+        - "No, it never worked"
+        - "Yes, it worked in an earlier build (give the SHA in the description)"
+  - type: textarea
+    id: ai
+    attributes:
+      label: AI disclosure
+      description: "If an AI agent wrote or filled in this report, give `Agent: <name> · Model: <id>` and say which observations came from a human on a real device."

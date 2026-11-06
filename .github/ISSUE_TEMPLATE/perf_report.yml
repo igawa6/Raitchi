@@ -1,0 +1,81 @@
+name: Performance report
+description: A measured, comparable performance result from a real device (no build tools needed).
+title: "[perf] "
+labels: ["performance", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Do not attach game files, keys, firmware or saves.** Use the `perf-report` skill protocol: fixed scene, 3 minutes, two runs.
+        Displayed FPS is not game speed: tell us if the game ran too fast or too slow.
+  - type: checkboxes
+    id: legal
+    attributes:
+      label: Confirmation
+      options:
+        - label: I use my own game and keys and attach none of them, or anything extracted from them.
+          required: true
+        - label: This was measured on a real device (not estimated).
+          required: true
+  - type: input
+    id: build
+    attributes:
+      label: Build version
+      description: Release tag or full commit SHA.
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device, Android version, SoC and GPU
+      placeholder: "Galaxy Z Fold5, Android 15, Snapdragon 8 Gen 2, Adreno 740"
+    validations:
+      required: true
+  - type: input
+    id: driver
+    attributes:
+      label: GPU driver
+    validations:
+      required: true
+  - type: input
+    id: game
+    attributes:
+      label: Game and game version number
+    validations:
+      required: true
+  - type: textarea
+    id: scene
+    attributes:
+      label: Scene and protocol
+      description: One sentence anyone can reproduce (location/menu), run length, battery/charging/thermal state.
+    validations:
+      required: true
+  - type: textarea
+    id: settings
+    attributes:
+      label: Settings
+      description: Resolution scale, CPU backend, driver options, any non-default option.
+    validations:
+      required: true
+  - type: textarea
+    id: ceilings
+    attributes:
+      label: Ceilings and thermals
+      description: "Battery saver on or off, CPU max frequencies, GPU ceiling vs current clock, temperatures before and after. Read-only; do not change phone settings. Write 'not measured' if unknown."
+    validations:
+      required: true
+  - type: textarea
+    id: results
+    attributes:
+      label: Results
+      description: Average FPS, 1% low FPS, game speed (correct / too fast / too slow), time to first frame. Both runs.
+      placeholder: |
+        Run 1: avg 28.4, 1% low 19.0, speed correct
+        Run 2: avg 27.9, 1% low 18.2, speed correct
+    validations:
+      required: true
+  - type: textarea
+    id: ai
+    attributes:
+      label: AI disclosure
+      description: "If an AI agent wrote this, give `Agent: <name> · Model: <id>` and say who took the measurements."

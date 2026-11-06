@@ -1,0 +1,43 @@
+name: Proposal / feature request
+description: Propose a change of scope, a new feature or a work item before writing the code.
+title: "[proposal] "
+labels: ["proposal", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Requests for game files, keys, firmware, ready-to-play builds or support for a specific copy are closed without reply.
+  - type: dropdown
+    id: project
+    attributes:
+      label: Project
+      options:
+        - AC-NativeNX app / runtime
+        - Build, tools or documentation
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is missing or wrong, and for whom.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Proposed scope
+      description: Files or components you expect to touch, and what is explicitly out of scope.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: How we will know it works
+      description: Test, measurement or observable result. Say which parts need a real device.
+  - type: checkboxes
+    id: ai
+    attributes:
+      label: AI assistance
+      options:
+        - label: "An AI agent will do this work (allowed; give Agent and Model in the PR; the evidence rules in CONTRIBUTING.md apply)."
